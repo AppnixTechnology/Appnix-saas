@@ -1,0 +1,23 @@
+export const config = {
+  api: {
+    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.appnix.com",
+    proxyPrefix: "/api/proxy",
+    timeout: 30000,
+  },
+  app: {
+    name: "Appnix",
+    description: "Unified Business Messaging & Marketing Platform",
+    url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  },
+  auth: {
+    tokenKey: "appnix_auth_token",
+    refreshTokenKey: "appnix_refresh_token",
+    userKey: "appnix_user",
+  },
+  theme: {
+    defaultTheme: "system",
+    storageKey: "appnix_theme",
+  },
+} as const;
+
+export type Config = typeof config;
