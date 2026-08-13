@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ type OtpFormData = z.infer<typeof otpSchema>;
 
 type VerifyType = "email_verification" | "password_reset" | "2fa";
 
-export default function VerifyOtpPage() {
+function VerifyOtpContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { verifyOtp, resendOtp } = useAuth();
@@ -287,5 +287,13 @@ export default function VerifyOtpPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function VerifyOtpPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+      <VerifyOtpContent />
+    </Suspense>
   );
 }

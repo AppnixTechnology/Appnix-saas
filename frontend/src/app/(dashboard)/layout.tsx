@@ -46,7 +46,7 @@ const navigation = [
   { name: "White-Label", href: "/dashboard/whitelabel", icon: Globe, roles: ["owner"] },
 ];
 
-export function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { theme, setTheme, resolvedTheme } = useTheme();

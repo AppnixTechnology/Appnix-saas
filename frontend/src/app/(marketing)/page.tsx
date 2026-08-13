@@ -161,8 +161,10 @@ export default function LandingPage() {
 
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button asChild size="lg" className="gap-2">
-                <Link href="/signup">Start Free Trial</Link>
-                <ArrowRight className="h-4 w-4" />
+                <Link href="/signup">
+                  Start Free Trial
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </Button>
               <Button asChild variant="outline" size="lg">
                 <Link href="/demo">Watch Demo</Link>
@@ -276,8 +278,10 @@ export default function LandingPage() {
             </div>
             <div className="mt-10">
               <Button asChild variant="secondary" size="lg" className="gap-2">
-                <Link href="/whitelabel">Learn More About White-Label</Link>
-                <ArrowRight className="h-4 w-4" />
+                <Link href="/whitelabel">
+                  Learn More About White-Label
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </div>
@@ -336,8 +340,10 @@ export default function LandingPage() {
               </p>
               <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Button asChild size="lg" className="gap-2 w-full sm:w-auto">
-                  <Link href="/signup">Start Free Trial</Link>
-                  <ArrowRight className="h-4 w-4" />
+                  <Link href="/signup">
+                    Start Free Trial
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
                   <Link href="/demo">Schedule a Demo</Link>
