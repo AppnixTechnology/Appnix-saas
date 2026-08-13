@@ -1,0 +1,157 @@
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosError, type AxiosResponse } from "axios";
+import { config } from "@/lib/config";
+
+const createAxiosInstance = (): AxiosInstance => {
+  const instance = axios.create({
+    baseURL: config.api.proxyPrefix,
+    timeout: config.api.timeout,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    withCredentials: true,
+  });
+
+  instance.interceptors.request.use(
+    (requestConfig: InternalAxiosRequestConfig) => {
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem(config.auth.tokenKey);
+        if (token && requestConfig.headers) {
+          requestConfig.headers.Authorization = `Bearer ${token}`;
+        }
+      }
+      return requestConfig;
+    },
+    (error: AxiosError) => Promise.reject(error)
+  );
+
+  instance.interceptors.response.use(
+    (response: AxiosResponse) => response,
+    async (error: AxiosError) => {
+      const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+
+        try {
+          const refreshToken = localStorage.getItem(config.auth.refreshTokenKey);
+          if (refreshToken) {
+            const response = await axios.post(
+              `${config.api.proxyPrefix}/auth/refresh`,
+              { refreshToken },
+              { withCredentials: true }
+            );
+
+            const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+            localStorage.setItem(config.auth.tokenKey, accessToken);
+            localStorage.setItem(config.auth.refreshTokenKey, newRefreshToken);
+
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+            }
+            return instance(originalRequest);
+          }
+        } catch {
+          if (typeof window !== "undefined") {
+            localStorage.removeItem(config.auth.tokenKey);
+            localStorage.removeItem(config.auth.refreshTokenKey);
+            localStorage.removeItem(config.auth.userKey);
+            window.location.href = "/signin";
+          }
+        }
+      }
+
+      return Promise.reject(error);
+    }
+  );
+
+  return instance;
+};
+
+export const api = createAxiosInstance();
+
+export const apiEndpoints = {
+  auth: {
+    login: "/auth/login",
+    register: "/auth/register",
+    logout: "/auth/logout",
+    refresh: "/auth/refresh",
+    forgotPassword: "/auth/forgot-password",
+    resetPassword: "/auth/reset-password",
+    verifyOtp: "/auth/verify-otp",
+    resendOtp: "/auth/resend-otp",
+    me: "/auth/me",
+  },
+  user: {
+    profile: "/user/profile",
+    update: "/user/profile",
+    avatar: "/user/avatar",
+  },
+  dashboard: {
+    stats: "/dashboard/stats",
+    activity: "/dashboard/activity",
+  },
+  inbox: {
+    conversations: "/inbox/conversations",
+    messages: "/inbox/messages",
+    send: "/inbox/send",
+  },
+  campaigns: {
+    list: "/campaigns",
+    create: "/campaigns",
+    get: (id: string) => `/campaigns/${id}`,
+    update: (id: string) => `/campaigns/${id}`,
+    delete: (id: string) => `/campaigns/${id}`,
+    send: (id: string) => `/campaigns/${id}/send`,
+    stats: (id: string) => `/campaigns/${id}/stats`,
+  },
+  contacts: {
+    list: "/contacts",
+    create: "/contacts",
+    get: (id: string) => `/contacts/${id}`,
+    update: (id: string) => `/contacts/${id}`,
+    delete: (id: string) => `/contacts/${id}`,
+    import: "/contacts/import",
+    export: "/contacts/export",
+  },
+  bots: {
+    list: "/bots",
+    create: "/bots",
+    get: (id: string) => `/bots/${id}`,
+    update: (id: string) => `/bots/${id}`,
+    delete: (id: string) => `/bots/${id}`,
+    test: (id: string) => `/bots/${id}/test`,
+  },
+  automations: {
+    list: "/automations",
+    create: "/automations",
+    get: (id: string) => `/automations/${id}`,
+    update: (id: string) => `/automations/${id}`,
+    delete: (id: string) => `/automations/${id}`,
+    toggle: (id: string) => `/automations/${id}/toggle`,
+  },
+  analytics: {
+    overview: "/analytics/overview",
+    conversations: "/analytics/conversations",
+    campaigns: "/analytics/campaigns",
+    bots: "/analytics/bots",
+    revenue: "/analytics/revenue",
+  },
+  team: {
+    members: "/team/members",
+    invite: "/team/invite",
+    remove: (id: string) => `/team/members/${id}`,
+    updateRole: (id: string) => `/team/members/${id}/role`,
+  },
+  billing: {
+    plans: "/billing/plans",
+    subscription: "/billing/subscription",
+    invoices: "/billing/invoices",
+    wallet: "/billing/wallet",
+    checkout: "/billing/checkout",
+  },
+  whitelabel: {
+    settings: "/whitelabel/settings",
+    domains: "/whitelabel/domains",
+    branding: "/whitelabel/branding",
+  },
+} as const;
