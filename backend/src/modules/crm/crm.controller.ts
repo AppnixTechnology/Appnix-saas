@@ -1,24 +1,48 @@
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { CrmService } from './crm.service';
-import { TenantId } from '@/common/decorators/tenant.decorator';
-import { TenantGuard } from '@/common/guards/tenant.guard';
+import {
+  Controller, Get, Post, Patch, Delete,
+  Body, Param, UseGuards,
+} from '@nestjs/common';
+import { CrmContactsService } from './crm.service';
+import { CreateCrmContactDto, UpdateCrmContactDto } from './dto/crm-contact.dto';
+import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser, AuthUser } from '../auth/decorators/current-user.decorator';
+import { Role } from '@prisma/client';
 
-@ApiTags('CRM')
-@Controller('crm')
-@UseGuards(TenantGuard)
-export class CrmController {
-  constructor(private readonly crmService: CrmService) {}
+@Controller('crm-contacts')
+@UseGuards(JwtAccessGuard, RolesGuard) // applies to every route in this controller
+export class CrmContactsController {
+  constructor(private crmContactsService: CrmContactsService) {}
 
-  @Get('contacts')
-  @ApiOperation({ summary: 'Get CRM contacts for tenant' })
-  findContacts(@TenantId() tenantId: string) {
-    return this.crmService.findContacts(tenantId);
+  @Post()
+  create(@CurrentUser() user: AuthUser, @Body() dto: CreateCrmContactDto) {
+    return this.crmContactsService.create(user.tenantId, dto);
   }
 
-  @Post('contacts')
-  @ApiOperation({ summary: 'Create new CRM contact' })
-  createContact(@TenantId() tenantId: string, @Body() body: { name: string; phone?: string; email?: string }) {
-    return this.crmService.createContact(tenantId, body);
+  @Get()
+  findAll(@CurrentUser() user: AuthUser) {
+    return this.crmContactsService.findAll(user.tenantId);
+  }
+
+  @Get(':id')
+  findOne(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.crmContactsService.findOne(user.tenantId, id);
+  }
+
+  @Patch(':id')
+  update(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Body() dto: UpdateCrmContactDto,
+  ) {
+    return this.crmContactsService.update(user.tenantId, id, dto);
+  }
+
+  // only TENANT_ADMIN or SUPER_ADMIN can delete contacts — MEMBERs cannot
+  @Delete(':id')
+  @Roles(Role.TENANT_ADMIN, Role.SUPER_ADMIN)
+  remove(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.crmContactsService.remove(user.tenantId, id);
   }
 }
