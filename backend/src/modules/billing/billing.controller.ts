@@ -1,12 +1,14 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { BillingService } from './billing.service';
 import { TenantId } from '@/common/decorators/tenant.decorator';
 import { TenantGuard } from '@/common/guards/tenant.guard';
+import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
 
 @ApiTags('Billing')
+@ApiBearerAuth()
 @Controller('billing')
-@UseGuards(TenantGuard)
+@UseGuards(JwtAccessGuard, TenantGuard)
 export class BillingController {
   constructor(private readonly billingService: BillingService) {}
 

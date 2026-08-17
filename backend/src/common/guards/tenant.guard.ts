@@ -1,16 +1,27 @@
-import { Injectable, CanActivate, ExecutionContext, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 
 @Injectable()
 export class TenantGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
-    const tenantId = request.headers['x-tenant-id'] || request.user?.tenantId;
+    const jwtTenantId = request.user?.tenantId;
+    const headerTenantId = request.headers['x-tenant-id'];
 
-    if (!tenantId) {
-      throw new BadRequestException('Tenant ID header (x-tenant-id) is required');
+    if (!jwtTenantId) {
+      throw new BadRequestException('Authenticated tenant context is required');
     }
 
-    request.tenantId = tenantId;
+    if (headerTenantId && String(headerTenantId) !== String(jwtTenantId)) {
+      throw new ForbiddenException('Tenant mismatch');
+    }
+
+    request.tenantId = jwtTenantId;
     return true;
   }
 }
