@@ -52,8 +52,11 @@
   --card-foreground: oklch(0.13 0.028 261.692);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.13 0.028 261.692);
-  --primary: oklch(0.54 0.24 262.881);
+
+  /* Brand navy (#0B1E5B) — set once, used everywhere via bg-primary / text-primary */
+  --primary: oklch(0.27 0.11 265.5);
   --primary-foreground: oklch(0.985 0 0);
+
   --secondary: oklch(0.967 0.003 264.542);
   --secondary-foreground: oklch(0.21 0.034 264.665);
   --muted: oklch(0.967 0.003 264.542);
@@ -63,7 +66,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.928 0.006 264.531);
   --input: oklch(0.928 0.006 264.531);
-  --ring: oklch(0.54 0.24 262.881);
+  --ring: oklch(0.27 0.11 265.5);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -72,12 +75,12 @@
   --radius: 0.5rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.13 0.028 261.692);
-  --sidebar-primary: oklch(0.54 0.24 262.881);
+  --sidebar-primary: oklch(0.27 0.11 265.5);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.967 0.003 264.542);
   --sidebar-accent-foreground: oklch(0.21 0.034 264.665);
   --sidebar-border: oklch(0.928 0.006 264.531);
-  --sidebar-ring: oklch(0.54 0.24 262.881);
+  --sidebar-ring: oklch(0.27 0.11 265.5);
 }
 
 .dark {
@@ -87,8 +90,11 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.16 0.03 261.692);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.64 0.24 262.881);
+
+  /* Lighter navy in dark mode so it still contrasts against a dark background */
+  --primary: oklch(0.5 0.13 265.5);
   --primary-foreground: oklch(0.985 0 0);
+
   --secondary: oklch(0.21 0.034 264.665);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.21 0.034 264.665);
@@ -98,7 +104,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(0.278 0.033 264.542);
   --input: oklch(0.278 0.033 264.542);
-  --ring: oklch(0.64 0.24 262.881);
+  --ring: oklch(0.5 0.13 265.5);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -106,12 +112,12 @@
   --chart-5: oklch(0.769 0.188 70.08);
   --sidebar: oklch(0.16 0.03 261.692);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.64 0.24 262.881);
+  --sidebar-primary: oklch(0.5 0.13 265.5);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.21 0.034 264.665);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.278 0.033 264.542);
-  --sidebar-ring: oklch(0.64 0.24 262.881);
+  --sidebar-ring: oklch(0.5 0.13 265.5);
 }
 
 @layer base {
@@ -124,6 +130,69 @@
   }
   html {
     @apply scroll-smooth;
+  }
+}
+
+/* Reusable auth-page patterns — used by signin, signup, reset-password, verify-otp.
+   Change these once here instead of editing every page. */
+@layer components {
+  .auth-shell {
+    @apply min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6;
+  }
+  .auth-card {
+    @apply rounded-xl bg-white p-6 shadow-xl sm:p-8;
+  }
+  .auth-logo-box {
+    @apply flex h-14 w-14 items-center justify-center rounded-2xl bg-primary;
+  }
+  .auth-link {
+    @apply font-medium text-primary hover:underline;
+  }
+}
+
+/* Reusable dashboard-shell patterns — used by AppSidebar + AppNavbar.
+   Change these once here to restyle the entire dashboard chrome (brand box,
+   nav items, icon buttons, etc.) without touching any .tsx file. */
+@layer components {
+  /* Outer page wrapper */
+  .dashboard-shell {
+    @apply flex min-h-screen flex-col bg-secondary/30;
+  }
+
+  /* Small square brand/logo box (navbar brand + sidebar mobile brand) */
+  .brand-box {
+    @apply flex h-9 w-9 items-center justify-center rounded-lg bg-primary;
+  }
+
+  /* Sidebar / navbar surface */
+  .app-surface {
+    @apply border-border bg-card;
+  }
+
+  /* Sidebar nav link — base, then active/inactive variants */
+  .sidebar-nav-item {
+    @apply flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors;
+  }
+  .sidebar-nav-item-active {
+    @apply bg-primary/10 text-primary;
+  }
+  .sidebar-nav-item-inactive {
+    @apply text-muted-foreground hover:bg-accent hover:text-accent-foreground;
+  }
+
+  /* Destructive nav item, e.g. Logout */
+  .sidebar-nav-item-danger {
+    @apply flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10;
+  }
+
+  /* Small icon-only buttons in the navbar (search scan, fullscreen, bell, etc.) */
+  .navbar-icon-btn {
+    @apply inline-flex rounded-md p-1.5 text-muted-foreground hover:bg-accent sm:p-2;
+  }
+
+  /* Navbar search input wrapper */
+  .navbar-search-input {
+    @apply border-none bg-secondary pl-10 focus-visible:ring-1 focus-visible:ring-primary/30;
   }
 }
 
