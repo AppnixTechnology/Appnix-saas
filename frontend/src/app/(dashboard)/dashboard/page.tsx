@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 import {
   Table,
   TableHeader,
@@ -72,11 +73,41 @@ const stats = [
 ];
 
 const recentActivity = [
-  { id: 1, type: "message", title: "New message from John Doe", time: "2 min ago", status: "unread" },
-  { id: 2, type: "campaign", title: "Campaign 'Summer Sale' sent", time: "15 min ago", status: "sent" },
-  { id: 3, type: "bot", title: "Bot 'Support Bot' resolved ticket #1234", time: "1 hour ago", status: "completed" },
-  { id: 4, type: "automation", title: "Automation 'Welcome Series' triggered", time: "3 hours ago", status: "running" },
-  { id: 5, type: "contact", title: "New contact added: Jane Smith", time: "5 hours ago", status: "added" },
+  {
+    id: 1,
+    type: "message",
+    title: "New message from John Doe",
+    time: "2 min ago",
+    status: "unread",
+  },
+  {
+    id: 2,
+    type: "campaign",
+    title: "Campaign 'Summer Sale' sent",
+    time: "15 min ago",
+    status: "sent",
+  },
+  {
+    id: 3,
+    type: "bot",
+    title: "Bot 'Support Bot' resolved ticket #1234",
+    time: "1 hour ago",
+    status: "completed",
+  },
+  {
+    id: 4,
+    type: "automation",
+    title: "Automation 'Welcome Series' triggered",
+    time: "3 hours ago",
+    status: "running",
+  },
+  {
+    id: 5,
+    type: "contact",
+    title: "New contact added: Jane Smith",
+    time: "5 hours ago",
+    status: "added",
+  },
 ];
 
 const quickActions = [
@@ -124,8 +155,20 @@ const contactsChartData = [
 ];
 
 const recentCampaigns = [
-  { id: 1, name: "Spring Outreach 2026", channel: "WhatsApp", status: "Active", reach: "1,240" },
-  { id: 2, name: "Product Launch V2", channel: "Email", status: "Scheduled", reach: "5,000" },
+  {
+    id: 1,
+    name: "Spring Outreach 2026",
+    channel: "WhatsApp",
+    status: "Active",
+    reach: "1,240",
+  },
+  {
+    id: 2,
+    name: "Product Launch V2",
+    channel: "Email",
+    status: "Scheduled",
+    reach: "5,000",
+  },
 ];
 
 const subscription = {
@@ -151,10 +194,10 @@ export default function DashboardPage() {
         </div>
         <div className="flex gap-2">
           <Button asChild>
-            <a href="/dashboard/campaigns/new">Create Campaign</a>
+            <Link href="/dashboard/campaigns/new">Create Campaign</Link>
           </Button>
           <Button asChild variant="outline">
-            <a href="/dashboard/inbox">Open Inbox</a>
+            <Link href="/dashboard/inbox">Open Inbox</Link>
           </Button>
         </div>
       </div>
@@ -164,14 +207,28 @@ export default function DashboardPage() {
         {stats.map((stat) => (
           <Card key={stat.name}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{stat.name}</CardTitle>
-              <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center", stat.color)}>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {stat.name}
+              </CardTitle>
+              <div
+                className={cn(
+                  "h-10 w-10 rounded-lg flex items-center justify-center",
+                  stat.color,
+                )}
+              >
                 <stat.icon className="h-5 w-5 text-white" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
-              <p className={cn("text-xs", stat.trend === "up" ? "text-green-600" : "text-muted-foreground")}>
+              <p
+                className={cn(
+                  "text-xs",
+                  stat.trend === "up"
+                    ? "text-green-600"
+                    : "text-muted-foreground",
+                )}
+              >
                 {stat.trend === "up" ? (
                   <>
                     <TrendingUp className="h-3 w-3 inline mr-1" />
@@ -239,7 +296,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <CardTitle>Recent Campaigns</CardTitle>
                 <Button asChild variant="ghost" size="sm">
-                  <a href="/dashboard/campaigns">View All</a>
+                  <Link href="/dashboard/campaigns">View All</Link>
                 </Button>
               </div>
             </CardHeader>
@@ -262,8 +319,10 @@ export default function DashboardPage() {
                         <Badge
                           variant="secondary"
                           className={cn(
-                            c.status === "Active" && "bg-green-100 text-green-700",
-                            c.status === "Scheduled" && "bg-muted text-muted-foreground"
+                            c.status === "Active" &&
+                              "bg-green-100 text-green-700",
+                            c.status === "Scheduled" &&
+                              "bg-muted text-muted-foreground",
                           )}
                         >
                           {c.status}
@@ -283,7 +342,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <CardTitle>Recent Activity</CardTitle>
                 <Button asChild variant="ghost" size="sm">
-                  <a href="/dashboard/activity">View All</a>
+                  <Link href="/dashboard/activity">View All</Link>
                 </Button>
               </div>
             </CardHeader>
@@ -294,37 +353,63 @@ export default function DashboardPage() {
                     key={activity.id}
                     className={cn(
                       "flex items-start gap-4 p-4 rounded-lg transition-colors",
-                      activity.status === "unread" ? "bg-accent/50" : "hover:bg-accent/30"
+                      activity.status === "unread"
+                        ? "bg-accent/50"
+                        : "hover:bg-accent/30",
                     )}
                   >
                     <div
                       className={cn(
                         "h-10 w-10 rounded-lg flex items-center justify-center shrink-0",
-                        activity.type === "message" && "bg-blue-100 text-blue-600",
-                        activity.type === "campaign" && "bg-purple-100 text-purple-600",
-                        activity.type === "bot" && "bg-green-100 text-green-600",
-                        activity.type === "automation" && "bg-orange-100 text-orange-600",
-                        activity.type === "contact" && "bg-pink-100 text-pink-600"
+                        activity.type === "message" &&
+                          "bg-blue-100 text-blue-600",
+                        activity.type === "campaign" &&
+                          "bg-purple-100 text-purple-600",
+                        activity.type === "bot" &&
+                          "bg-green-100 text-green-600",
+                        activity.type === "automation" &&
+                          "bg-orange-100 text-orange-600",
+                        activity.type === "contact" &&
+                          "bg-pink-100 text-pink-600",
                       )}
                     >
-                      {activity.type === "message" && <MessageSquare className="h-5 w-5" />}
-                      {activity.type === "campaign" && <Send className="h-5 w-5" />}
+                      {activity.type === "message" && (
+                        <MessageSquare className="h-5 w-5" />
+                      )}
+                      {activity.type === "campaign" && (
+                        <Send className="h-5 w-5" />
+                      )}
                       {activity.type === "bot" && <Bot className="h-5 w-5" />}
-                      {activity.type === "automation" && <Zap className="h-5 w-5" />}
-                      {activity.type === "contact" && <Users className="h-5 w-5" />}
+                      {activity.type === "automation" && (
+                        <Zap className="h-5 w-5" />
+                      )}
+                      {activity.type === "contact" && (
+                        <Users className="h-5 w-5" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground">{activity.title}</p>
-                      <p className="text-sm text-muted-foreground">{activity.time}</p>
+                      <p className="font-medium text-foreground">
+                        {activity.title}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {activity.time}
+                      </p>
                     </div>
-                    <div className={cn(
-                      "px-2 py-1 rounded-full text-xs font-medium",
-                      activity.status === "unread" && "bg-blue-100 text-blue-700",
-                      activity.status === "sent" && "bg-purple-100 text-purple-700",
-                      activity.status === "completed" && "bg-green-100 text-green-700",
-                      activity.status === "running" && "bg-orange-100 text-orange-700",
-                      activity.status === "added" && "bg-pink-100 text-pink-700"
-                    )}>
+                    <div
+                      className={cn(
+                        "px-2 py-1 rounded-full text-xs font-medium",
+                        activity.status === "unread" &&
+                          "bg-blue-100 text-blue-700",
+                        activity.status === "sent" &&
+                          "bg-purple-100 text-purple-700",
+                        activity.status === "completed" &&
+                          "bg-green-100 text-green-700",
+                        activity.status === "running" &&
+                          "bg-orange-100 text-orange-700",
+                        activity.status === "added" &&
+                          "bg-pink-100 text-pink-700",
+                      )}
+                    >
                       {activity.status}
                     </div>
                   </div>
@@ -378,24 +463,31 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {quickActions.map((action) => (
-                <div key={action.name} className="rounded-lg border p-4 space-y-3">
+                <div
+                  key={action.name}
+                  className="rounded-lg border p-4 space-y-3"
+                >
                   <div className="flex items-center gap-2">
                     <action.icon className="h-4 w-4 text-foreground" />
-                    <span className="font-medium text-foreground">{action.name}</span>
+                    <span className="font-medium text-foreground">
+                      {action.name}
+                    </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{action.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {action.description}
+                  </p>
                   <Button
                     asChild
                     className={cn(
                       "w-full justify-between text-white",
                       action.color,
-                      "hover:opacity-90"
+                      "hover:opacity-90",
                     )}
                   >
-                    <a href={action.href}>
+                    <Link href={action.href}>
                       {action.buttonText}
                       <ArrowUpRight className="h-4 w-4" />
-                    </a>
+                    </Link>
                   </Button>
                 </div>
               ))}
@@ -414,17 +506,22 @@ export default function DashboardPage() {
                   <p className="font-medium text-foreground">Professional</p>
                 </div>
                 <Button variant="outline" size="sm" asChild>
-                  <a href="/dashboard/billing">Upgrade</a>
+                  <Link href="/dashboard/billing">Upgrade</Link>
                 </Button>
               </div>
               <div className="space-y-3">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">Conversations this month</span>
+                    <span className="text-muted-foreground">
+                      Conversations this month
+                    </span>
                     <span className="font-medium">1,247 / 10,000</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full" style={{ width: "12.47%" }} />
+                    <div
+                      className="h-full bg-primary rounded-full"
+                      style={{ width: "12.47%" }}
+                    />
                   </div>
                 </div>
                 <div>
@@ -433,7 +530,10 @@ export default function DashboardPage() {
                     <span className="font-medium">5 / 10</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-green-500 rounded-full" style={{ width: "50%" }} />
+                    <div
+                      className="h-full bg-green-500 rounded-full"
+                      style={{ width: "50%" }}
+                    />
                   </div>
                 </div>
                 <div>
@@ -442,7 +542,10 @@ export default function DashboardPage() {
                     <span className="font-medium">3 / 5</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-purple-500 rounded-full" style={{ width: "60%" }} />
+                    <div
+                      className="h-full bg-purple-500 rounded-full"
+                      style={{ width: "60%" }}
+                    />
                   </div>
                 </div>
               </div>

@@ -54,16 +54,16 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
         {/* Right-side icons + user */}
         <div className="ml-auto flex items-center gap-0.5 sm:gap-2">
           <button className="navbar-icon-btn" aria-label="Scan">
-            <ScanLine className="h-[18px] w-[18px]" />
+            <ScanLine className="h-4.5 w-4.5" />
           </button>
           <button className="navbar-icon-btn" aria-label="Fullscreen">
-            <Maximize2 className="h-[18px] w-[18px]" />
+            <Maximize2 className="h-4.5 w-4.5" />
           </button>
           <button
             className="navbar-icon-btn relative"
             aria-label="Notifications"
           >
-            <Bell className="h-[18px] w-[18px]" />
+            <Bell className="h-4.5 w-4.5" />
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive sm:right-1.5 sm:top-1.5" />
           </button>
 
@@ -77,7 +77,7 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
               </p>
             </div>
             <Image
-              src="/avatar-placeholder.jpg"
+              src="/avatar-placeholder.png"
               alt="Video User"
               width={36}
               height={36}

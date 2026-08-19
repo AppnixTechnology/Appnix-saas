@@ -55,7 +55,7 @@ const menuItems: MenuItem[] = [
     children: [
       { label: "Analytics", href: "/automations/analytics", icon: BarChart3 },
       { label: "Workflow", href: "/automations/workflow", icon: GitBranch },
-      { label: "Data Store", href: "/automations/data-store", icon: Database },
+      { label: "Data Store", href: "/automations/datastore", icon: Database },
       { label: "Templates", href: "/automations/templates", icon: FileText },
       {
         label: "App Authentications",

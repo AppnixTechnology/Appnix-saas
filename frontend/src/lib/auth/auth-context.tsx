@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode, type ContextType } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+  type ContextType,
+} from "react";
 import { api, apiEndpoints } from "@/lib/api/axios";
 import { config } from "@/lib/config";
 
@@ -27,13 +34,28 @@ export interface AuthState {
 }
 
 interface AuthContextValue extends AuthState {
-  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
+  login: (
+    email: string,
+    password: string,
+    rememberMe?: boolean,
+  ) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
-  resetPassword: (token: string, password: string, confirmPassword: string) => Promise<void>;
-  verifyOtp: (email: string, otp: string, type: "email_verification" | "password_reset" | "2fa") => Promise<void>;
-  resendOtp: (email: string, type: "email_verification" | "password_reset" | "2fa") => Promise<void>;
+  resetPassword: (
+    token: string,
+    password: string,
+    confirmPassword: string,
+  ) => Promise<void>;
+  verifyOtp: (
+    email: string,
+    otp: string,
+    type: "email_verification" | "password_reset" | "2fa",
+  ) => Promise<void>;
+  resendOtp: (
+    email: string,
+    type: "email_verification" | "password_reset" | "2fa",
+  ) => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
   clearError: () => void;
   refreshUser: () => Promise<void>;
@@ -74,7 +96,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await api.get(apiEndpoints.auth.me);
       if (response.data.success && response.data.data) {
         setAuth(response.data.data);
-        localStorage.setItem(config.auth.userKey, JSON.stringify(response.data.data));
+        localStorage.setItem(
+          config.auth.userKey,
+          JSON.stringify(response.data.data),
+        );
       } else {
         setAuth(null);
       }
@@ -107,86 +132,91 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
   }, []);
 
-  
- const login = async (email: string, password: string, rememberMe = false) => {
-  setState((prev) => ({ ...prev, isLoading: true, error: null }));
-  try {
-    const response = await api.post(apiEndpoints.auth.login, { email, password});
+  const login = async (email: string, password: string, rememberMe = false) => {
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    try {
+      const response = await api.post(apiEndpoints.auth.login, {
+        email,
+        password,
+      });
 
-    // Backend sends back only { accessToken, refreshToken } directly,
-    // not wrapped inside "data" or "success".
-    const { accessToken, refreshToken } = response.data;
+      // Backend sends back only { accessToken, refreshToken } directly,
+      // not wrapped inside "data" or "success".
+      const { accessToken, refreshToken } = response.data;
 
-    localStorage.setItem(config.auth.tokenKey, accessToken);
-    localStorage.setItem(config.auth.refreshTokenKey, refreshToken);
+      localStorage.setItem(config.auth.tokenKey, accessToken);
+      localStorage.setItem(config.auth.refreshTokenKey, refreshToken);
 
-    // Backend does not send back a "user" object yet (needs to be fixed on backend side).
-    // We only have the email here (no name/workspace info at login time),
-    // so other fields are left empty for now.
-    // TODO: remove this once backend starts returning the real user object.
-    setAuth({
-      id: "",
-      email: email,
-      name: "",
-      role: "owner",
-      workspaceId: "",
-      workspaceName: "",
-      permissions: [],
-      emailVerified: false,
-      twoFactorEnabled: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Login failed";
-    setState((prev) => ({ ...prev, isLoading: false, error: message }));
-    throw error;
-  }
-};
+      // Backend does not send back a "user" object yet (needs to be fixed on backend side).
+      // We only have the email here (no name/workspace info at login time),
+      // so other fields are left empty for now.
+      // TODO: remove this once backend starts returning the real user object.
+      const tempUser = {
+        id: "",
+        email: email,
+        name: "",
+        role: "owner" as const,
+        workspaceId: "",
+        workspaceName: "",
+        permissions: [],
+        emailVerified: false,
+        twoFactorEnabled: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(config.auth.userKey, JSON.stringify(tempUser));
+      setAuth(tempUser);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Login failed";
+      setState((prev) => ({ ...prev, isLoading: false, error: message }));
+      throw error;
+    }
+  };
 
+  const register = async (data: RegisterData) => {
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    try {
+      // Backend only needs these 4 fields, so we pick just these from the form data.
+      // "workspaceName" from the form is sent as "tenantName" because that's what backend expects.
+      const response = await api.post(apiEndpoints.auth.register, {
+        tenantName: data.workspaceName,
+        email: data.email,
+        password: data.password,
+        name: data.name,
+      });
 
-const register = async (data: RegisterData) => {
-  setState((prev) => ({ ...prev, isLoading: true, error: null }));
-  try {
-    // Backend only needs these 4 fields, so we pick just these from the form data.
-    // "workspaceName" from the form is sent as "tenantName" because that's what backend expects.
-    const response = await api.post(apiEndpoints.auth.register, {
-      tenantName: data.workspaceName,
-      email: data.email,
-      password: data.password,
-      name: data.name,
-    });
+      // Backend sends back only { accessToken, refreshToken } directly,
+      // not wrapped inside "data" or "success" like we expected earlier.
+      const { accessToken, refreshToken } = response.data;
 
-    // Backend sends back only { accessToken, refreshToken } directly,
-    // not wrapped inside "data" or "success" like we expected earlier.
-    const { accessToken, refreshToken } = response.data;
+      localStorage.setItem(config.auth.tokenKey, accessToken);
+      localStorage.setItem(config.auth.refreshTokenKey, refreshToken);
 
-    localStorage.setItem(config.auth.tokenKey, accessToken);
-    localStorage.setItem(config.auth.refreshTokenKey, refreshToken);
-
-    // Backend does not send back a "user" object yet (this needs to be fixed on backend side).
-    // So for now, we build a temporary user object using the form data we already have.
-    // TODO: remove this once backend starts returning the real user object.
-    setAuth({
-      id: "",
-      email: data.email,
-      name: data.name,
-      role: "owner",
-      workspaceId: "",
-      workspaceName: data.workspaceName,
-      permissions: [],
-      emailVerified: false,
-      twoFactorEnabled: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Registration failed";
-    setState((prev) => ({ ...prev, isLoading: false, error: message }));
-    throw error;
-  }
-};
-
+      // Backend does not send back a "user" object yet (this needs to be fixed on backend side).
+      // So for now, we build a temporary user object using the form data we already have.
+      // TODO: remove this once backend starts returning the real user object.
+      const tempUser = {
+        id: "",
+        email: data.email,
+        name: data.name,
+        role: "owner" as const,
+        workspaceId: "",
+        workspaceName: data.workspaceName,
+        permissions: [],
+        emailVerified: false,
+        twoFactorEnabled: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(config.auth.userKey, JSON.stringify(tempUser));
+      setAuth(tempUser);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Registration failed";
+      setState((prev) => ({ ...prev, isLoading: false, error: message }));
+      throw error;
+    }
+  };
 
   const logout = async () => {
     setState((prev) => ({ ...prev, isLoading: true }));
@@ -207,28 +237,46 @@ const register = async (data: RegisterData) => {
       await api.post(apiEndpoints.auth.forgotPassword, { email });
       setState((prev) => ({ ...prev, isLoading: false }));
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to send reset email";
+      const message =
+        error instanceof Error ? error.message : "Failed to send reset email";
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
       throw error;
     }
   };
 
-  const resetPassword = async (token: string, password: string, confirmPassword: string) => {
+  const resetPassword = async (
+    token: string,
+    password: string,
+    confirmPassword: string,
+  ) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
-      await api.post(apiEndpoints.auth.resetPassword, { token, password, confirmPassword });
+      await api.post(apiEndpoints.auth.resetPassword, {
+        token,
+        password,
+        confirmPassword,
+      });
       setState((prev) => ({ ...prev, isLoading: false }));
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Password reset failed";
+      const message =
+        error instanceof Error ? error.message : "Password reset failed";
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
       throw error;
     }
   };
 
-  const verifyOtp = async (email: string, otp: string, type: "email_verification" | "password_reset" | "2fa") => {
+  const verifyOtp = async (
+    email: string,
+    otp: string,
+    type: "email_verification" | "password_reset" | "2fa",
+  ) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
-      const response = await api.post(apiEndpoints.auth.verifyOtp, { email, otp, type });
+      const response = await api.post(apiEndpoints.auth.verifyOtp, {
+        email,
+        otp,
+        type,
+      });
       if (response.data.success && response.data.data) {
         const { user, accessToken, refreshToken } = response.data.data;
         localStorage.setItem(config.auth.tokenKey, accessToken);
@@ -239,17 +287,22 @@ const register = async (data: RegisterData) => {
         throw new Error(response.data.message || "OTP verification failed");
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "OTP verification failed";
+      const message =
+        error instanceof Error ? error.message : "OTP verification failed";
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
       throw error;
     }
   };
 
-  const resendOtp = async (email: string, type: "email_verification" | "password_reset" | "2fa") => {
+  const resendOtp = async (
+    email: string,
+    type: "email_verification" | "password_reset" | "2fa",
+  ) => {
     try {
       await api.post(apiEndpoints.auth.resendOtp, { email, type });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to resend OTP";
+      const message =
+        error instanceof Error ? error.message : "Failed to resend OTP";
       setState((prev) => ({ ...prev, error: message }));
       throw error;
     }
@@ -267,7 +320,8 @@ const register = async (data: RegisterData) => {
         throw new Error(response.data.message || "Profile update failed");
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Profile update failed";
+      const message =
+        error instanceof Error ? error.message : "Profile update failed";
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
       throw error;
     }
