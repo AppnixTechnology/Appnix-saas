@@ -191,9 +191,9 @@
   }
 
   /* Navbar search input wrapper */
-  .navbar-search-input {
-    @apply border-none bg-secondary pl-10 focus-visible:ring-1 focus-visible:ring-primary/30;
-  }
+ .navbar-search-input {
+  @apply border-none bg-secondary pl-10! focus-visible:ring-1 focus-visible:ring-primary/30;
+}
 }
 
 @layer utilities {

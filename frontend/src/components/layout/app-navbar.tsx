@@ -2,14 +2,17 @@
 
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/lib/auth/auth-context";
 import { Search, Menu, ScanLine, Maximize2, Bell, Users } from "lucide-react";
 
 interface AppNavbarProps {
   // Toggles the mobile sidebar drawer, lifted from the parent shell.
+
   onMenuClick: () => void;
 }
 
 export function AppNavbar({ onMenuClick }: AppNavbarProps) {
+  const { user } = useAuth();
   return (
     <header className="app-surface sticky top-0 z-30 flex h-16 items-stretch border-b">
       {/* Brand column: width-matched to the sidebar (w-64) on desktop so the
@@ -19,20 +22,24 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
           <Users className="h-4 w-4 text-primary-foreground" />
         </div>
         <div className="hidden sm:block">
-          <p className="text-sm font-bold leading-tight text-foreground">CRM Admin</p>
-          <p className="text-[11px] leading-tight text-muted-foreground">Management Console</p>
+          <p className="text-sm font-bold leading-tight text-foreground">
+            CRM Admin
+          </p>
+          <p className="text-[11px] leading-tight text-muted-foreground">
+            Management Console
+          </p>
         </div>
       </div>
 
       {/* Right side of the header: hamburger, search, icons, user */}
       <div className="flex flex-1 items-center gap-3 px-3 sm:px-4 lg:px-6">
-        {/* <button
+        <button
           onClick={onMenuClick}
-          className="rounded-md p-2 text-muted-foreground hover:bg-accent"
+          className="rounded-md p-2 text-muted-foreground hover:bg-accent lg:hidden"
           aria-label="Toggle sidebar"
         >
           <Menu className="h-5 w-5" />
-        </button> */}
+        </button>
 
         {/* Search bar: grows to fill space, shrinks gracefully on small screens */}
         <div className="relative max-w-xl flex-1">
@@ -52,15 +59,22 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
           <button className="navbar-icon-btn" aria-label="Fullscreen">
             <Maximize2 className="h-[18px] w-[18px]" />
           </button>
-          <button className="navbar-icon-btn relative" aria-label="Notifications">
+          <button
+            className="navbar-icon-btn relative"
+            aria-label="Notifications"
+          >
             <Bell className="h-[18px] w-[18px]" />
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive sm:right-1.5 sm:top-1.5" />
           </button>
 
           <div className="ml-1 flex items-center gap-2 border-l border-border pl-1.5 sm:pl-3">
             <div className="hidden text-right sm:block">
-              <p className="text-sm font-semibold leading-tight text-foreground">Video User</p>
-              <p className="text-xs leading-tight text-muted-foreground">Administrator</p>
+              <p className="text-sm font-semibold leading-tight text-foreground">
+                {user?.name || "User"}
+              </p>
+              <p className="text-xs leading-tight text-muted-foreground capitalize">
+                {user?.role || "Member"}
+              </p>
             </div>
             <Image
               src="/avatar-placeholder.jpg"

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/lib/auth/auth-context";
@@ -36,6 +36,7 @@ function SignInContent() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
@@ -152,10 +153,17 @@ function SignInContent() {
 
             {/* Keep me logged in checkbox (maps to rememberMe) */}
             <div className="flex items-center gap-2">
-              <Checkbox
-                id="keepLoggedIn"
-                {...register("rememberMe")}
-                disabled={isLoading}
+              <Controller
+                name="rememberMe"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="keepLoggedIn"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                  />
+                )}
               />
               <Label
                 htmlFor="keepLoggedIn"

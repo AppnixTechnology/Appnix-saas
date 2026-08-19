@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/lib/auth/auth-context";
@@ -30,10 +30,15 @@ const signUpSchema = z
     email: z.string().email("Please enter a valid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
-    workspaceName: z.string().min(2, "Workspace name must be at least 2 characters"),
+    workspaceName: z
+      .string()
+      .min(2, "Workspace name must be at least 2 characters"),
     termsAccepted: z
       .boolean()
-      .refine((val) => val === true, "You must accept the terms and conditions"),
+      .refine(
+        (val) => val === true,
+        "You must accept the terms and conditions",
+      ),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -57,6 +62,7 @@ function SignUpContent() {
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
@@ -230,7 +236,9 @@ function SignUpContent() {
                   />
                 </div>
                 {errors.workspaceName && (
-                  <p className="text-sm text-red-600">{errors.workspaceName.message}</p>
+                  <p className="text-sm text-red-600">
+                    {errors.workspaceName.message}
+                  </p>
                 )}
               </div>
 
@@ -252,7 +260,9 @@ function SignUpContent() {
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                       disabled={isLoading}
                     >
                       {showPassword ? (
@@ -263,7 +273,9 @@ function SignUpContent() {
                     </button>
                   </div>
                   {errors.password && (
-                    <p className="text-sm text-red-600">{errors.password.message}</p>
+                    <p className="text-sm text-red-600">
+                      {errors.password.message}
+                    </p>
                   )}
                 </div>
 
@@ -281,7 +293,9 @@ function SignUpContent() {
                     />
                   </div>
                   {errors.confirmPassword && (
-                    <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
+                    <p className="text-sm text-red-600">
+                      {errors.confirmPassword.message}
+                    </p>
                   )}
                 </div>
               </div>
@@ -305,11 +319,18 @@ function SignUpContent() {
 
               {/* Terms checkbox */}
               <div className="flex items-start gap-2 pt-1">
-                <Checkbox
-                  id="termsAccepted"
-                  {...register("termsAccepted")}
-                  className="mt-0.5"
-                  disabled={isLoading}
+                <Controller
+                  name="termsAccepted"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="termsAccepted"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="mt-0.5"
+                      disabled={isLoading}
+                    />
+                  )}
                 />
                 <Label
                   htmlFor="termsAccepted"
@@ -327,7 +348,9 @@ function SignUpContent() {
                 </Label>
               </div>
               {errors.termsAccepted && (
-                <p className="text-sm text-red-600">{errors.termsAccepted.message}</p>
+                <p className="text-sm text-red-600">
+                  {errors.termsAccepted.message}
+                </p>
               )}
 
               {/* Submit button — default Button variant already uses bg-primary */}
@@ -365,10 +388,22 @@ function SignUpContent() {
                 disabled={isLoading}
               >
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.43 3.58v2.98h3.93c2.3-2.12 3.52-5.24 3.52-8.8z" />
-                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.93l-3.93-2.98c-1.09.73-2.48 1.16-4 1.16-3.08 0-5.68-2.08-6.61-4.87H1.34v3.06C3.31 21.3 7.34 24 12 24z" />
-                  <path fill="#FBBC05" d="M5.39 14.38c-.24-.73-.38-1.5-.38-2.38s.14-1.65.38-2.38V6.56H1.34C.49 8.24 0 10.06 0 12s.49 3.76 1.34 5.44l4.05-3.06z" />
-                  <path fill="#EA4335" d="M12 4.75c1.76 0 3.34.61 4.58 1.79l3.44-3.44C17.94 1.19 15.24 0 12 0 7.34 0 3.31 2.7 1.34 6.56l4.05 3.06C6.32 6.83 8.92 4.75 12 4.75z" />
+                  <path
+                    fill="#4285F4"
+                    d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.43 3.58v2.98h3.93c2.3-2.12 3.52-5.24 3.52-8.8z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 24c3.24 0 5.95-1.08 7.93-2.93l-3.93-2.98c-1.09.73-2.48 1.16-4 1.16-3.08 0-5.68-2.08-6.61-4.87H1.34v3.06C3.31 21.3 7.34 24 12 24z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.39 14.38c-.24-.73-.38-1.5-.38-2.38s.14-1.65.38-2.38V6.56H1.34C.49 8.24 0 10.06 0 12s.49 3.76 1.34 5.44l4.05-3.06z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 4.75c1.76 0 3.34.61 4.58 1.79l3.44-3.44C17.94 1.19 15.24 0 12 0 7.34 0 3.31 2.7 1.34 6.56l4.05 3.06C6.32 6.83 8.92 4.75 12 4.75z"
+                  />
                 </svg>
                 Google
               </Button>
@@ -379,7 +414,11 @@ function SignUpContent() {
                 onClick={() => (window.location.href = "/api/auth/github")}
                 disabled={isLoading}
               >
-                <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="mr-2 h-4 w-4"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
                 </svg>
                 GitHub
