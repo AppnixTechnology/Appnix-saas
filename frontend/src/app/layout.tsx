@@ -21,6 +21,11 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  // Fixes: "metadataBase property in metadata export is not set..." warning.
+  // Used to resolve relative URLs (like /og-image.png below) into absolute
+  // URLs for Open Graph / Twitter cards. Falls back to appnix.com if
+  // NEXT_PUBLIC_SITE_URL isn't set in the environment.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://appnix.com"),
   title: {
     default: "Appnix - Unified Business Messaging & Marketing Platform",
     template: "%s | Appnix",
