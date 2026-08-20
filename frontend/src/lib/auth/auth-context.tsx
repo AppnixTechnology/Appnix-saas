@@ -28,7 +28,8 @@ export interface AuthState {
 
 interface AuthContextValue extends AuthState {
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  signup: (data: SignupData) => Promise<void>;
+  register: (data: SignupData) => Promise<void>;
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string, confirmPassword: string) => Promise<void>;
@@ -39,14 +40,16 @@ interface AuthContextValue extends AuthState {
   refreshUser: () => Promise<void>;
 }
 
-export interface RegisterData {
+export interface SignupData {
   email: string;
   password: string;
-  confirmPassword: string;
+  confirmPassword?: string;
   name: string;
   workspaceName: string;
-  termsAccepted: boolean;
+  termsAccepted?: boolean;
 }
+
+export type RegisterData = SignupData;
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -127,10 +130,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (data: RegisterData) => {
+  const signup = async (data: SignupData) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
-      const response = await api.post(apiEndpoints.auth.register, data);
+      const response = await api.post(apiEndpoints.auth.signup, data);
       if (response.data.success && response.data.data) {
         const { user, accessToken, refreshToken } = response.data.data;
         localStorage.setItem(config.auth.tokenKey, accessToken);
@@ -138,10 +141,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(config.auth.userKey, JSON.stringify(user));
         setAuth(user);
       } else {
-        throw new Error(response.data.message || "Registration failed");
+        throw new Error(response.data.message || "Signup failed");
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Registration failed";
+      const message = error instanceof Error ? error.message : "Signup failed";
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
       throw error;
     }
@@ -237,7 +240,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         ...state,
         login,
-        register,
+        signup,
+        register: signup,
         logout,
         forgotPassword,
         resetPassword,

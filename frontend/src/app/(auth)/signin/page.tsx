@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/lib/auth/auth-context";
+import { config } from "@/lib/config";
 import { useToast } from "@/hooks/use-toast";
 import { MessageSquare, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 
@@ -181,7 +182,9 @@ function SignInContent() {
                 variant="outline"
                 type="button"
                 className="w-full"
-                onClick={() => window.location.href = "/api/auth/google"}
+                onClick={() => {
+                  window.location.href = config.auth.googleOAuthUrl;
+                }}
                 disabled={isLoading}
               >
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">

@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/lib/auth/auth-context";
+import { config } from "@/lib/config";
 import { useToast } from "@/hooks/use-toast";
 import { MessageSquare, Mail, Lock, User, Building, Eye, EyeOff, Loader2, Shield } from "lucide-react";
 
@@ -33,7 +34,7 @@ type SignUpFormData = z.infer<typeof signUpSchema>;
 function SignUpContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { register: registerUser } = useAuth();
+  const { signup } = useAuth();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -71,7 +72,7 @@ function SignUpContent() {
   const onSubmit = async (data: SignUpFormData) => {
     setIsLoading(true);
     try {
-      await registerUser({
+      await signup({
         name: data.name,
         email: data.email,
         password: data.password,
@@ -281,7 +282,9 @@ function SignUpContent() {
                 variant="outline"
                 type="button"
                 className="w-full"
-                onClick={() => window.location.href = "/api/auth/google"}
+                onClick={() => {
+                  window.location.href = config.auth.googleOAuthUrl;
+                }}
                 disabled={isLoading}
               >
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">

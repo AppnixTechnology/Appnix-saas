@@ -13,6 +13,7 @@ export const config = {
     tokenKey: "appnix_auth_token",
     refreshTokenKey: "appnix_refresh_token",
     userKey: "appnix_user",
+    googleOAuthUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000/api/v1"}/auth/google`,
   },
   theme: {
     defaultTheme: "system",
