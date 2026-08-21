@@ -35,6 +35,12 @@ import {
   ShieldCheck,
   Wallet,
   CreditCard,
+  User,
+  Bell,
+  Shield,
+  Palette,
+  Plug,
+  History,
 } from "lucide-react";
 
 // Sub-item type for expandable menu sections
@@ -135,6 +141,20 @@ const menuItems: MenuItem[] = [
         href: "/workspace/support",
         icon: Headset,
       },
+    ],
+  },
+  {
+    label: "Settings",
+    href: "/settings",
+    icon: Settings,
+    children: [
+      { label: "Profile", href: "/settings/profile", icon: User },
+      { label: "Notifications", href: "/settings/notifications", icon: Bell },
+      { label: "Security", href: "/settings/security", icon: Shield },
+      { label: "Appearance", href: "/settings/appearance", icon: Palette },
+      { label: "Integrations", href: "/settings/integrations", icon: Plug },
+      { label: "Activity Logs", href: "/settings/activity-logs", icon: History },
+      { label: "Account & Data", href: "/settings/account-data", icon: Database },
     ],
   },
 ];
@@ -304,6 +324,7 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
                                 sub.href !== "/crm" &&
                                 sub.href !== "/department" &&
                                 sub.href !== "/workspace" &&
+                                sub.href !== "/settings" &&
                                 sub.href !== "/automations" &&
                                 pathname.startsWith(sub.href + "/"));
                             const SubIcon = sub.icon;
@@ -337,20 +358,13 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
 
           {/* Fixed bottom section — never scrolls, always pinned to the bottom */}
           <div className="shrink-0 space-y-1 border-t border-border px-3 py-3">
-            <Link
-              href="/dashboard/settings"
-              className="sidebar-nav-item sidebar-nav-item-inactive"
-            >
-              <Settings className="h-4.5 w-4.5" />
-              Settings
-            </Link>
             <button
               type="button"
               onClick={handleLogout}
-              className="sidebar-nav-item-danger"
+              className="sidebar-nav-item-danger w-full justify-start"
             >
-              <LogOut className="h-4.5 w-4.5" />
-              Logout
+              <LogOut className="h-4.5 w-4.5 shrink-0" />
+              <span>Logout</span>
             </button>
           </div>
         </div>
