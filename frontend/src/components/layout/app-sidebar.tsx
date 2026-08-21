@@ -33,6 +33,8 @@ import {
   Contact,
   Megaphone,
   ShieldCheck,
+  Wallet,
+  CreditCard,
 } from "lucide-react";
 
 // Sub-item type for expandable menu sections
@@ -108,7 +110,33 @@ const menuItems: MenuItem[] = [
       { label: "Roles", href: "/department/roles", icon: ShieldCheck },
     ],
   },
-  { label: "Workspace", href: "/workspace", icon: Share2 },
+  {
+    label: "Workspace",
+    href: "/workspace",
+    icon: Share2,
+    children: [
+      {
+        label: "Account Settings",
+        href: "/workspace/account-settings",
+        icon: Settings,
+      },
+      {
+        label: "Wallet & Transactions",
+        href: "/workspace/wallet",
+        icon: Wallet,
+      },
+      {
+        label: "Billing",
+        href: "/workspace/billing",
+        icon: CreditCard,
+      },
+      {
+        label: "Support",
+        href: "/workspace/support",
+        icon: Headset,
+      },
+    ],
+  },
 ];
 
 interface AppSidebarProps {
@@ -275,6 +303,7 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
                               (sub.href !== "/channels" &&
                                 sub.href !== "/crm" &&
                                 sub.href !== "/department" &&
+                                sub.href !== "/workspace" &&
                                 sub.href !== "/automations" &&
                                 pathname.startsWith(sub.href + "/"));
                             const SubIcon = sub.icon;

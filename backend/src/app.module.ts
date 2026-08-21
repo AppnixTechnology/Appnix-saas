@@ -6,6 +6,7 @@ import { TenantsModule } from './modules/tenants/tenants.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { CrmContactsModule } from './modules/crm/crm.module';
 import { MailModule } from './modules/mail/mail.module';
+import { SupportModule } from './modules/support/support.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -18,6 +19,7 @@ import { PrismaModule } from './prisma/prisma.module';
     TenantsModule,
     BillingModule,
     CrmContactsModule,
+    SupportModule,
   ],
 })
 export class AppModule {}
