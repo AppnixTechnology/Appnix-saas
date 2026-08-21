@@ -32,6 +32,7 @@ import {
   KeyRound,
   Contact,
   Megaphone,
+  ShieldCheck,
 } from "lucide-react";
 
 // Sub-item type for expandable menu sections
@@ -97,7 +98,16 @@ const menuItems: MenuItem[] = [
   },
   { label: "Chat Widget", href: "/chat-widget", icon: MessageSquare },
   { label: "Voice AI Agent", href: "/voice-ai-agent", icon: Headset },
-  { label: "Department", href: "/department", icon: Building2 },
+  {
+    label: "Department",
+    href: "/department",
+    icon: Building2,
+    children: [
+      { label: "Analytics", href: "/department/analytics", icon: BarChart3 },
+      { label: "Departments", href: "/department/departments", icon: Building2 },
+      { label: "Roles", href: "/department/roles", icon: ShieldCheck },
+    ],
+  },
   { label: "Workspace", href: "/workspace", icon: Share2 },
 ];
 
@@ -264,6 +274,7 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
                               pathname === sub.href ||
                               (sub.href !== "/channels" &&
                                 sub.href !== "/crm" &&
+                                sub.href !== "/department" &&
                                 sub.href !== "/automations" &&
                                 pathname.startsWith(sub.href + "/"));
                             const SubIcon = sub.icon;
