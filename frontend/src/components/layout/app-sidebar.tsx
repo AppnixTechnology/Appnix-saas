@@ -60,7 +60,6 @@ interface MenuItem {
 // Main navigation items shown under the "MENU" label.
 const menuItems: MenuItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Products", href: "/products", icon: LayoutGrid },
   {
     label: "Channels",
     href: "/channels",
@@ -263,7 +262,9 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
 
                 // Item without children: render a plain link (unchanged behavior)
                 if (!hasChildren) {
-                  const isActive = pathname === item.href;
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href === "/dashboard" && pathname === "/products");
                   return (
                     <Link
                       key={item.href}

@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth/auth-context";
-import { cn } from "@/lib/utils";
 import {
   Search,
   Menu,
@@ -13,8 +11,6 @@ import {
   Maximize2,
   Bell,
   Users,
-  LayoutDashboard,
-  LayoutGrid,
 } from "lucide-react";
 
 interface AppNavbarProps {
@@ -24,7 +20,6 @@ interface AppNavbarProps {
 
 export function AppNavbar({ onMenuClick }: AppNavbarProps) {
   const { user } = useAuth();
-  const pathname = usePathname();
 
   return (
     <header className="app-surface sticky top-0 z-30 flex h-16 items-stretch border-b">
@@ -54,37 +49,8 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
           <Menu className="h-5 w-5" />
         </button>
 
-        {/* Dashboard / Products Switcher in Top Navigation */}
-        <div className="hidden sm:flex items-center gap-1 bg-muted/60 p-1 rounded-lg border border-border/60 shrink-0">
-          <Link
-            href="/dashboard"
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer",
-              pathname === "/dashboard"
-                ? "bg-emerald-600 text-white shadow-xs"
-                : "text-muted-foreground hover:text-foreground hover:bg-background/80"
-            )}
-          >
-            <LayoutDashboard className="h-3.5 w-3.5" />
-            <span>Dashboard</span>
-          </Link>
-
-          <Link
-            href="/products"
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer",
-              pathname === "/products" || pathname.startsWith("/products/")
-                ? "bg-emerald-600 text-white shadow-xs"
-                : "text-muted-foreground hover:text-foreground hover:bg-background/80"
-            )}
-          >
-            <LayoutGrid className="h-3.5 w-3.5" />
-            <span>Products</span>
-          </Link>
-        </div>
-
         {/* Search bar: grows to fill space, shrinks gracefully on small screens */}
-        <div className="relative max-w-md flex-1">
+        <div className="relative max-w-xl flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
