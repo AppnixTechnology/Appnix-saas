@@ -25,6 +25,8 @@ import {
   Calendar,
   CreditCard,
   UserPlus,
+  LayoutDashboard,
+  LayoutGrid,
 } from "lucide-react";
 import {
   LineChart,
@@ -182,7 +184,35 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Welcome Header (unchanged) */}
+      {/* Navigation Switcher: [ Dashboard ] [ Products ] */}
+      <div className="flex items-center justify-between">
+        <div className="inline-flex items-center gap-1.5 rounded-lg border bg-muted/40 p-1">
+          <Button
+            asChild
+            size="sm"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs"
+          >
+            <Link href="/dashboard" className="gap-1.5">
+              <LayoutDashboard className="h-3.5 w-3.5" />
+              Dashboard
+            </Link>
+          </Button>
+
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-background/80"
+          >
+            <Link href="/products" className="gap-1.5">
+              <LayoutGrid className="h-3.5 w-3.5" />
+              Products
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">

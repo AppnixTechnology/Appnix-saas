@@ -60,6 +60,7 @@ interface MenuItem {
 // Main navigation items shown under the "MENU" label.
 const menuItems: MenuItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Products", href: "/products", icon: LayoutGrid },
   {
     label: "Channels",
     href: "/channels",
