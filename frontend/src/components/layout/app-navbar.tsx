@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth/auth-context";
@@ -7,7 +8,6 @@ import { Search, Menu, ScanLine, Maximize2, Bell, Users } from "lucide-react";
 
 interface AppNavbarProps {
   // Toggles the mobile sidebar drawer, lifted from the parent shell.
-
   onMenuClick: () => void;
 }
 
@@ -67,23 +67,28 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive sm:right-1.5 sm:top-1.5" />
           </button>
 
-          <div className="ml-1 flex items-center gap-2 border-l border-border pl-1.5 sm:pl-3">
+          {/* User Profile section -> Clickable link to /settings/profile */}
+          <Link
+            href="/settings/profile"
+            className="group ml-1 flex items-center gap-2 rounded-lg border-l border-border py-1 pl-1.5 pr-1.5 sm:pl-3 transition-colors hover:bg-accent/60 cursor-pointer"
+            title="Open Profile Settings"
+          >
             <div className="hidden text-right sm:block">
-              <p className="text-sm font-semibold leading-tight text-foreground">
+              <p className="text-sm font-semibold leading-tight text-foreground transition-colors group-hover:text-primary">
                 {user?.name || "User"}
               </p>
-              <p className="text-xs leading-tight text-muted-foreground capitalize">
+              <p className="text-xs capitalize leading-tight text-muted-foreground">
                 {user?.role || "Member"}
               </p>
             </div>
             <Image
               src="/avatar-placeholder.png"
-              alt="Video User"
+              alt={user?.name || "User"}
               width={36}
               height={36}
-              className="h-8 w-8 rounded-full object-cover sm:h-9 sm:w-9"
+              className="h-8 w-8 rounded-full object-cover ring-1 ring-border transition-all group-hover:ring-2 group-hover:ring-primary sm:h-9 sm:w-9"
             />
-          </div>
+          </Link>
         </div>
       </div>
     </header>
