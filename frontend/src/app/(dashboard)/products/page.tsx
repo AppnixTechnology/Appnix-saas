@@ -174,55 +174,35 @@ export default function ProductsOverviewPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Breadcrumb & Switcher */}
+      {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        {/* Navigation Switcher: [ Dashboard ] [ Products ] */}
-        <div className="inline-flex items-center gap-1.5 rounded-lg border bg-muted/40 p-1">
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-background/80"
-          >
-            <Link href="/dashboard" className="gap-1.5">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
+            <Layers className="h-6 w-6 text-emerald-600" />
+            Products & Feature Suite
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Explore and launch all powerful visual builders, omnichannel bots, and business automation products.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative w-72 max-w-full">
+            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Search products & tools..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8.5 h-9 text-xs bg-background"
+            />
+          </div>
+          <Button asChild variant="outline" size="sm" className="gap-1.5 text-xs font-semibold">
+            <Link href="/dashboard">
               <LayoutDashboard className="h-3.5 w-3.5" />
-              Dashboard
-            </Link>
-          </Button>
-
-          <Button
-            asChild
-            size="sm"
-            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs"
-          >
-            <Link href="/products" className="gap-1.5">
-              <LayoutGrid className="h-3.5 w-3.5" />
-              Products
+              Back to Dashboard
             </Link>
           </Button>
         </div>
-
-        {/* Search */}
-        <div className="relative w-72 max-w-full">
-          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-          <Input
-            placeholder="Search products & tools..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8.5 h-8.5 text-xs bg-background"
-          />
-        </div>
-      </div>
-
-      {/* Page Title & Intro */}
-      <div>
-        <h1 className="text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
-          <Layers className="h-6 w-6 text-emerald-600" />
-          Products & Feature Suite
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Explore and launch all powerful visual builders, omnichannel bots, and business automation products.
-        </p>
       </div>
 
       {/* Products Responsive Grid */}
