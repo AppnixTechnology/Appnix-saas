@@ -1,0 +1,385 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { Client } from "@/super-admin/types";
+import { clientService } from "@/super-admin/services";
+import { AddClientModal } from "@/super-admin/components/clients/AddClientModal";
+import {
+  Building2,
+  Plus,
+  Search,
+  Filter,
+  ArrowUpDown,
+  MoreVertical,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  MessageSquare,
+  Wallet,
+  ExternalLink,
+  ChevronRight,
+  ShieldAlert,
+  Trash2,
+  PauseCircle,
+  PlayCircle,
+  Eye,
+  Edit,
+} from "lucide-react";
+
+export default function SuperAdminClientsPage() {
+  const [clients, setClients] = useState<Client[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilterTab, setActiveFilterTab] = useState<string>("All");
+  const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+
+  const fetchClients = () => {
+    clientService.getAll().then(setClients);
+  };
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  const handleToggleStatus = (id: string, currentStatus: Client["status"]) => {
+    const newStatus = currentStatus === "Active" ? "Suspended" : "Active";
+    clientService.updateStatus(id, newStatus).then(() => {
+      fetchClients();
+    });
+  };
+
+  const handleDeleteClient = (id: string, name: string) => {
+    if (confirm(`Are you sure you want to delete organization ${name}? This cannot be undone.`)) {
+      clientService.delete(id).then(() => {
+        fetchClients();
+      });
+    }
+  };
+
+  const filteredClients = clients.filter((client) => {
+    const matchesSearch =
+      client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client.ownerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client.plan.toLowerCase().includes(searchQuery.toLowerCase());
+
+    if (!matchesSearch) return false;
+
+    if (activeFilterTab === "All") return true;
+    if (activeFilterTab === "Active") return client.status === "Active";
+    if (activeFilterTab === "Trial") return client.status === "Trial";
+    if (activeFilterTab === "Suspended") return client.status === "Suspended";
+    if (activeFilterTab === "Negative Balance") return client.walletBalance < 0;
+
+    return true;
+  });
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-5">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
+            <Building2 className="h-6 w-6 text-emerald-600" />
+            Clients
+          </h1>
+          <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+            Manage organizations, provision new tenant workspaces, and monitor subscription plans.
+          </p>
+        </div>
+
+        <Button
+          onClick={() => setIsAddClientOpen(true)}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs gap-1.5 shadow-sm"
+        >
+          <Plus className="h-4 w-4" />
+          Add Client
+        </Button>
+      </div>
+
+      {/* Filter Tabs & Search Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border rounded-xl bg-card p-3 shadow-xs">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+          {["All", "Active", "Trial", "Suspended", "Negative Balance"].map((tab) => {
+            const isSelected = activeFilterTab === tab;
+            const count =
+              tab === "All"
+                ? clients.length
+                : tab === "Negative Balance"
+                ? clients.filter((c) => c.walletBalance < 0).length
+                : clients.filter((c) => c.status === tab).length;
+
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveFilterTab(tab)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer",
+                  isSelected
+                    ? "bg-emerald-600 text-white font-semibold shadow-xs"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                <span>{tab}</span>
+                <span
+                  className={cn(
+                    "px-1.5 py-0.2 rounded-full text-[10px]",
+                    isSelected ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
+                  )}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="relative w-64 max-w-full">
+            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Search clients, owner, email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8.5 h-8.5 text-xs bg-background"
+            />
+          </div>
+          <Button variant="outline" size="sm" className="text-xs gap-1 h-8.5 text-muted-foreground">
+            <Filter className="h-3.5 w-3.5" />
+            Filter
+          </Button>
+        </div>
+      </div>
+
+      {/* Clients Table */}
+      <div className="rounded-2xl border bg-card overflow-hidden shadow-xs">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-muted/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="p-4 text-left">Org Name</th>
+                <th className="p-4 text-left">Plan</th>
+                <th className="p-4 text-left">Client Status</th>
+                <th className="p-4 text-left">WhatsApp Status</th>
+                <th className="p-4 text-right">Wallet Balance</th>
+                <th className="p-4 text-left">Signup Date</th>
+                <th className="p-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredClients.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-muted-foreground text-xs">
+                    No client organizations found matching your search.
+                  </td>
+                </tr>
+              ) : (
+                filteredClients.map((client) => {
+                  const isNegative = client.walletBalance < 0;
+                  return (
+                    <tr
+                      key={client.id}
+                      className="border-b last:border-0 hover:bg-muted/30 transition-colors text-xs"
+                    >
+                      {/* Org Name */}
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center font-bold text-primary text-xs shrink-0">
+                            {client.name.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-bold text-foreground hover:text-emerald-600 cursor-pointer">
+                              {client.name}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground">
+                              {client.ownerName} • {client.email}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Plan */}
+                      <td className="p-4">
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "text-[10px] font-bold px-2 py-0.5",
+                            client.plan === "Enterprise" && "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300",
+                            client.plan === "Pro" && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300",
+                            client.plan === "Growth" && "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300",
+                            client.plan === "Starter" && "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300"
+                          )}
+                        >
+                          {client.plan}
+                        </Badge>
+                      </td>
+
+                      {/* Client Status */}
+                      <td className="p-4">
+                        <Badge
+                          variant="secondary"
+                          className={cn(
+                            "text-[10px] font-bold",
+                            client.status === "Active" && "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+                            client.status === "Trial" && "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300",
+                            client.status === "Suspended" && "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300",
+                            client.status === "Inactive" && "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          {client.status}
+                        </Badge>
+                      </td>
+
+                      {/* WhatsApp Status */}
+                      <td className="p-4">
+                        <span className="inline-flex items-center gap-1.5 text-xs">
+                          <span
+                            className={cn(
+                              "h-2 w-2 rounded-full",
+                              client.whatsappStatus === "Connected" && "bg-emerald-500",
+                              client.whatsappStatus === "Pending" && "bg-amber-500",
+                              client.whatsappStatus === "Disconnected" && "bg-slate-400"
+                            )}
+                          />
+                          <span className="text-foreground font-medium">{client.whatsappStatus}</span>
+                        </span>
+                      </td>
+
+                      {/* Wallet Balance */}
+                      <td className="p-4 text-right">
+                        <span
+                          className={cn(
+                            "font-bold font-mono",
+                            isNegative ? "text-rose-600 dark:text-rose-400" : "text-foreground"
+                          )}
+                        >
+                          {isNegative ? `-$${Math.abs(client.walletBalance).toFixed(2)}` : `$${client.walletBalance.toFixed(2)}`}
+                        </span>
+                      </td>
+
+                      {/* Signup Date */}
+                      <td className="p-4 text-muted-foreground whitespace-nowrap">
+                        {client.signupDate}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="p-4 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => setSelectedClient(client)}
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            title="View Client Details"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => handleToggleStatus(client.id, client.status)}
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            title={client.status === "Active" ? "Suspend Client" : "Activate Client"}
+                          >
+                            {client.status === "Active" ? (
+                              <PauseCircle className="h-4 w-4 text-amber-600" />
+                            ) : (
+                              <PlayCircle className="h-4 w-4 text-emerald-600" />
+                            )}
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => handleDeleteClient(client.id, client.name)}
+                            className="h-8 w-8 text-muted-foreground hover:text-rose-600"
+                            title="Delete Client"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Add Client Modal */}
+      <AddClientModal
+        isOpen={isAddClientOpen}
+        onClose={() => setIsAddClientOpen(false)}
+        onClientAdded={(newClient) => {
+          clientService.create(newClient).then(() => {
+            fetchClients();
+            alert(`Organization ${newClient.name} successfully created!`);
+          });
+        }}
+      />
+
+      {/* View Client Details Drawer / Modal */}
+      {selectedClient && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-lg rounded-2xl border bg-card p-6 shadow-2xl animate-in space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-emerald-600/10 flex items-center justify-center font-bold text-emerald-600 text-sm">
+                  {selectedClient.name.charAt(0)}
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-foreground">{selectedClient.name}</h3>
+                  <p className="text-xs text-muted-foreground">ID: {selectedClient.id}</p>
+                </div>
+              </div>
+              <Button size="sm" variant="ghost" onClick={() => setSelectedClient(null)}>
+                ✕
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="p-3 border rounded-lg bg-muted/20">
+                <p className="text-muted-foreground text-[10px] uppercase font-semibold">Account Owner</p>
+                <p className="font-bold text-foreground mt-0.5">{selectedClient.ownerName}</p>
+                <p className="text-muted-foreground">{selectedClient.email}</p>
+              </div>
+              <div className="p-3 border rounded-lg bg-muted/20">
+                <p className="text-muted-foreground text-[10px] uppercase font-semibold">Subscription Plan</p>
+                <p className="font-bold text-foreground mt-0.5">{selectedClient.plan} Tier</p>
+                <p className="text-emerald-600 font-semibold">${selectedClient.mrr}/mo MRR</p>
+              </div>
+              <div className="p-3 border rounded-lg bg-muted/20">
+                <p className="text-muted-foreground text-[10px] uppercase font-semibold">Wallet Balance</p>
+                <p className={cn("font-bold font-mono mt-0.5 text-sm", selectedClient.walletBalance < 0 ? "text-rose-600" : "text-foreground")}>
+                  ${selectedClient.walletBalance.toFixed(2)}
+                </p>
+              </div>
+              <div className="p-3 border rounded-lg bg-muted/20">
+                <p className="text-muted-foreground text-[10px] uppercase font-semibold">WhatsApp Connectivity</p>
+                <p className="font-bold text-foreground mt-0.5">{selectedClient.whatsappStatus}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t">
+              <Button size="sm" variant="outline" onClick={() => setSelectedClient(null)}>
+                Close
+              </Button>
+              <Button
+                size="sm"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+                onClick={() => alert(`Impersonating tenant session for ${selectedClient.name}...`)}
+              >
+                Login as Tenant →
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
