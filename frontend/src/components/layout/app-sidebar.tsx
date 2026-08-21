@@ -9,6 +9,10 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   ArrowLeftRight,
+  LayoutGrid,
+  Camera,
+  ScanLine,
+  Smartphone,
   Users,
   Bot,
   Zap,
@@ -26,6 +30,8 @@ import {
   Database,
   FileText,
   KeyRound,
+  Contact,
+  Megaphone,
 } from "lucide-react";
 
 // Sub-item type for expandable menu sections
@@ -45,8 +51,28 @@ interface MenuItem {
 // Main navigation items shown under the "MENU" label.
 const menuItems: MenuItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Channels", href: "/channels", icon: ArrowLeftRight },
-  { label: "CRM", href: "/crm", icon: Users },
+  {
+    label: "Channels",
+    href: "/channels",
+    icon: ArrowLeftRight,
+    children: [
+      { label: "All Channels", href: "/channels", icon: LayoutGrid },
+      { label: "WhatsApp", href: "/channels/whatsapp", icon: MessageSquare },
+      { label: "Instagram", href: "/channels/instagram", icon: Camera },
+      { label: "Facebook", href: "/channels/facebook", icon: ScanLine },
+      { label: "RCS", href: "/channels/rcs", icon: Smartphone },
+    ],
+  },
+  {
+    label: "CRM",
+    href: "/crm",
+    icon: Users,
+    children: [
+      { label: "Contacts", href: "/crm/contacts", icon: Contact },
+      { label: "Bulk Campaign", href: "/crm/bulk-campaign", icon: Megaphone },
+      { label: "Live Chat", href: "/crm/live-chat", icon: MessageSquare },
+    ],
+  },
   { label: "Chatbots", href: "/chatbots", icon: Bot },
   {
     label: "Automations",
@@ -92,9 +118,15 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
   // (so refreshing on a sub-page keeps the section open).
   useEffect(() => {
     const activeParent = menuItems.find((item) =>
-      item.children?.some((child) => pathname === child.href),
+      pathname === item.href ||
+      (item.href !== "/dashboard" && pathname.startsWith(item.href + "/")) ||
+      item.children?.some(
+        (child) =>
+          pathname === child.href ||
+          (child.href !== item.href && pathname.startsWith(child.href + "/"))
+      ),
     );
-    if (activeParent) {
+    if (activeParent && activeParent.children?.length) {
       setExpanded(activeParent.label);
     }
   }, [pathname]);
@@ -162,7 +194,12 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
                 const hasChildren = !!item.children?.length;
                 const isParentActive =
                   pathname === item.href ||
-                  item.children?.some((c) => pathname === c.href);
+                  (item.href !== "/dashboard" && pathname.startsWith(item.href + "/")) ||
+                  item.children?.some(
+                    (c) =>
+                      pathname === c.href ||
+                      (c.href !== item.href && pathname.startsWith(c.href + "/"))
+                  );
                 const isOpen = expanded === item.label;
 
                 // Item without children: render a plain link (unchanged behavior)
@@ -223,20 +260,29 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
                       <div className="overflow-hidden">
                         <div className="ml-6.75 space-y-0.5 border-l border-border pl-4">
                           {item.children!.map((sub) => {
-                            const isSubActive = pathname === sub.href;
+                            const isSubActive =
+                              pathname === sub.href ||
+                              (sub.href !== "/channels" &&
+                                sub.href !== "/crm" &&
+                                sub.href !== "/automations" &&
+                                pathname.startsWith(sub.href + "/"));
+                            const SubIcon = sub.icon;
                             return (
                               <Link
                                 key={sub.href}
                                 href={sub.href}
                                 onClick={onClose}
                                 className={cn(
-                                  "block rounded-md px-3 py-2 text-sm transition-colors",
+                                  "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
                                   isSubActive
                                     ? "bg-primary/10 font-medium text-primary border-l-2 border-primary -ml-4.5 pl-3"
                                     : "text-muted-foreground hover:bg-accent hover:text-foreground",
                                 )}
                               >
-                                {sub.label}
+                                {SubIcon && (
+                                  <SubIcon className="h-4 w-4 shrink-0" />
+                                )}
+                                <span className="truncate">{sub.label}</span>
                               </Link>
                             );
                           })}
