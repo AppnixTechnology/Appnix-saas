@@ -33,13 +33,13 @@ export interface AuthState {
   error: string | null;
 }
 
-interface AuthContextValue extends AuthState {
   login: (
     email: string,
     password: string,
     rememberMe?: boolean,
   ) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  signup: (data: SignupData) => Promise<void>;
+  register: (data: SignupData) => Promise<void>;
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (
@@ -61,14 +61,16 @@ interface AuthContextValue extends AuthState {
   refreshUser: () => Promise<void>;
 }
 
-export interface RegisterData {
+export interface SignupData {
   email: string;
   password: string;
-  confirmPassword: string;
+  confirmPassword?: string;
   name: string;
   workspaceName: string;
-  termsAccepted: boolean;
+  termsAccepted?: boolean;
 }
+
+export type RegisterData = SignupData;
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -173,7 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (data: RegisterData) => {
+  const signup = async (data: SignupData) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
       // Backend only needs these 4 fields, so we pick just these from the form data.
@@ -332,7 +334,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         ...state,
         login,
-        register,
+        signup,
+        register: signup,
         logout,
         forgotPassword,
         resetPassword,

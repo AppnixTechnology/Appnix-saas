@@ -11,6 +11,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/lib/auth/auth-context";
+import { config } from "@/lib/config";
 import { useToast } from "@/hooks/use-toast";
 import {
   User,
@@ -50,7 +51,7 @@ type SignUpFormData = z.infer<typeof signUpSchema>;
 function SignUpContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { register: registerUser } = useAuth();
+  const { signup } = useAuth();
   const { toast } = useToast();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -96,7 +97,7 @@ function SignUpContent() {
   const onSubmit = async (data: SignUpFormData) => {
     setIsLoading(true);
     try {
-      await registerUser({
+      await signup({
         name: data.name,
         email: data.email,
         password: data.password,

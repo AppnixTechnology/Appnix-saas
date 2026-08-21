@@ -11,6 +11,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/lib/auth/auth-context";
+import { config } from "@/lib/config";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, Eye, EyeOff, LogIn, KeyRound, Loader2 } from "lucide-react";
 

@@ -7,11 +7,34 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   findByEmail(email: string) {
-    return this.prisma.user.findUnique({ where: { email } });
+    return this.prisma.user.findUnique({
+      where: { email },
+      include: { tenant: true },
+    });
+  }
+
+  findByGoogleId(googleId: string) {
+    return this.prisma.user.findUnique({
+      where: { googleId },
+      include: { tenant: true },
+    });
   }
 
   findById(id: string) {
-    return this.prisma.user.findUnique({ where: { id } });
+    return this.prisma.user.findUnique({
+      where: { id },
+      include: { tenant: true },
+    });
+  }
+
+  findUsersWithActiveResetTokens() {
+    return this.prisma.user.findMany({
+      where: {
+        passwordResetToken: { not: null },
+        passwordResetExpiry: { gte: new Date() },
+      },
+      include: { tenant: true },
+    });
   }
 
   findByTenant(tenantId: string) {
@@ -60,10 +83,82 @@ export class UsersService {
     });
   }
 
+  // creates the tenant AND OAuth admin user atomically
+  async createOAuthTenantWithUser(data: {
+    tenantName: string;
+    email: string;
+    name?: string;
+    avatar?: string;
+    googleId?: string;
+  }) {
+    const slug = this.generateSlug(data.tenantName);
+
+    return this.prisma.$transaction(async (tx) => {
+      const tenant = await tx.tenant.create({
+        data: { name: data.tenantName, slug },
+      });
+
+      const user = await tx.user.create({
+        data: {
+          email: data.email,
+          name: data.name,
+          avatar: data.avatar,
+          googleId: data.googleId,
+          role: Role.TENANT_ADMIN,
+          tenantId: tenant.id,
+        },
+      });
+
+      return { tenant, user };
+    });
+  }
+
+  linkGoogleAccount(userId: string, googleId: string, avatar?: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        googleId,
+        ...(avatar ? { avatar } : {}),
+      },
+      include: { tenant: true },
+    });
+  }
+
   updateRefreshToken(userId: string, hashedRefreshToken: string | null) {
     return this.prisma.user.update({
       where: { id: userId },
       data: { hashedRefreshToken },
+    });
+  }
+
+  updatePasswordResetToken(
+    userId: string,
+    hashedToken: string,
+    expiry: Date,
+  ) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        passwordResetToken: hashedToken,
+        passwordResetExpiry: expiry,
+      },
+    });
+  }
+
+  updatePassword(userId: string, passwordHash: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
+  }
+
+  clearPasswordResetToken(userId: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        passwordResetToken: null,
+        passwordResetExpiry: null,
+      },
     });
   }
 

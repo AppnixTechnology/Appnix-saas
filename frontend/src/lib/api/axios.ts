@@ -72,6 +72,7 @@ export const api = createAxiosInstance();
 export const apiEndpoints = {
   auth: {
     login: "/auth/login",
+    signup: "/auth/signup",
     register: "/auth/signup",
     logout: "/auth/logout",
     refresh: "/auth/refresh",
