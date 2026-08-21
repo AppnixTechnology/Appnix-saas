@@ -33,6 +33,7 @@ export interface AuthState {
   error: string | null;
 }
 
+interface AuthContextValue extends AuthState {
   login: (
     email: string,
     password: string,
