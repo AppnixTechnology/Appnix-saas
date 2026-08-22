@@ -81,33 +81,35 @@ const featureItems = [
   },
 ];
 
+import { WhatsAppIcon, InstagramIcon, RCSIcon, FacebookIcon } from "@/components/landing/channel-icons";
+
 const channelItems = [
   {
     name: "WhatsApp Business API",
     description: "Official Meta Cloud API with green badge & templates",
     href: "#channels",
-    icon: MessageSquare,
+    icon: WhatsAppIcon,
     badge: "Official API",
   },
   {
     name: "RCS Business Messaging",
     description: "Rich cards, action chips & Google verified senders",
     href: "#channels",
-    icon: Smartphone,
+    icon: RCSIcon,
     badge: "Google Verified",
   },
   {
     name: "Instagram Direct",
     description: "Automate DMs, story mentions & comment responses",
     href: "#channels",
-    icon: MessageSquare,
+    icon: InstagramIcon,
     badge: "Meta Direct",
   },
   {
     name: "Facebook Messenger",
     description: "Connect Facebook Pages and Click-to-Messenger ads",
     href: "#channels",
-    icon: Send,
+    icon: FacebookIcon,
     badge: "Meta API",
   },
 ];

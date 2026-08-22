@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { WhatsAppIcon, RCSIcon } from "@/components/landing/channel-icons";
 
 export function CampaignShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => void }) {
   return (
@@ -32,8 +33,15 @@ export function CampaignShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => v
                       Campaign: Q1 Enterprise Product Launch & Special Offer
                     </h4>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Multi-Channel: WhatsApp Cloud API + RCS Verified • High Priority Broadcast
+                  <p className="text-xs text-muted-foreground mt-1 flex flex-wrap items-center gap-1.5">
+                    <span>Multi-Channel:</span>
+                    <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-medium bg-emerald-500/10 px-1.5 py-0.2 rounded text-[11px]">
+                      <WhatsAppIcon className="h-3 w-3 shrink-0" /> WhatsApp Cloud API
+                    </span>
+                    <span>+</span>
+                    <span className="inline-flex items-center gap-1 text-blue-700 dark:text-blue-400 font-medium bg-blue-500/10 px-1.5 py-0.2 rounded text-[11px]">
+                      <RCSIcon className="h-3 w-3 shrink-0" /> RCS Verified
+                    </span>
                   </p>
                 </div>
                 <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-semibold text-xs border-emerald-500/20 w-fit">

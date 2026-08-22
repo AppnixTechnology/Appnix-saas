@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { WhatsAppIcon, RCSIcon, InstagramIcon } from "@/components/landing/channel-icons";
 
 const mockContacts = [
   {
@@ -128,7 +129,10 @@ export function CRMShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => void }
                           <div className="text-[10px] text-muted-foreground">{contact.company}</div>
                         </td>
                         <td className="p-3">
-                          <span className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-medium px-1.5 py-0.5 rounded text-[10px]">
+                          <span className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-medium px-1.5 py-0.5 rounded text-[10px] inline-flex items-center gap-1">
+                            {contact.channel === "WhatsApp" && <WhatsAppIcon className="h-3 w-3 shrink-0" />}
+                            {contact.channel === "RCS API" && <RCSIcon className="h-3 w-3 shrink-0 text-blue-600" />}
+                            {contact.channel === "Instagram" && <InstagramIcon className="h-3 w-3 shrink-0 text-pink-600" />}
                             {contact.channel}
                           </span>
                         </td>

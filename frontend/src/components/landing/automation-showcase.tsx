@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { WhatsAppIcon, RCSIcon } from "@/components/landing/channel-icons";
 
 export function AutomationShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => void }) {
   const [activeBranch, setActiveBranch] = useState<"yes" | "no">("yes");
@@ -113,7 +114,7 @@ export function AutomationShowcase({ onOpenDemoModal }: { onOpenDemoModal: () =>
                 {/* Node 2: Action */}
                 <div className="w-full sm:max-w-md rounded-xl border border-border bg-background p-3.5 shadow-xs flex items-center gap-3">
                   <div className="h-9 w-9 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-500/20">
-                    <MessageSquare className="h-4 w-4" />
+                    <WhatsAppIcon className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
@@ -187,7 +188,7 @@ export function AutomationShowcase({ onOpenDemoModal }: { onOpenDemoModal: () =>
                       <span className="text-[10px] font-bold text-blue-600 bg-blue-500/15 px-1.5 py-0.2 rounded">
                         IF NO (No Click)
                       </span>
-                      <Smartphone className="h-3.5 w-3.5 text-blue-600" />
+                      <RCSIcon className="h-3.5 w-3.5 text-blue-600" />
                     </div>
                     <p className="text-[11px] font-bold text-foreground">
                       Send RCS Rich Card

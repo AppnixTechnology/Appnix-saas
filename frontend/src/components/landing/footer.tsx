@@ -5,6 +5,13 @@ import Image from "next/image";
 import { MessageSquare, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
+import {
+  WhatsAppIcon,
+  InstagramIcon,
+  RCSIcon,
+  FacebookIcon,
+} from "@/components/landing/channel-icons";
+
 interface FooterProps {
   onOpenDemoModal: () => void;
 }
@@ -95,22 +102,26 @@ export function Footer({ onOpenDemoModal }: FooterProps) {
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
-                <Link href="#channels" className="hover:text-foreground transition-colors">
+                <Link href="#channels" className="hover:text-foreground transition-colors inline-flex items-center gap-1.5">
+                  <WhatsAppIcon className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                   WhatsApp Business API
                 </Link>
               </li>
               <li>
-                <Link href="#channels" className="hover:text-foreground transition-colors">
+                <Link href="#channels" className="hover:text-foreground transition-colors inline-flex items-center gap-1.5">
+                  <RCSIcon className="h-3.5 w-3.5 text-blue-600 shrink-0" />
                   RCS Business Messaging
                 </Link>
               </li>
               <li>
-                <Link href="#channels" className="hover:text-foreground transition-colors">
+                <Link href="#channels" className="hover:text-foreground transition-colors inline-flex items-center gap-1.5">
+                  <InstagramIcon className="h-3.5 w-3.5 text-pink-600 shrink-0" />
                   Instagram Direct & DMs
                 </Link>
               </li>
               <li>
-                <Link href="#channels" className="hover:text-foreground transition-colors">
+                <Link href="#channels" className="hover:text-foreground transition-colors inline-flex items-center gap-1.5">
+                  <FacebookIcon className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
                   Facebook Messenger
                 </Link>
               </li>

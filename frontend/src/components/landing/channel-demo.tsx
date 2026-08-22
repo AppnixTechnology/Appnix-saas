@@ -19,6 +19,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  WhatsAppIcon,
+  InstagramIcon,
+  RCSIcon,
+  FacebookIcon,
+} from "@/components/landing/channel-icons";
 
 type ChannelId = "whatsapp" | "instagram" | "rcs" | "facebook";
 
@@ -256,10 +262,10 @@ export function ChannelDemo({ onOpenDemoModal }: { onOpenDemoModal: () => void }
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    {channel.id === "whatsapp" && <MessageSquare className="h-5 w-5 text-emerald-600" />}
-                    {channel.id === "instagram" && <MessageSquare className="h-5 w-5 text-pink-600" />}
-                    {channel.id === "rcs" && <Smartphone className="h-5 w-5 text-blue-600" />}
-                    {channel.id === "facebook" && <Send className="h-5 w-5 text-indigo-600" />}
+                    {channel.id === "whatsapp" && <WhatsAppIcon className="h-5 w-5 text-emerald-600" />}
+                    {channel.id === "instagram" && <InstagramIcon className="h-5 w-5 text-pink-600" />}
+                    {channel.id === "rcs" && <RCSIcon className="h-5 w-5 text-blue-600" />}
+                    {channel.id === "facebook" && <FacebookIcon className="h-5 w-5 text-indigo-600" />}
                     <span className="font-bold text-xs sm:text-sm text-foreground">
                       {channel.id.toUpperCase()}
                     </span>

@@ -26,6 +26,12 @@ import {
   BarChart2,
   Users,
 } from "lucide-react";
+import {
+  WhatsAppIcon,
+  InstagramIcon,
+  RCSIcon,
+  FacebookIcon,
+} from "@/components/landing/channel-icons";
 
 interface HeroProps {
   onOpenDemoModal: () => void;
@@ -155,17 +161,24 @@ export function Hero({ onOpenDemoModal }: HeroProps) {
 
                   {/* Channel filter pills */}
                   <div className="grid grid-cols-4 gap-1 text-[10px] font-semibold text-center">
-                    <span className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 py-1 rounded border border-emerald-500/30">
-                      WhatsApp
+                    <span className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 py-1 px-1.5 rounded border border-emerald-500/30 flex items-center justify-center gap-1">
+                      <WhatsAppIcon className="h-3 w-3 shrink-0" />
+                      <span className="hidden sm:inline">WhatsApp</span>
+                      <span className="sm:hidden">WA</span>
                     </span>
-                    <span className="bg-pink-500/15 text-pink-700 dark:text-pink-400 py-1 rounded border border-pink-500/30">
-                      Instagram
+                    <span className="bg-pink-500/15 text-pink-700 dark:text-pink-400 py-1 px-1.5 rounded border border-pink-500/30 flex items-center justify-center gap-1">
+                      <InstagramIcon className="h-3 w-3 shrink-0" />
+                      <span className="hidden sm:inline">Instagram</span>
+                      <span className="sm:hidden">IG</span>
                     </span>
-                    <span className="bg-blue-500/15 text-blue-700 dark:text-blue-400 py-1 rounded border border-blue-500/30">
-                      RCS
+                    <span className="bg-blue-500/15 text-blue-700 dark:text-blue-400 py-1 px-1.5 rounded border border-blue-500/30 flex items-center justify-center gap-1">
+                      <RCSIcon className="h-3 w-3 shrink-0" />
+                      <span>RCS</span>
                     </span>
-                    <span className="bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 py-1 rounded border border-indigo-500/30">
-                      Facebook
+                    <span className="bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 py-1 px-1.5 rounded border border-indigo-500/30 flex items-center justify-center gap-1">
+                      <FacebookIcon className="h-3 w-3 shrink-0" />
+                      <span className="hidden sm:inline">Facebook</span>
+                      <span className="sm:hidden">FB</span>
                     </span>
                   </div>
 
@@ -351,7 +364,7 @@ export function Hero({ onOpenDemoModal }: HeroProps) {
           {/* Floating Status Cards around Hero Dashboard (Desktop & Tablet) */}
           <div className="hidden sm:flex absolute -bottom-6 -left-6 rounded-xl border border-border bg-card/95 backdrop-blur-md p-3.5 shadow-xl items-center gap-3 animate-in fade-in slide-in-from-bottom-2 duration-700">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-              <CheckCircle2 className="h-5 w-5" />
+              <WhatsAppIcon className="h-5 w-5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
@@ -364,7 +377,7 @@ export function Hero({ onOpenDemoModal }: HeroProps) {
 
           <div className="hidden sm:flex absolute -top-5 -right-5 rounded-xl border border-border bg-card/95 backdrop-blur-md p-3.5 shadow-xl items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-700">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 border border-blue-500/20">
-              <Smartphone className="h-5 w-5" />
+              <RCSIcon className="h-5 w-5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
