@@ -270,7 +270,7 @@ export function ChannelDemo({ onOpenDemoModal }: { onOpenDemoModal: () => void }
           </p>
         </div>
 
-        {/* Interactive Channel Tabs Grid */}
+        {/* Interactive Channel Tabs Grid (Hover & Click Switch) */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
           {channelsData.map((channel) => {
             const isSelected = channel.id === selectedChannelId;
@@ -278,6 +278,7 @@ export function ChannelDemo({ onOpenDemoModal }: { onOpenDemoModal: () => void }
               <button
                 key={channel.id}
                 onClick={() => setSelectedChannelId(channel.id)}
+                onMouseEnter={() => setSelectedChannelId(channel.id)}
                 className={`p-4 rounded-xl text-left border transition-all duration-200 cursor-pointer ${
                   isSelected
                     ? "bg-card border-primary ring-2 ring-primary/20 shadow-md scale-[1.02]"
