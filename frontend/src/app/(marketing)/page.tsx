@@ -19,6 +19,7 @@ import { FinalCTA } from "@/components/landing/final-cta";
 import { Footer } from "@/components/landing/footer";
 import { LeadFormModal } from "@/components/landing/lead-form-modal";
 import { FloatingLeadTrigger } from "@/components/landing/floating-lead-trigger";
+import { ScrollToTop } from "@/components/landing/scroll-to-top";
 import { ExitIntentModal } from "@/components/landing/exit-intent-modal";
 import { StickyMobileCTA } from "@/components/landing/sticky-mobile-cta";
 
@@ -86,7 +87,10 @@ export default function LandingPage() {
       {/* 17. Floating Lead Trigger (Desktop/Tablet) */}
       <FloatingLeadTrigger onClick={() => handleOpenDemo("Live Chat Assistance", "Floating Expert Button")} />
 
-      {/* 18. Sticky Mobile Conversion Bar */}
+      {/* 18. Scroll To Top Button (Bottom-Left) */}
+      <ScrollToTop />
+
+      {/* 19. Sticky Mobile Conversion Bar */}
       <StickyMobileCTA onOpenDemoModal={() => handleOpenDemo("Mobile Demo Request", "Mobile Sticky CTA")} />
 
       {/* 19. Exit-Intent Lead Capture (Desktop Only) */}
