@@ -70,9 +70,9 @@ export const metadata: Metadata = {
     creator: "@appnixtech",
   },
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
+    icon: "/logo-favicon.png",
+    shortcut: "/logo-favicon.png",
+    apple: "/logo-favicon.png",
   },
   manifest: "/site.webmanifest",
 };
