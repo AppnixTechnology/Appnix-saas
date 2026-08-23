@@ -77,7 +77,7 @@ export function TrustMetrics() {
   }, []);
 
   return (
-    <section ref={containerRef} className="border-y border-border/60 bg-muted/30 py-12 sm:py-16">
+    <section id="trust-metrics" ref={containerRef} className="border-y border-border/60 bg-muted/30 py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-6 md:grid-cols-4 lg:gap-8">
           {metrics.map((item, idx) => (
