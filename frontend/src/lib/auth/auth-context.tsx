@@ -9,6 +9,7 @@ import {
 } from "react";
 import { api, apiEndpoints } from "@/lib/api/axios";
 import { config } from "@/lib/config";
+import { getRecaptchaToken } from "@/lib/recaptcha";
 
 export interface User {
   id: string;
@@ -136,9 +137,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string, rememberMe = false) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
+      const recaptchaToken = await getRecaptchaToken("login");
       const response = await api.post(apiEndpoints.auth.login, {
         email,
         password,
+        recaptchaToken,
       });
 
       const authData = response.data?.data || response.data;
@@ -176,12 +179,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signup = async (data: SignupData) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
+      const recaptchaToken = await getRecaptchaToken("signup");
       const response = await api.post(apiEndpoints.auth.signup, {
         tenantName: data.workspaceName,
         workspaceName: data.workspaceName,
         email: data.email,
         password: data.password,
         name: data.name,
+        recaptchaToken,
       });
 
       const authData = response.data?.data || response.data;
@@ -267,7 +272,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const forgotPassword = async (email: string) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
-      await api.post(apiEndpoints.auth.forgotPassword, { email });
+      const recaptchaToken = await getRecaptchaToken("forgot_password");
+      await api.post(apiEndpoints.auth.forgotPassword, { email, recaptchaToken });
       setState((prev) => ({ ...prev, isLoading: false }));
     } catch (error: any) {
       const message =

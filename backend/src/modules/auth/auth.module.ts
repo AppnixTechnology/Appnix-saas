@@ -9,6 +9,8 @@ import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { RecaptchaService } from './recaptcha.service';
+import { RecaptchaGuard } from './guards/recaptcha.guard';
 
 @Module({
   imports: [PassportModule, JwtModule.register({}), UsersModule, MailModule],
@@ -19,7 +21,9 @@ import { GoogleAuthGuard } from './guards/google-auth.guard';
     JwtRefreshStrategy,
     GoogleStrategy,
     GoogleAuthGuard,
+    RecaptchaService,
+    RecaptchaGuard,
   ],
-  exports: [AuthService],
+  exports: [AuthService, RecaptchaService, RecaptchaGuard],
 })
 export class AuthModule {}

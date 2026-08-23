@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { MailService } from '../mail/mail.service';
+import { RecaptchaService } from './recaptcha.service';
 import { OtpType } from './dto/auth.dto';
 
 export interface JwtPayload {
@@ -44,6 +45,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private mailService: MailService,
+    private recaptchaService: RecaptchaService,
   ) {}
 
   formatUser(user: any, tenantName?: string): UserResponse {
@@ -180,7 +182,12 @@ export class AuthService {
     email: string,
     password: string,
     name?: string,
+    recaptchaToken?: string,
   ) {
+    if (recaptchaToken) {
+      await this.recaptchaService.verifyToken(recaptchaToken, 'signup');
+    }
+
     const existing = await this.usersService.findByEmail(email);
     if (existing) throw new ConflictException('Email already in use');
 
@@ -206,7 +213,11 @@ export class AuthService {
     };
   }
 
-  async login(email: string, password: string) {
+  async login(email: string, password: string, recaptchaToken?: string) {
+    if (recaptchaToken) {
+      await this.recaptchaService.verifyToken(recaptchaToken, 'login');
+    }
+
     const user = await this.usersService.findByEmail(email);
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
@@ -264,7 +275,11 @@ export class AuthService {
     await this.usersService.updateRefreshToken(userId, null);
   }
 
-  async forgotPassword(email: string) {
+  async forgotPassword(email: string, recaptchaToken?: string) {
+    if (recaptchaToken) {
+      await this.recaptchaService.verifyToken(recaptchaToken, 'forgot_password');
+    }
+
     const user = await this.usersService.findByEmail(email);
     // Timing-attack safe response if email not found
     if (!user) {

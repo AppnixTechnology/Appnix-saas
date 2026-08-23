@@ -73,6 +73,14 @@ export class SignupDto {
   })
   @IsOptional()
   termsAccepted?: boolean;
+
+  @ApiProperty({
+    description: 'Google reCAPTCHA v3 response token',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  recaptchaToken?: string;
 }
 
 export class LoginDto {
@@ -89,6 +97,14 @@ export class LoginDto {
   })
   @IsString()
   password: string;
+
+  @ApiProperty({
+    description: 'Google reCAPTCHA v3 response token',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  recaptchaToken?: string;
 }
 
 // ─── Password Reset DTOs ────────────────────────────────────────────────────
@@ -100,6 +116,14 @@ export class ForgotPasswordDto {
   })
   @IsEmail()
   email: string;
+
+  @ApiProperty({
+    description: 'Google reCAPTCHA v3 response token',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  recaptchaToken?: string;
 }
 
 export class ResetPasswordDto {
@@ -137,6 +161,14 @@ export class ResetPasswordDto {
   @IsString()
   @MinLength(8)
   confirmPassword: string;
+
+  @ApiProperty({
+    description: 'Google reCAPTCHA v3 response token',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  recaptchaToken?: string;
 }
 
 // ─── OTP DTOs ───────────────────────────────────────────────────────────────

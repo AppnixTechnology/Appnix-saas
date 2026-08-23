@@ -78,7 +78,7 @@ export class AuthController {
   @ApiResponse({ status: 409, description: 'Email already in use.' })
   async signup(@Body() dto: SignupDto) {
     const workspaceName = dto.workspaceName || dto.tenantName || 'My Workspace';
-    const result = await this.authService.signup(workspaceName, dto.email, dto.password, dto.name);
+    const result = await this.authService.signup(workspaceName, dto.email, dto.password, dto.name, dto.recaptchaToken);
     return { success: true, data: result };
   }
 
@@ -90,7 +90,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Signed in successfully.' })
   @ApiResponse({ status: 401, description: 'Invalid credentials.' })
   async login(@Body() dto: LoginDto) {
-    const result = await this.authService.login(dto.email, dto.password);
+    const result = await this.authService.login(dto.email, dto.password, dto.recaptchaToken);
     return { success: true, data: result };
   }
 
@@ -100,7 +100,7 @@ export class AuthController {
   @ApiBody({ type: ForgotPasswordDto })
   @ApiResponse({ status: 200, description: 'Reset email/OTP dispatched successfully.' })
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
-    const result = await this.authService.forgotPassword(dto.email);
+    const result = await this.authService.forgotPassword(dto.email, dto.recaptchaToken);
     return { success: true, ...result };
   }
 
