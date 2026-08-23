@@ -1,6 +1,6 @@
 export const config = {
   api: {
-    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.appnix.com",
+    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000/api/v1",
     proxyPrefix: "/api/proxy",
     timeout: 30000,
   },
@@ -14,6 +14,7 @@ export const config = {
     refreshTokenKey: "appnix_refresh_token",
     userKey: "appnix_user",
     googleOAuthUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000/api/v1"}/auth/google`,
+    googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
   },
   theme: {
     defaultTheme: "system",

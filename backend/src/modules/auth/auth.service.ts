@@ -283,8 +283,35 @@ export class AuthService {
 
     return {
       success: true,
-      message: 'Password reset code has been sent to your email.',
+      message: 'Password reset verification code has been sent to your email.',
     };
+  }
+
+  async sendEmailVerificationOtp(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      return { success: true, message: 'If an account exists with this email, a verification code was sent.' };
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedOtp = await bcrypt.hash(otp, 10);
+    const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+
+    await this.usersService.updatePasswordResetToken(user.id, hashedOtp, expiry);
+
+    await this.mailService.sendOtpEmail(email, otp, 'EMAIL_VERIFICATION');
+
+    return {
+      success: true,
+      message: 'Email verification code has been sent to your email.',
+    };
+  }
+
+  async resendOtp(email: string, type: OtpType) {
+    if (type === OtpType.EMAIL_VERIFICATION) {
+      return this.sendEmailVerificationOtp(email);
+    }
+    return this.forgotPassword(email);
   }
 
   async verifyOtp(email: string, otp: string, type: OtpType) {
@@ -302,41 +329,60 @@ export class AuthService {
       throw new BadRequestException('Invalid verification code');
     }
 
-    // Return tokens and user if valid
-    const tokens = await this.generateTokens(user.id, user.email, user.tenantId, user.role);
-    const formattedUser = this.formatUser(user);
+    if (type === OtpType.EMAIL_VERIFICATION) {
+      // Clear token and mark verified
+      await this.usersService.clearPasswordResetToken(user.id);
+      const tokens = await this.generateTokens(user.id, user.email, user.tenantId, user.role);
+      const formattedUser = this.formatUser(user);
+      return {
+        ...tokens,
+        user: formattedUser,
+        message: 'Email verified successfully.',
+      };
+    }
 
+    // For password reset OTP verification
     return {
-      ...tokens,
-      user: formattedUser,
+      success: true,
+      token: otp,
+      email: user.email,
+      message: 'Verification code verified successfully. You can now set your new password.',
     };
   }
 
-  async resendOtp(email: string, type: OtpType) {
-    return this.forgotPassword(email);
-  }
-
-  async resetPassword(token: string, password: string, confirmPassword?: string) {
+  async resetPassword(token: string, password: string, confirmPassword?: string, email?: string) {
     if (confirmPassword && password !== confirmPassword) {
       throw new BadRequestException('Passwords do not match');
     }
 
-    // Search active tokens
-    const activeUsers = await this.usersService.findUsersWithActiveResetTokens();
     let targetUser: any = null;
 
-    for (const user of activeUsers) {
-      if (user.passwordResetToken) {
-        const isMatch = await bcrypt.compare(token, user.passwordResetToken);
-        if (isMatch) {
-          targetUser = user;
-          break;
+    if (email) {
+      targetUser = await this.usersService.findByEmail(email);
+      if (!targetUser || !targetUser.passwordResetToken || !targetUser.passwordResetExpiry) {
+        throw new BadRequestException('Invalid or expired reset code');
+      }
+      if (new Date() > new Date(targetUser.passwordResetExpiry)) {
+        throw new BadRequestException('Reset code has expired. Please request a new one.');
+      }
+      const isMatch = await bcrypt.compare(token, targetUser.passwordResetToken);
+      if (!isMatch) {
+        throw new BadRequestException('Invalid verification code');
+      }
+    } else {
+      const activeUsers = await this.usersService.findUsersWithActiveResetTokens();
+      for (const user of activeUsers) {
+        if (user.passwordResetToken) {
+          const isMatch = await bcrypt.compare(token, user.passwordResetToken);
+          if (isMatch) {
+            targetUser = user;
+            break;
+          }
         }
       }
-    }
-
-    if (!targetUser) {
-      throw new BadRequestException('Invalid or expired reset token');
+      if (!targetUser) {
+        throw new BadRequestException('Invalid or expired reset code');
+      }
     }
 
     const passwordHash = await bcrypt.hash(password, 12);

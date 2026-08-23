@@ -2,6 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { config } from "@/lib/config";
 
 const ALLOWED_ORIGINS = [
+  "http://localhost:4000",
+  "http://localhost:3000",
   "https://api.appnix.com",
   "https://staging-api.appnix.com",
   "http://localhost:8000",

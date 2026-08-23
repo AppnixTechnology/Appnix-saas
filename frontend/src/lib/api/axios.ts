@@ -29,7 +29,15 @@ const createAxiosInstance = (): AxiosInstance => {
     async (error: AxiosError) => {
       const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-      if (error.response?.status === 401 && !originalRequest._retry) {
+      const isAuthEndpoint =
+        originalRequest?.url?.includes("/auth/login") ||
+        originalRequest?.url?.includes("/auth/signup") ||
+        originalRequest?.url?.includes("/auth/forgot-password") ||
+        originalRequest?.url?.includes("/auth/reset-password") ||
+        originalRequest?.url?.includes("/auth/verify-otp") ||
+        originalRequest?.url?.includes("/auth/google");
+
+      if (error.response?.status === 401 && !originalRequest?._retry && !isAuthEndpoint) {
         originalRequest._retry = true;
 
         try {
@@ -38,17 +46,28 @@ const createAxiosInstance = (): AxiosInstance => {
             const response = await axios.post(
               `${config.api.proxyPrefix}/auth/refresh`,
               { refreshToken },
-              { withCredentials: true }
+              {
+                headers: {
+                  Authorization: `Bearer ${refreshToken}`,
+                },
+                withCredentials: true,
+              }
             );
 
-            const { accessToken, refreshToken: newRefreshToken } = response.data.data;
-            localStorage.setItem(config.auth.tokenKey, accessToken);
-            localStorage.setItem(config.auth.refreshTokenKey, newRefreshToken);
+            const refreshData = response.data?.data || response.data;
+            const accessToken = refreshData?.accessToken;
+            const newRefreshToken = refreshData?.refreshToken;
 
-            if (originalRequest.headers) {
-              originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+            if (accessToken) {
+              localStorage.setItem(config.auth.tokenKey, accessToken);
+              if (newRefreshToken) {
+                localStorage.setItem(config.auth.refreshTokenKey, newRefreshToken);
+              }
+              if (originalRequest.headers) {
+                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+              }
+              return instance(originalRequest);
             }
-            return instance(originalRequest);
           }
         } catch {
           if (typeof window !== "undefined") {

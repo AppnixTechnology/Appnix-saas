@@ -104,6 +104,15 @@ export class ForgotPasswordDto {
 
 export class ResetPasswordDto {
   @ApiProperty({
+    description: 'Email address of the account',
+    example: 'admin@acme.com',
+    required: false,
+  })
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @ApiProperty({
     description: 'The 6-digit OTP received via email',
     example: '482901',
   })

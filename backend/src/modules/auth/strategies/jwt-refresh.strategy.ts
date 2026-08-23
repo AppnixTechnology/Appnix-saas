@@ -9,7 +9,10 @@ import { JwtPayload } from '../auth.service';
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
   constructor(configService: ConfigService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        ExtractJwt.fromBodyField('refreshToken'),
+      ]),
       secretOrKey: configService.get<string>('JWT_REFRESH_SECRET') || configService.get<string>('JWT_SECRET') || 'default-refresh-secret',
       passReqToCallback: true,
       ignoreExpiration: false,
@@ -17,7 +20,8 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
   }
 
   validate(req: Request, payload: JwtPayload) {
-    const refreshToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+    const bearer = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+    const refreshToken = bearer || req.body?.refreshToken || '';
     return {
       userId: payload.sub,
       email: payload.email,

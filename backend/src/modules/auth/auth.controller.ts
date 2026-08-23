@@ -132,7 +132,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Password reset successfully.' })
   @ApiResponse({ status: 400, description: 'Invalid token or mismatched passwords.' })
   async resetPassword(@Body() dto: ResetPasswordDto) {
-    const result = await this.authService.resetPassword(dto.token, dto.password, dto.confirmPassword);
+    const result = await this.authService.resetPassword(dto.token, dto.password, dto.confirmPassword, dto.email);
     return { success: true, ...result };
   }
 

@@ -6,7 +6,6 @@ import {
   useEffect,
   useState,
   type ReactNode,
-  type ContextType,
 } from "react";
 import { api, apiEndpoints } from "@/lib/api/axios";
 import { config } from "@/lib/config";
@@ -41,12 +40,14 @@ interface AuthContextValue extends AuthState {
   ) => Promise<void>;
   signup: (data: SignupData) => Promise<void>;
   register: (data: SignupData) => Promise<void>;
+  loginWithGoogleToken: (idToken: string) => Promise<void>;
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (
     token: string,
     password: string,
-    confirmPassword: string,
+    confirmPassword?: string,
+    email?: string,
   ) => Promise<void>;
   verifyOtp: (
     email: string,
@@ -97,12 +98,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshUser = async () => {
     try {
       const response = await api.get(apiEndpoints.auth.me);
-      if (response.data.success && response.data.data) {
-        setAuth(response.data.data);
-        localStorage.setItem(
-          config.auth.userKey,
-          JSON.stringify(response.data.data),
-        );
+      const userData = response.data?.data || response.data;
+      if (userData && userData.id) {
+        setAuth(userData);
+        localStorage.setItem(config.auth.userKey, JSON.stringify(userData));
       } else {
         setAuth(null);
       }
@@ -116,19 +115,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const token = localStorage.getItem(config.auth.tokenKey);
       const storedUser = localStorage.getItem(config.auth.userKey);
 
-      if (token && storedUser) {
-        try {
-          const user = JSON.parse(storedUser);
-          setAuth(user);
-          await refreshUser();
-        } catch {
-          localStorage.removeItem(config.auth.tokenKey);
-          localStorage.removeItem(config.auth.refreshTokenKey);
-          localStorage.removeItem(config.auth.userKey);
-          setAuth(null);
+      if (token) {
+        if (storedUser) {
+          try {
+            const user = JSON.parse(storedUser);
+            setAuth(user);
+          } catch {
+            localStorage.removeItem(config.auth.userKey);
+          }
         }
+        await refreshUser();
       } else {
-        setState((prev) => ({ ...prev, isLoading: false }));
+        setState((prev) => ({ ...prev, isLoading: false, isAuthenticated: false }));
       }
     };
 
@@ -143,81 +141,113 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password,
       });
 
-      // Backend sends back only { accessToken, refreshToken } directly,
-      // not wrapped inside "data" or "success".
-      const { accessToken, refreshToken } = response.data;
+      const authData = response.data?.data || response.data;
+      const accessToken = authData?.accessToken || authData?.token;
+      const refreshToken = authData?.refreshToken;
+      const user = authData?.user;
+
+      if (!accessToken) {
+        throw new Error(response.data?.message || "Invalid credentials received");
+      }
 
       localStorage.setItem(config.auth.tokenKey, accessToken);
-      localStorage.setItem(config.auth.refreshTokenKey, refreshToken);
+      if (refreshToken) {
+        localStorage.setItem(config.auth.refreshTokenKey, refreshToken);
+      }
 
-      // Backend does not send back a "user" object yet (needs to be fixed on backend side).
-      // We only have the email here (no name/workspace info at login time),
-      // so other fields are left empty for now.
-      // TODO: remove this once backend starts returning the real user object.
-      const tempUser = {
-        id: "",
-        email: email,
-        name: "",
-        role: "owner" as const,
-        workspaceId: "",
-        workspaceName: "",
-        permissions: [],
-        emailVerified: false,
-        twoFactorEnabled: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      localStorage.setItem(config.auth.userKey, JSON.stringify(tempUser));
-      setAuth(tempUser);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Login failed";
+      if (user) {
+        localStorage.setItem(config.auth.userKey, JSON.stringify(user));
+        setAuth(user);
+      } else {
+        await refreshUser();
+      }
+    } catch (error: any) {
+      const message =
+        error.response?.data?.message
+          ? Array.isArray(error.response.data.message)
+            ? error.response.data.message.join(", ")
+            : error.response.data.message
+          : error.response?.data?.error || error.message || "Invalid email or password";
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
-      throw error;
+      throw new Error(message);
     }
   };
 
   const signup = async (data: SignupData) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
-      // Backend only needs these 4 fields, so we pick just these from the form data.
-      // "workspaceName" from the form is sent as "tenantName" because that's what backend expects.
-      const response = await api.post(apiEndpoints.auth.register, {
+      const response = await api.post(apiEndpoints.auth.signup, {
         tenantName: data.workspaceName,
+        workspaceName: data.workspaceName,
         email: data.email,
         password: data.password,
         name: data.name,
       });
 
-      // Backend sends back only { accessToken, refreshToken } directly,
-      // not wrapped inside "data" or "success" like we expected earlier.
-      const { accessToken, refreshToken } = response.data;
+      const authData = response.data?.data || response.data;
+      const accessToken = authData?.accessToken || authData?.token;
+      const refreshToken = authData?.refreshToken;
+      const user = authData?.user;
+
+      if (!accessToken) {
+        throw new Error(response.data?.message || "Registration failed");
+      }
 
       localStorage.setItem(config.auth.tokenKey, accessToken);
-      localStorage.setItem(config.auth.refreshTokenKey, refreshToken);
+      if (refreshToken) {
+        localStorage.setItem(config.auth.refreshTokenKey, refreshToken);
+      }
 
-      // Backend does not send back a "user" object yet (this needs to be fixed on backend side).
-      // So for now, we build a temporary user object using the form data we already have.
-      // TODO: remove this once backend starts returning the real user object.
-      const tempUser = {
-        id: "",
-        email: data.email,
-        name: data.name,
-        role: "owner" as const,
-        workspaceId: "",
-        workspaceName: data.workspaceName,
-        permissions: [],
-        emailVerified: false,
-        twoFactorEnabled: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      localStorage.setItem(config.auth.userKey, JSON.stringify(tempUser));
-      setAuth(tempUser);
-    } catch (error) {
+      if (user) {
+        localStorage.setItem(config.auth.userKey, JSON.stringify(user));
+        setAuth(user);
+      } else {
+        await refreshUser();
+      }
+    } catch (error: any) {
       const message =
-        error instanceof Error ? error.message : "Registration failed";
+        error.response?.data?.message
+          ? Array.isArray(error.response.data.message)
+            ? error.response.data.message.join(", ")
+            : error.response.data.message
+          : error.response?.data?.error || error.message || "Registration failed";
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
-      throw error;
+      throw new Error(message);
+    }
+  };
+
+  const loginWithGoogleToken = async (idToken: string) => {
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    try {
+      const response = await api.post("/auth/google", { idToken });
+      const authData = response.data?.data || response.data;
+      const accessToken = authData?.accessToken || authData?.token;
+      const refreshToken = authData?.refreshToken;
+      const user = authData?.user;
+
+      if (!accessToken) {
+        throw new Error("Google authentication failed to return access token");
+      }
+
+      localStorage.setItem(config.auth.tokenKey, accessToken);
+      if (refreshToken) {
+        localStorage.setItem(config.auth.refreshTokenKey, refreshToken);
+      }
+
+      if (user) {
+        localStorage.setItem(config.auth.userKey, JSON.stringify(user));
+        setAuth(user);
+      } else {
+        await refreshUser();
+      }
+    } catch (error: any) {
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Google sign in failed";
+      setState((prev) => ({ ...prev, isLoading: false, error: message }));
+      throw new Error(message);
     }
   };
 
@@ -239,18 +269,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await api.post(apiEndpoints.auth.forgotPassword, { email });
       setState((prev) => ({ ...prev, isLoading: false }));
-    } catch (error) {
+    } catch (error: any) {
       const message =
-        error instanceof Error ? error.message : "Failed to send reset email";
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to send password reset instructions";
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
-      throw error;
+      throw new Error(message);
     }
   };
 
   const resetPassword = async (
     token: string,
     password: string,
-    confirmPassword: string,
+    confirmPassword?: string,
+    email?: string,
   ) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
@@ -258,13 +292,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         token,
         password,
         confirmPassword,
+        email,
       });
       setState((prev) => ({ ...prev, isLoading: false }));
-    } catch (error) {
+    } catch (error: any) {
       const message =
-        error instanceof Error ? error.message : "Password reset failed";
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Password reset failed";
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
-      throw error;
+      throw new Error(message);
     }
   };
 
@@ -280,20 +318,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         otp,
         type,
       });
-      if (response.data.success && response.data.data) {
-        const { user, accessToken, refreshToken } = response.data.data;
-        localStorage.setItem(config.auth.tokenKey, accessToken);
-        localStorage.setItem(config.auth.refreshTokenKey, refreshToken);
-        localStorage.setItem(config.auth.userKey, JSON.stringify(user));
-        setAuth(user);
+      const data = response.data?.data || response.data;
+      if (data) {
+        const { user, accessToken, refreshToken } = data;
+        if (accessToken) {
+          localStorage.setItem(config.auth.tokenKey, accessToken);
+        }
+        if (refreshToken) {
+          localStorage.setItem(config.auth.refreshTokenKey, refreshToken);
+        }
+        if (user) {
+          localStorage.setItem(config.auth.userKey, JSON.stringify(user));
+          setAuth(user);
+        }
       } else {
-        throw new Error(response.data.message || "OTP verification failed");
+        throw new Error(response.data?.message || "OTP verification failed");
       }
-    } catch (error) {
+    } catch (error: any) {
       const message =
-        error instanceof Error ? error.message : "OTP verification failed";
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "OTP verification failed";
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
-      throw error;
+      throw new Error(message);
     }
   };
 
@@ -303,11 +351,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   ) => {
     try {
       await api.post(apiEndpoints.auth.resendOtp, { email, type });
-    } catch (error) {
+    } catch (error: any) {
       const message =
-        error instanceof Error ? error.message : "Failed to resend OTP";
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to resend OTP";
       setState((prev) => ({ ...prev, error: message }));
-      throw error;
+      throw new Error(message);
     }
   };
 
@@ -315,18 +366,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
       const response = await api.put(apiEndpoints.user.update, data);
-      if (response.data.success && response.data.data) {
-        const updatedUser = { ...state.user, ...response.data.data } as User;
-        localStorage.setItem(config.auth.userKey, JSON.stringify(updatedUser));
-        setAuth(updatedUser);
-      } else {
-        throw new Error(response.data.message || "Profile update failed");
+      const updatedUser = response.data?.data || response.data;
+      if (updatedUser) {
+        const merged = { ...state.user, ...updatedUser } as User;
+        localStorage.setItem(config.auth.userKey, JSON.stringify(merged));
+        setAuth(merged);
       }
-    } catch (error) {
+    } catch (error: any) {
       const message =
-        error instanceof Error ? error.message : "Profile update failed";
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Profile update failed";
       setState((prev) => ({ ...prev, isLoading: false, error: message }));
-      throw error;
+      throw new Error(message);
     }
   };
 
@@ -337,6 +390,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         signup,
         register: signup,
+        loginWithGoogleToken,
         logout,
         forgotPassword,
         resetPassword,
