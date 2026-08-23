@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -202,24 +203,13 @@ const statusConfig: Record<
 };
 
 export default function BulkCampaignPage() {
+  const router = useRouter();
   const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
   const [selected, setSelected] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [channelFilter, setChannelFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [rowsCount, setRowsCount] = useState<string>("20");
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
-
-  // New Campaign Form State
-  const [newCampaign, setNewCampaign] = useState({
-    name: "",
-    channel: "whatsapp" as ChannelType,
-    audience: "VIP Customers Segment",
-    audienceCount: 1200,
-    messageText: "",
-    scheduleType: "now",
-    scheduleDateTime: "",
-  });
 
   const filteredCampaigns = campaigns.filter((camp) => {
     const matchesStatus =
@@ -282,40 +272,6 @@ export default function BulkCampaignPage() {
     setCampaigns([duplicated, ...campaigns]);
   };
 
-  const handleCreateCampaign = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newCampaign.name.trim()) return;
-
-    const created: Campaign = {
-      id: `CMP-${Math.floor(1000 + Math.random() * 9000)}`,
-      name: newCampaign.name.trim(),
-      channel: newCampaign.channel,
-      audience: newCampaign.audience,
-      audienceCount: Number(newCampaign.audienceCount) || 500,
-      sentCount: newCampaign.scheduleType === "now" ? Number(newCampaign.audienceCount) || 500 : 0,
-      status: newCampaign.scheduleType === "now" ? "completed" : "scheduled",
-      scheduledAt:
-        newCampaign.scheduleType === "now"
-          ? "Sent Immediately"
-          : newCampaign.scheduleDateTime || "Tomorrow, 10:00 AM",
-      createdAt: "Just now",
-      deliveryRate: newCampaign.scheduleType === "now" ? "98.5%" : "0.0%",
-      openRate: newCampaign.scheduleType === "now" ? "52.0%" : "0.0%",
-    };
-
-    setCampaigns([created, ...campaigns]);
-    setIsCreateModalOpen(false);
-    setNewCampaign({
-      name: "",
-      channel: "whatsapp",
-      audience: "VIP Customers Segment",
-      audienceCount: 1200,
-      messageText: "",
-      scheduleType: "now",
-      scheduleDateTime: "",
-    });
-  };
-
   const totalAudience = campaigns.reduce((acc, c) => acc + c.audienceCount, 0);
   const totalSent = campaigns.reduce((acc, c) => acc + c.sentCount, 0);
 
@@ -370,7 +326,7 @@ export default function BulkCampaignPage() {
             </Button>
             <Button
               size="sm"
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => router.push("/crm/campaigns/create")}
               className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0 shadow-sm"
             >
               <Plus className="h-4 w-4 sm:mr-1.5" />
@@ -776,202 +732,6 @@ export default function BulkCampaignPage() {
           </div>
         </div>
       </div>
-
-      {/* Create Campaign Modal */}
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-xl border bg-card p-6 shadow-xl animate-in max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b pb-3">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Megaphone className="h-4 w-4 text-primary" />
-                </div>
-                <h2 className="text-lg font-bold text-foreground">Launch Bulk Campaign</h2>
-              </div>
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateCampaign} className="space-y-4 pt-4">
-              <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1">
-                  Campaign Title *
-                </label>
-                <Input
-                  required
-                  placeholder="e.g. Festival Season VIP Discount 25%"
-                  value={newCampaign.name}
-                  onChange={(e) =>
-                    setNewCampaign({ ...newCampaign, name: e.target.value })
-                  }
-                  className="h-9"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                  Select Channel *
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {(["whatsapp", "instagram", "rcs", "facebook"] as ChannelType[]).map(
-                    (channel) => {
-                      const cfg = channelConfig[channel];
-                      const Icon = cfg.icon;
-                      const isSelected = newCampaign.channel === channel;
-                      return (
-                        <button
-                          key={channel}
-                          type="button"
-                          onClick={() =>
-                            setNewCampaign({ ...newCampaign, channel })
-                          }
-                          className={cn(
-                            "flex flex-col items-center justify-center p-3 rounded-lg border text-center transition-all",
-                            isSelected
-                              ? "border-primary bg-primary/10 ring-1 ring-primary"
-                              : "border-border hover:bg-muted/50"
-                          )}
-                        >
-                          <div
-                            className={cn(
-                              "h-8 w-8 rounded-lg flex items-center justify-center mb-1.5",
-                              cfg.style
-                            )}
-                          >
-                            <Icon className="h-4 w-4" />
-                          </div>
-                          <span className="text-xs font-semibold text-foreground">
-                            {cfg.label}
-                          </span>
-                        </button>
-                      );
-                    }
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-muted-foreground mb-1">
-                    Target Contact Segment
-                  </label>
-                  <select
-                    className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    value={newCampaign.audience}
-                    onChange={(e) =>
-                      setNewCampaign({ ...newCampaign, audience: e.target.value })
-                    }
-                  >
-                    <option value="VIP Customers Segment">VIP Customers (1,240)</option>
-                    <option value="All Active Leads">All Active Leads (4,500)</option>
-                    <option value="Cart Drop-offs (Last 7 Days)">Cart Drop-offs (820)</option>
-                    <option value="Recent Buyers (30 Days)">Recent Buyers (2,150)</option>
-                    <option value="Newsletter Subscribers">Newsletter Subscribers (5,800)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-muted-foreground mb-1">
-                    Recipient Count
-                  </label>
-                  <Input
-                    type="number"
-                    value={newCampaign.audienceCount}
-                    onChange={(e) =>
-                      setNewCampaign({
-                        ...newCampaign,
-                        audienceCount: Number(e.target.value),
-                      })
-                    }
-                    className="h-9 text-xs"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1">
-                  Message Content / Template Text
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Hey {{name}}, don't miss our exclusive 25% discount this weekend! Click here to redeem: https://appnix.io/offer"
-                  value={newCampaign.messageText}
-                  onChange={(e) =>
-                    setNewCampaign({ ...newCampaign, messageText: e.target.value })
-                  }
-                  className="w-full rounded-md border border-input bg-background p-2.5 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                  Schedule Options
-                </label>
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
-                    <input
-                      type="radio"
-                      name="scheduleType"
-                      checked={newCampaign.scheduleType === "now"}
-                      onChange={() =>
-                        setNewCampaign({ ...newCampaign, scheduleType: "now" })
-                      }
-                      className="accent-primary"
-                    />
-                    Send Immediately
-                  </label>
-                  <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
-                    <input
-                      type="radio"
-                      name="scheduleType"
-                      checked={newCampaign.scheduleType === "later"}
-                      onChange={() =>
-                        setNewCampaign({ ...newCampaign, scheduleType: "later" })
-                      }
-                      className="accent-primary"
-                    />
-                    Schedule for Later
-                  </label>
-                </div>
-
-                {newCampaign.scheduleType === "later" && (
-                  <div className="mt-2">
-                    <Input
-                      placeholder="e.g. 28 Feb 2026, 10:00 AM"
-                      value={newCampaign.scheduleDateTime}
-                      onChange={(e) =>
-                        setNewCampaign({
-                          ...newCampaign,
-                          scheduleDateTime: e.target.value,
-                        })
-                      }
-                      className="h-9 text-xs"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-4 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsCreateModalOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" className="bg-primary text-primary-foreground gap-1.5">
-                  <Send className="h-3.5 w-3.5" />
-                  {newCampaign.scheduleType === "now" ? "Dispatch Now" : "Schedule Campaign"}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

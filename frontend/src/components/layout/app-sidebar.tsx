@@ -41,6 +41,7 @@ import {
   Palette,
   Plug,
   History,
+  Send,
 } from "lucide-react";
 
 // Sub-item type for expandable menu sections
@@ -78,7 +79,7 @@ const menuItems: MenuItem[] = [
     icon: Users,
     children: [
       { label: "Contacts", href: "/crm/contacts", icon: Contact },
-      { label: "Bulk Campaign", href: "/crm/bulk-campaign", icon: Megaphone },
+      { label: "Bulk Campaign", href: "/crm/bulk-campaign", icon: Send },
       { label: "Live Chat", href: "/crm/live-chat", icon: MessageSquare },
     ],
   },

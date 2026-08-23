@@ -5,6 +5,7 @@ import { UsersModule } from './modules/users/users.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { CrmContactsModule } from './modules/crm/crm.module';
+import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { MailModule } from './modules/mail/mail.module';
 import { SupportModule } from './modules/support/support.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -19,6 +20,7 @@ import { PrismaModule } from './prisma/prisma.module';
     TenantsModule,
     BillingModule,
     CrmContactsModule,
+    CampaignsModule,
     SupportModule,
   ],
 })

@@ -17,6 +17,10 @@ model Tenant {
   crmContacts   CrmContact[]
   subscriptions Subscription[]
   users         User[]
+  campaigns     Campaign[]
+  campaignAudiences CampaignAudience[]
+  channelConfigs ChannelConfig[]
+  metaTemplates MetaTemplate[]
 
   @@map("tenants")
 }
@@ -71,6 +75,142 @@ model CrmContact {
 
   @@index([tenantId])
   @@map("crm_contacts")
+}
+
+model Campaign {
+  id                  String              @id @default(uuid())
+  tenantId            String
+  name                String
+  description         String?
+  audienceId          String?
+  audienceName        String?
+  audienceCount       Int                 @default(0)
+  audienceSnapshot    Json?
+  channel             ChannelType
+  metaTemplateId      String?
+  metaTemplateName    String?
+  metaTemplateLanguage String?
+  templateVariables   Json?
+  variableMappings    Json?
+  status              CampaignStatus      @default(DRAFT)
+  launchMode          LaunchMode          @default(IMMEDIATE)
+  scheduledAt         DateTime?
+  testSentAt          DateTime?
+  testRecipient       String?
+  testStatus          TestStatus?
+  testMessageId       String?
+  launchedAt          DateTime?
+  completedAt         DateTime?
+  errorMessage        String?
+  createdBy           String
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  tenant              Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([status])
+  @@map("campaigns")
+}
+
+model CampaignAudience {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  contactIds  String[]
+  contactCount Int     @default(0)
+  status      AudienceStatus @default(ACTIVE)
+  lastUpdated DateTime @default(now()) @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("campaign_audiences")
+}
+
+model ChannelConfig {
+  id           String        @id @default(uuid())
+  tenantId     String
+  channel      ChannelType
+  isConnected  Boolean       @default(false)
+  config       Json?
+  connectedAt  DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, channel])
+  @@index([tenantId])
+  @@map("channel_configs")
+}
+
+model MetaTemplate {
+  id            String           @id @default(uuid())
+  tenantId      String
+  metaTemplateId String          @unique
+  name          String
+  category      TemplateCategory
+  language      String
+  status        TemplateStatus
+  components    Json
+  preview       String?
+  lastSyncedAt  DateTime         @default(now())
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  tenant        Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("meta_templates")
+}
+
+enum CampaignStatus {
+  DRAFT
+  READY_FOR_TEST
+  TEST_SENT
+  SCHEDULED
+  LAUNCHING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum LaunchMode {
+  IMMEDIATE
+  SCHEDULED
+}
+
+enum TestStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum ChannelType {
+  WHATSAPP
+  INSTAGRAM
+  RCS
+  FACEBOOK
+}
+
+enum AudienceStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum TemplateCategory {
+  MARKETING
+  UTILITY
+  AUTHENTICATION
+}
+
+enum TemplateStatus {
+  APPROVED
+  PENDING
+  REJECTED
+  PAUSED
 }
 
 enum Role {
