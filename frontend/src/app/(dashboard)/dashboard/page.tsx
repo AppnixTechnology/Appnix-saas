@@ -210,7 +210,7 @@ export default function DashboardPage() {
               {t.sidebar.products}
             </Link>
           </Button>
-          <Button asChild>
+<Button asChild>
             <Link href="/dashboard/campaigns/new">{t.dashboard.startCampaign}</Link>
           </Button>
           <Button asChild variant="outline">

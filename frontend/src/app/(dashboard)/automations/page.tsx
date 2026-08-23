@@ -1,7 +1,5 @@
-export default function Automations() {
-    return (
-        <div>
-            <h1>Automations</h1>
-        </div>
-    )
+import { redirect } from "next/navigation";
+
+export default function AutomationsPage() {
+  redirect("/automations/workflow");
 }

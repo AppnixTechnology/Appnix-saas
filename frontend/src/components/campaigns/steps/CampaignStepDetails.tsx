@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, Save, Sparkles, Megaphone } from "lucide-react";
+import { ChevronLeft, ChevronRight, Save, Sparkles, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +17,7 @@ interface CampaignStepDetailsProps {
   updateCampaignData: (data: { name?: string; description?: string }) => void;
   canProceed: boolean;
   onNext: () => void;
+  onPrev?: () => void;
   onSaveDraft?: () => void;
   isSaving?: boolean;
 }
@@ -26,6 +27,7 @@ export function CampaignStepDetails({
   updateCampaignData,
   canProceed,
   onNext,
+  onPrev,
   onSaveDraft,
   isSaving,
 }: CampaignStepDetailsProps) {
@@ -99,6 +101,21 @@ export function CampaignStepDetails({
 
       <div className="flex items-center justify-between pt-2">
         <div>
+          {onPrev ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onPrev}
+              className="gap-2"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Back
+            </Button>
+          ) : (
+            <div />
+          )}
+        </div>
+        <div className="flex items-center gap-3">
           {onSaveDraft && (
             <Button
               type="button"
@@ -111,16 +128,16 @@ export function CampaignStepDetails({
               {isSaving ? "Saving Draft..." : "Save Draft"}
             </Button>
           )}
+          <Button
+            type="button"
+            onClick={onNext}
+            disabled={!canProceed}
+            className="gap-2 px-6 shadow-sm"
+          >
+            Continue to Audience
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
-        <Button
-          type="button"
-          onClick={onNext}
-          disabled={!canProceed}
-          className="gap-2 px-6 shadow-sm"
-        >
-          Continue to Audience
-          <ChevronRight className="h-4 w-4" />
-        </Button>
       </div>
     </div>
   );

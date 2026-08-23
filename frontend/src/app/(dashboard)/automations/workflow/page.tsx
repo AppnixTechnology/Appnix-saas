@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -14,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import {
   Plus,
+  ArrowLeft,
   Lock,
   FolderPlus,
   Folder,
@@ -113,6 +115,19 @@ export default function WorkflowPage() {
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumb Back Navigation */}
+      <div className="flex items-center text-xs text-muted-foreground gap-1.5">
+        <Link
+          href="/automations"
+          className="inline-flex items-center gap-1 font-medium text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Automations</span>
+        </Link>
+        <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/60" />
+        <span className="text-foreground font-medium">Workflow</span>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-lg font-extrabold tracking-wide text-foreground">

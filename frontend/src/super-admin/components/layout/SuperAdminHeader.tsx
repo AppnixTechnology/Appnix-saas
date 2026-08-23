@@ -6,6 +6,14 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import {
   Search,
@@ -15,8 +23,11 @@ import {
   QrCode,
   Shield,
   User,
+  Users,
   Settings,
   LogOut,
+  ChevronDown,
+  Clock,
   X,
   CheckCircle2,
   AlertTriangle,
@@ -31,7 +42,6 @@ export function SuperAdminHeader({ onMenuClick }: SuperAdminHeaderProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   const notifications = [
     {
@@ -119,7 +129,6 @@ export function SuperAdminHeader({ onMenuClick }: SuperAdminHeaderProps) {
             size="icon"
             onClick={() => {
               setIsNotificationsOpen(!isNotificationsOpen);
-              setIsProfileMenuOpen(false);
             }}
             className="h-9 w-9 relative text-muted-foreground hover:text-foreground"
             title="Super Admin Alerts"
@@ -135,6 +144,12 @@ export function SuperAdminHeader({ onMenuClick }: SuperAdminHeaderProps) {
                 <Badge className="bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 text-[10px]">
                   3 New
                 </Badge>
+              </div>
+
+              {/* 45-Day Retention Notice */}
+              <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-2 text-[10px] text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                <span>Alerts are automatically removed after <strong>45 days</strong>.</span>
               </div>
 
               <div className="space-y-1.5 max-h-64 overflow-y-auto">
@@ -164,71 +179,79 @@ export function SuperAdminHeader({ onMenuClick }: SuperAdminHeaderProps) {
         </div>
 
         {/* Admin Profile & Avatar Menu */}
-        <div className="relative border-l pl-2 sm:pl-3">
-          <button
-            onClick={() => {
-              setIsProfileMenuOpen(!isProfileMenuOpen);
-              setIsNotificationsOpen(false);
-            }}
-            className="flex items-center gap-2.5 p-1 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
-          >
-            <div className="hidden text-right sm:block">
-              <p className="text-xs font-bold leading-tight text-foreground group-hover:text-emerald-600 transition-colors">
-                Sarah Jenkins
-              </p>
-              <p className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                Super Admin
-              </p>
-            </div>
-            <div className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs ring-2 ring-emerald-600/30">
-              SJ
-            </div>
-          </button>
-
-          {isProfileMenuOpen && (
-            <div className="absolute right-0 mt-2 w-56 rounded-xl border bg-card p-2 shadow-xl z-50 animate-in space-y-1">
-              <div className="px-3 py-2 border-b">
-                <p className="text-xs font-bold text-foreground">Sarah Jenkins</p>
-                <p className="text-[11px] text-muted-foreground">sarah.admin@appnix.io</p>
-                <Badge className="mt-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-semibold">
-                  Root Administrator
-                </Badge>
+        <div className="border-l pl-2 sm:pl-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-2 p-1 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group outline-none focus-visible:ring-1 focus-visible:ring-emerald-600 data-[state=open]:bg-muted/80">
+              <div className="hidden text-right sm:block">
+                <p className="text-xs font-bold leading-tight text-foreground group-hover:text-emerald-600 transition-colors">
+                  Sarah Jenkins
+                </p>
+                <p className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                  Super Admin
+                </p>
               </div>
+              <div className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs ring-2 ring-emerald-600/30">
+                SJ
+              </div>
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+            </DropdownMenuTrigger>
 
-              <Link
-                href="/super-admin/settings"
-                onClick={() => setIsProfileMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-foreground hover:bg-muted transition-colors"
-              >
-                <Settings className="h-4 w-4 text-muted-foreground" />
-                Console Settings
-              </Link>
+            <DropdownMenuContent align="end" className="w-60 p-1.5 shadow-lg">
+              <DropdownMenuLabel className="font-normal px-2 py-2">
+                <div className="flex flex-col space-y-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-foreground">Sarah Jenkins</p>
+                    <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-semibold">
+                      Root Admin
+                    </Badge>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">sarah.admin@appnix.io</p>
+                </div>
+              </DropdownMenuLabel>
 
-              <Link
-                href="/super-admin/team"
-                onClick={() => setIsProfileMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-xs text-foreground hover:bg-muted transition-colors"
-              >
-                <Shield className="h-4 w-4 text-muted-foreground" />
-                Team & Access
-              </Link>
+              <DropdownMenuSeparator />
 
-              <div className="border-t pt-1">
-                <button
-                  onClick={() => {
-                    setIsProfileMenuOpen(false);
-                    if (confirm("Sign out from Super Admin Console?")) {
-                      router.push("/signin");
-                    }
-                  }}
-                  className="flex w-full items-center gap-2 px-3 py-2 rounded-md text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+              <DropdownMenuItem asChild>
+                <Link
+                  href="/super-admin/settings"
+                  className="flex items-center gap-2.5 px-2.5 py-2 cursor-pointer rounded-md text-xs text-foreground hover:bg-accent focus:bg-accent transition-colors"
                 >
-                  <LogOut className="h-4 w-4" />
-                  Sign Out
-                </button>
-              </div>
-            </div>
-          )}
+                  <Settings className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex flex-col">
+                    <span className="font-medium">Profile & Settings</span>
+                    <span className="text-[10px] text-muted-foreground">Admin console preferences</span>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem asChild>
+                <Link
+                  href="/super-admin/team"
+                  className="flex items-center gap-2.5 px-2.5 py-2 cursor-pointer rounded-md text-xs text-foreground hover:bg-accent focus:bg-accent transition-colors"
+                >
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex flex-col">
+                    <span className="font-medium">Manage Members</span>
+                    <span className="text-[10px] text-muted-foreground">Staff access & permissions</span>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem
+                onClick={() => {
+                  if (confirm("Sign out from Super Admin Console?")) {
+                    router.push("/signin");
+                  }
+                }}
+                className="flex items-center gap-2.5 px-2.5 py-2 cursor-pointer rounded-md text-xs text-rose-600 focus:text-rose-600 focus:bg-rose-50 dark:focus:bg-rose-950/40 transition-colors"
+              >
+                <LogOut className="h-4 w-4 text-rose-600" />
+                <span className="font-semibold">Sign Out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

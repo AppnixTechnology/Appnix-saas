@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Save, Send, CheckCircle2, AlertCircle, Loader2, X, Megaphone, ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -79,6 +79,7 @@ export function CampaignWizard({
   loadTemplates,
   STEPS,
 }: CampaignWizardProps) {
+  const router = useRouter();
   const [showTestModal, setShowTestModal] = useState(false);
   const [showLaunchModal, setShowLaunchModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -137,6 +138,7 @@ export function CampaignWizard({
             updateCampaignData={updateCampaignData}
             canProceed={canProceed}
             onNext={nextStep}
+            onPrev={() => router.push("/crm/bulk-campaign")}
             onSaveDraft={handleSaveDraft}
             isSaving={isSaving}
           />
@@ -229,16 +231,20 @@ export function CampaignWizard({
   return (
     <div className="min-h-screen bg-background pb-16">
       <div className="max-w-5xl mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-6">
-        {/* Top Header Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/crm/bulk-campaign"
-              className="h-9 w-9 rounded-lg border bg-card hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shrink-0"
-              title="Back to Bulk Campaigns"
+        {/* Top Header Bar with sleek inline back button */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <button
+              type="button"
+              onClick={() => router.push("/crm/bulk-campaign")}
+              className="inline-flex items-center gap-1.5 font-medium text-muted-foreground hover:text-primary transition-colors cursor-pointer py-1"
             >
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span>Back to Bulk Campaigns</span>
+            </button>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">Create Campaign</h1>
@@ -250,19 +256,19 @@ export function CampaignWizard({
                 {STEPS[currentStepIndex]?.description}
               </p>
             </div>
-          </div>
 
-          <div className="flex items-center gap-2.5">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSaveDraft}
-              disabled={isSaving || !campaign.name.trim()}
-              className="gap-2 text-xs"
-            >
-              <Save className="h-3.5 w-3.5" />
-              {isSaving ? "Saving Draft..." : "Save Draft"}
-            </Button>
+            <div className="flex items-center gap-2.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSaveDraft}
+                disabled={isSaving || !campaign.name.trim()}
+                className="gap-2 text-xs"
+              >
+                <Save className="h-3.5 w-3.5" />
+                {isSaving ? "Saving Draft..." : "Save Draft"}
+              </Button>
+            </div>
           </div>
         </div>
 

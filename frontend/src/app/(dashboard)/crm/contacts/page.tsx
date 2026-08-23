@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -8,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
   Filter,
+  ArrowLeft,
   Tag,
   Plus,
   Users,
@@ -237,9 +239,15 @@ export default function CrmContactsPage() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col gap-3">
-        <div className="flex items-center text-sm text-muted-foreground gap-1">
-          <span>CRM</span>
-          <ChevronRight className="h-3.5 w-3.5" />
+        <div className="flex items-center text-xs text-muted-foreground gap-1.5">
+          <Link
+            href="/crm"
+            className="inline-flex items-center gap-1 font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>CRM</span>
+          </Link>
+          <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/60" />
           <span className="text-primary font-medium">Contacts</span>
         </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,8 @@ import { staffService } from "@/super-admin/services";
 import { AddStaffModal } from "@/super-admin/components/team/AddStaffModal";
 import {
   ShieldCheck,
+  ArrowLeft,
+  ChevronRight,
   Plus,
   Search,
   MoreVertical,
@@ -44,6 +47,19 @@ export default function SuperAdminTeamPage() {
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumb Back Navigation */}
+      <div className="flex items-center text-xs text-muted-foreground gap-1.5">
+        <Link
+          href="/super-admin/dashboard"
+          className="inline-flex items-center gap-1 font-medium text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Super Admin</span>
+        </Link>
+        <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/60" />
+        <span className="font-semibold text-foreground">Team & Staff</span>
+      </div>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-5">
         <div>

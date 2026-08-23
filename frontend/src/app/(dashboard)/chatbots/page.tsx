@@ -1,20 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import {
   ChevronRight,
+  ArrowLeft,
   Plus,
-  Lock,
   ListFilter,
   FolderPlus,
   Folder,
@@ -25,12 +29,18 @@ import {
   MessageSquare,
   Camera,
   Zap,
-  TrendingUp,
   MessageCircle,
+  Search,
+  Bot,
+  Play,
+  Share2,
+  Trash2,
+  Sparkles,
+  BarChart3,
+  Users,
 } from "lucide-react";
 
-// ---------- Types ----------
-type Channel = "whatsapp" | "instagram";
+type Channel = "whatsapp" | "instagram" | "rcs" | "facebook";
 
 interface Workflow {
   id: string;
@@ -38,259 +48,374 @@ interface Workflow {
   channel: Channel;
   name: string;
   trigger: string;
+  status: "DRAFT" | "PUBLISHED" | "DISABLED";
   tags: string[];
+  conversations: number;
   created: string;
 }
 
-// ---------- Mock data ----------
-const folders = [
-  { id: "all", name: "All", count: 12 },
-  { id: "nourin", name: "Nourin", count: 0 },
+const initialFolders = [
+  { id: "all", name: "All Botflows", count: 12 },
+  { id: "support", name: "Customer Support", count: 5 },
+  { id: "sales", name: "Lead Generation & Sales", count: 4 },
+  { id: "marketing", name: "Promotions & Offers", count: 3 },
 ];
 
-const workflows: Workflow[] = [
+const initialWorkflows: Workflow[] = [
   {
-    id: "1",
+    id: "bot-101",
     active: true,
     channel: "whatsapp",
-    name: "Main Support Flow",
-    trigger: "Received Inbound Webhook",
-    tags: [],
-    created: "03 Mar, 2026",
+    name: "Customer Support AI Assistant",
+    trigger: "Incoming Customer Message",
+    status: "PUBLISHED",
+    tags: ["AI", "Support", "24/7"],
+    conversations: 4250,
+    created: "22 Feb, 2026",
   },
   {
-    id: "2",
+    id: "bot-102",
     active: true,
     channel: "instagram",
-    name: "Marketing Promo Bot",
-    trigger: "Hot-Keyword Received",
-    tags: ["Promotions"],
-    created: "02 Mar, 2026",
+    name: "Instagram Story & DM Qualifier",
+    trigger: "Keyword: 'PRICING'",
+    status: "PUBLISHED",
+    tags: ["Sales", "Promotions"],
+    conversations: 1890,
+    created: "20 Feb, 2026",
   },
   {
-    id: "3",
+    id: "bot-103",
+    active: true,
+    channel: "rcs",
+    name: "RCS OTP & Verification Bot",
+    trigger: "Webhook: auth.otp.request",
+    status: "PUBLISHED",
+    tags: ["Security", "Carrier"],
+    conversations: 8940,
+    created: "15 Feb, 2026",
+  },
+  {
+    id: "bot-104",
     active: false,
     channel: "whatsapp",
-    name: "Google Sheet Sync",
-    trigger: "Data Entry Trigger",
-    tags: ["Internal", "+2"],
-    created: "26 Feb, 2026",
-  },
-  {
-    id: "4",
-    active: true,
-    channel: "whatsapp",
-    name: "Untitled Automation",
-    trigger: "--NA--",
-    tags: [],
-    created: "26 Feb, 2026",
+    name: "Abandoned Cart Recovery Flow",
+    trigger: "Shopify Webhook: Cart_Drop",
+    status: "DRAFT",
+    tags: ["E-commerce", "High ROI"],
+    conversations: 0,
+    created: "10 Feb, 2026",
   },
 ];
 
-const channelIcon: Record<Channel, React.ElementType> = {
-  whatsapp: MessageSquare,
-  instagram: Camera,
-};
-
-const channelStyle: Record<Channel, string> = {
-  whatsapp: "bg-green-100 text-green-600",
-  instagram: "bg-gradient-to-br from-yellow-400 via-pink-500 to-purple-600 text-white",
+const channelStyle: Record<Channel, { bg: string; icon: React.ElementType }> = {
+  whatsapp: { bg: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", icon: MessageSquare },
+  instagram: { bg: "bg-pink-500/10 text-pink-600 border-pink-500/20", icon: Camera },
+  rcs: { bg: "bg-blue-500/10 text-blue-600 border-blue-500/20", icon: MessageCircle },
+  facebook: { bg: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20", icon: Share2 },
 };
 
 export default function BotWorkflowPage() {
+  const router = useRouter();
   const [activeFolder, setActiveFolder] = useState("all");
-  const [rows, setRows] = useState(workflows);
+  const [rows, setRows] = useState(initialWorkflows);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedChannel, setSelectedChannel] = useState<string>("all");
 
   const toggleWorkflow = (id: string) => {
     setRows((prev) =>
-      prev.map((w) => (w.id === id ? { ...w, active: !w.active } : w))
+      prev.map((w) =>
+        w.id === id ? { ...w, active: !w.active, status: !w.active ? "PUBLISHED" : "DISABLED" } : w
+      )
     );
   };
 
+  const handleDuplicate = (flow: Workflow) => {
+    const cloned: Workflow = {
+      ...flow,
+      id: `bot-${Date.now().toString().slice(-4)}`,
+      name: `${flow.name} (Copy)`,
+      status: "DRAFT",
+      active: false,
+      conversations: 0,
+      created: "Today",
+    };
+    setRows([cloned, ...rows]);
+  };
+
+  const handleDelete = (id: string) => {
+    setRows(rows.filter((r) => r.id !== id));
+  };
+
+  const filteredRows = rows.filter((r) => {
+    const matchesSearch =
+      r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.trigger.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchesChannel = selectedChannel === "all" || r.channel === selectedChannel;
+    return matchesSearch && matchesChannel;
+  });
+
   return (
-    <div className="space-y-4">
-      {/* Breadcrumb + Header actions */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center text-sm gap-1">
-          <span className="text-muted-foreground">Bot</span>
-          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="font-semibold text-foreground">Workflow</span>
+    <div className="space-y-6 w-full">
+      {/* Sleek Breadcrumb Back Navigation */}
+      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-1 font-medium text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Dashboard</span>
+        </Link>
+        <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/60" />
+        <span className="font-semibold text-primary">Chatbots & Automations</span>
+      </nav>
+
+      {/* Header Banner & Action Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-5">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
+            <Bot className="h-6 w-6 text-primary" />
+            Chatbots & Workflow Automations
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Design multi-channel visual botflows, keyword triggers, OpenAI responses, and human agent escalations.
+          </p>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
-          <Button className="bg-green-600 hover:bg-green-700 text-white shrink-0">
-            <Plus className="h-4 w-4 sm:mr-1" />
-            <span className="hidden sm:inline">Create Botflow</span>
-          </Button>
-          <Button variant="outline" className="bg-blue-50 hover:bg-blue-100 border-blue-200 text-foreground shrink-0">
-            <Lock className="h-4 w-4 sm:mr-1" />
-            <span className="hidden sm:inline">Unlock Botflow</span>
-          </Button>
-          <Button className="bg-blue-950 hover:bg-blue-900 text-white shrink-0">
-            <ListFilter className="h-4 w-4 sm:mr-1" />
-            <span className="hidden sm:inline">Open Filters</span>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => router.push("/chatbots/builder/new")}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs gap-1.5 shadow-sm px-4"
+          >
+            <Plus className="h-4 w-4" />
+            Create Botflow
           </Button>
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
-        {/* Left column: Folders + Active Flows */}
-        <div className="space-y-4">
-          <div className="rounded-xl border bg-background p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-semibold text-foreground">Folders</h2>
-              <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground">
-                <FolderPlus className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="space-y-1">
-              {folders.map((folder) => (
-                <button
-                  key={folder.id}
-                  onClick={() => setActiveFolder(folder.id)}
-                  className={cn(
-                    "w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg text-sm transition-colors",
-                    activeFolder === folder.id
-                      ? "bg-accent font-medium text-foreground"
-                      : "text-muted-foreground hover:bg-accent/50"
-                  )}
-                >
-                  <span className="flex items-center gap-2 truncate">
-                    <Folder
-                      className={cn(
-                        "h-4 w-4 shrink-0",
-                        activeFolder === folder.id ? "fill-primary text-primary" : ""
-                      )}
-                    />
-                    {folder.name}
-                  </span>
-                  {folder.count > 0 && (
-                    <Badge className="bg-blue-950 hover:bg-blue-950 h-5 min-w-5 px-1.5 justify-center">
-                      {folder.count}
-                    </Badge>
-                  )}
-                </button>
-              ))}
-            </div>
+      {/* Quick Metrics Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="rounded-xl border bg-card p-4 shadow-xs space-y-1">
+          <p className="text-xs font-medium text-muted-foreground">Total Botflows</p>
+          <p className="text-2xl font-bold text-foreground">{rows.length}</p>
+        </div>
+        <div className="rounded-xl border bg-card p-4 shadow-xs space-y-1">
+          <p className="text-xs font-medium text-muted-foreground">Active Workflows</p>
+          <p className="text-2xl font-bold text-emerald-600">{rows.filter((r) => r.active).length}</p>
+        </div>
+        <div className="rounded-xl border bg-card p-4 shadow-xs space-y-1">
+          <p className="text-xs font-medium text-muted-foreground">Conversations Handled</p>
+          <p className="text-2xl font-bold text-primary">15,080</p>
+        </div>
+        <div className="rounded-xl border bg-card p-4 shadow-xs space-y-1">
+          <p className="text-xs font-medium text-muted-foreground">Resolution Rate</p>
+          <p className="text-2xl font-bold text-foreground">94.2%</p>
+        </div>
+      </div>
+
+      {/* Main Content Layout with Folders & Table */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left: Folders Sidebar (3 cols) */}
+        <div className="lg:col-span-3 rounded-2xl border bg-card p-4 shadow-xs space-y-3">
+          <div className="flex items-center justify-between border-b pb-2">
+            <h3 className="font-bold text-xs text-foreground uppercase tracking-wider">Folders</h3>
+            <button
+              type="button"
+              onClick={() => alert("Create new folder")}
+              className="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
+            >
+              <Plus className="h-3 w-3" /> New
+            </button>
           </div>
 
-          <div className="rounded-xl bg-blue-950 text-white p-4 relative overflow-hidden">
-            <p className="text-xs uppercase tracking-wide text-blue-200 font-medium">
-              Active Flows
-            </p>
-            <p className="text-3xl font-bold mt-1">84%</p>
-            <div className="flex items-center gap-1 mt-2 text-xs bg-green-500/20 text-green-400 w-fit px-1.5 py-0.5 rounded">
-              <TrendingUp className="h-3 w-3" />
-              +12% vs last month
-            </div>
-            <Zap className="absolute -bottom-3 -right-3 h-20 w-20 text-blue-800/40" />
+          <div className="space-y-1">
+            {initialFolders.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setActiveFolder(f.id)}
+                className={cn(
+                  "w-full flex items-center justify-between p-2 rounded-xl text-xs font-medium transition-colors cursor-pointer",
+                  activeFolder === f.id
+                    ? "bg-primary/10 text-primary font-semibold"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <Folder className="h-3.5 w-3.5" />
+                  <span className="truncate">{f.name}</span>
+                </div>
+                <Badge variant="secondary" className="text-[10px] py-0 px-1.5">
+                  {f.count}
+                </Badge>
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Right column: Workflows table */}
-        <div className="rounded-xl border bg-background overflow-hidden">
+        {/* Right: Workflows Table (9 cols) */}
+        <div className="lg:col-span-9 rounded-2xl border bg-card shadow-xs overflow-hidden">
+          {/* Filter Bar */}
+          <div className="p-3 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-muted/10">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                placeholder="Search botflows, keywords, tags..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 h-8 text-xs bg-background"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <select
+                value={selectedChannel}
+                onChange={(e) => setSelectedChannel(e.target.value)}
+                className="h-8 rounded-lg border bg-background px-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+              >
+                <option value="all">All Channels</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="instagram">Instagram</option>
+                <option value="rcs">RCS</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Table */}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b bg-muted/30">
-                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground whitespace-nowrap">
-                    Active
-                  </th>
-                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground whitespace-nowrap">
-                    Action
-                  </th>
-                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground whitespace-nowrap">
-                    Channel
-                  </th>
-                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground whitespace-nowrap">
-                    Name
-                  </th>
-                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground whitespace-nowrap">
-                    Tags
-                  </th>
-                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground whitespace-nowrap">
-                    Created
-                  </th>
+            <table className="w-full text-xs text-left">
+              <thead className="bg-muted/30 border-b text-muted-foreground uppercase font-bold text-[10px]">
+                <tr>
+                  <th className="p-3">Status</th>
+                  <th className="p-3">Channel</th>
+                  <th className="p-3">Bot Name & Trigger</th>
+                  <th className="p-3">Tags</th>
+                  <th className="p-3">Traffic</th>
+                  <th className="p-3">Created</th>
+                  <th className="p-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody>
-                {rows.map((flow) => {
-                  const Icon = channelIcon[flow.channel];
+              <tbody className="divide-y divide-border/60">
+                {filteredRows.map((flow) => {
+                  const cfg = channelStyle[flow.channel] || channelStyle.whatsapp;
+                  const Icon = cfg.icon;
+
                   return (
-                    <tr key={flow.id} className="border-b last:border-0 hover:bg-accent/30">
-                      <td className="p-3">
-                        <Switch
-                          checked={flow.active}
-                          onCheckedChange={() => toggleWorkflow(flow.id)}
-                        />
-                      </td>
-                      <td className="p-3">
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <Button size="icon" variant="ghost" className="h-7 w-7">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button size="icon" variant="ghost" className="h-7 w-7">
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button size="icon" variant="ghost" className="h-7 w-7">
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button size="icon" variant="ghost" className="h-7 w-7">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start">
-                              <DropdownMenuItem>Move to folder</DropdownMenuItem>
-                              <DropdownMenuItem>Export</DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                    <tr key={flow.id} className="hover:bg-accent/30 transition-colors group">
+                      <td className="p-3 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={flow.active}
+                            onCheckedChange={() => toggleWorkflow(flow.id)}
+                          />
+                          <Badge
+                            variant={flow.status === "PUBLISHED" ? "default" : "secondary"}
+                            className={cn(
+                              "text-[9px] py-0 px-1.5 font-bold",
+                              flow.status === "PUBLISHED"
+                                ? "bg-emerald-600 text-white"
+                                : "bg-muted text-muted-foreground"
+                            )}
+                          >
+                            {flow.status}
+                          </Badge>
                         </div>
                       </td>
-                      <td className="p-3">
+
+                      <td className="p-3 whitespace-nowrap">
                         <div
                           className={cn(
-                            "h-7 w-7 rounded-md flex items-center justify-center",
-                            channelStyle[flow.channel]
+                            "h-7 w-7 rounded-lg flex items-center justify-center border",
+                            cfg.bg
                           )}
+                          title={flow.channel}
                         >
                           <Icon className="h-4 w-4" />
                         </div>
                       </td>
-                      <td className="p-3 min-w-45">
-                        <p className="font-medium text-primary">{flow.name}</p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <Zap className="h-3 w-3" />
+
+                      <td className="p-3 min-w-[200px]">
+                        <Link
+                          href={`/chatbots/builder/${flow.id}`}
+                          className="font-bold text-foreground hover:text-primary transition-colors block truncate"
+                        >
+                          {flow.name}
+                        </Link>
+                        <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5 truncate">
+                          <Zap className="h-3 w-3 text-primary" />
                           {flow.trigger}
                         </p>
                       </td>
+
                       <td className="p-3 whitespace-nowrap">
-                        {flow.tags.length === 0 ? (
-                          <Badge variant="secondary" className="text-muted-foreground italic font-normal">
-                            --Double Click to Edit--
-                          </Badge>
-                        ) : (
-                          <div className="flex items-center gap-1 flex-wrap">
-                            {flow.tags.map((tag, i) => (
-                              <Badge
-                                key={i}
-                                variant="secondary"
-                                className={cn(
-                                  tag === "Promotions" && "bg-green-100 text-green-700",
-                                  tag === "Internal" && "bg-blue-100 text-blue-700",
-                                  tag === "+2" && "bg-muted text-muted-foreground"
-                                )}
-                              >
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
+                        <div className="flex items-center gap-1 flex-wrap">
+                          {flow.tags.map((t, idx) => (
+                            <Badge
+                              key={idx}
+                              variant="outline"
+                              className="text-[10px] py-0 px-1 font-medium"
+                            >
+                              {t}
+                            </Badge>
+                          ))}
+                        </div>
                       </td>
+
+                      <td className="p-3 whitespace-nowrap font-medium text-foreground">
+                        {flow.conversations.toLocaleString()} chats
+                      </td>
+
                       <td className="p-3 whitespace-nowrap text-muted-foreground">
                         {flow.created}
+                      </td>
+
+                      <td className="p-3 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                            onClick={() => router.push(`/chatbots/builder/${flow.id}`)}
+                            title="Edit Flow"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                            onClick={() => handleDuplicate(flow)}
+                            title="Duplicate"
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="icon" variant="ghost" className="h-7 w-7">
+                                <MoreVertical className="h-3.5 w-3.5" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => router.push(`/chatbots/builder/${flow.id}`)}
+                              >
+                                Open Visual Builder
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => router.push("/crm/live-chat")}>
+                                View Active Conversations
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleDelete(flow.id)}
+                                className="text-destructive font-medium"
+                              >
+                                Delete Botflow
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -298,41 +423,7 @@ export default function BotWorkflowPage() {
               </tbody>
             </table>
           </div>
-
-          {/* Pagination */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 border-t">
-            <p className="text-sm text-muted-foreground">
-              Showing 1-{rows.length} of 12 workflows
-            </p>
-            <div className="flex items-center gap-1">
-              <Button variant="outline" size="icon" className="h-8 w-8">
-                <ChevronRight className="h-4 w-4 rotate-180" />
-              </Button>
-              <Button size="sm" className="h-8 w-8 p-0 bg-blue-950 hover:bg-blue-900">
-                1
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                2
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                3
-              </Button>
-              <Button variant="outline" size="icon" className="h-8 w-8">
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
         </div>
-      </div>
-
-      {/* Floating action buttons (bottom-right) */}
-      <div className="fixed bottom-6 right-6 flex flex-col gap-2">
-        <Button size="icon" className="h-11 w-11 rounded-full bg-green-600 hover:bg-green-700 shadow-lg">
-          <Zap className="h-5 w-5" />
-        </Button>
-        <Button size="icon" className="h-11 w-11 rounded-full bg-blue-950 hover:bg-blue-900 shadow-lg">
-          <MessageCircle className="h-5 w-5" />
-        </Button>
       </div>
     </div>
   );

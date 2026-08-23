@@ -150,6 +150,8 @@ export const apiEndpoints = {
     update: (id: string) => `/bots/${id}`,
     delete: (id: string) => `/bots/${id}`,
     test: (id: string) => `/bots/${id}/test`,
+    publish: (id: string) => `/bots/${id}/publish`,
+    duplicate: (id: string) => `/bots/${id}/duplicate`,
   },
   automations: {
     list: "/automations",

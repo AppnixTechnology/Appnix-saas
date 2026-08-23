@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   SlidersHorizontal,
+  ArrowLeft,
+  ChevronRight,
   MoreVertical,
   Tag,
   Star,
@@ -181,8 +184,21 @@ export default function ChatsPage() {
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden rounded-lg border bg-background">
       {/* Sidebar */}
       <div className="flex w-full max-w-[300px] flex-col border-r">
+        {/* Breadcrumb Back Navigation */}
+        <div className="flex items-center text-xs text-muted-foreground gap-1.5 px-4 pt-3">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1 font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Dashboard</span>
+          </Link>
+          <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/60" />
+          <span className="font-semibold text-foreground">Chat Widget</span>
+        </div>
+
         {/* Header */}
-        <div className="flex items-center justify-between px-4 pt-4">
+        <div className="flex items-center justify-between px-4 pt-3">
           <h1 className="text-xl font-bold text-foreground">Chats</h1>
           <div className="flex items-center gap-1 text-muted-foreground">
             <Button variant="ghost" size="icon" className="h-8 w-8">
