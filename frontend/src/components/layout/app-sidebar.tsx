@@ -210,8 +210,8 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
 
       <aside
         className={cn(
-          "app-surface fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r transition-transform duration-200 ease-in-out",
-          "lg:static lg:z-0 lg:translate-x-0",
+          "app-surface fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col border-r transition-transform duration-200 ease-in-out",
+          "lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:z-20 lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
