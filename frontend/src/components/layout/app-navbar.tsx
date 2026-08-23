@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth/auth-context";
+import { useTranslation } from "@/lib/i18n";
+import { LanguageSelector } from "@/components/landing/language-selector";
 import {
   Search,
   Menu,
@@ -20,6 +22,7 @@ interface AppNavbarProps {
 
 export function AppNavbar({ onMenuClick }: AppNavbarProps) {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <header className="app-surface sticky top-0 z-30 flex h-16 items-stretch border-b">
@@ -31,10 +34,10 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
         </div>
         <div className="hidden sm:block">
           <p className="text-sm font-bold leading-tight text-foreground">
-            CRM Admin
+            Appnix CRM
           </p>
           <p className="text-[11px] leading-tight text-muted-foreground">
-            Management Console
+            {t.dashboard.title}
           </p>
         </div>
       </div>
@@ -54,17 +57,22 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search insights..."
+            placeholder={t.dashboard.searchPlaceholder}
             className="navbar-search-input"
           />
         </div>
 
-        {/* Right-side icons + user */}
-        <div className="ml-auto flex items-center gap-0.5 sm:gap-2">
-          <button className="navbar-icon-btn" aria-label="Scan">
+        {/* Right-side icons + language selector + user */}
+        <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          {/* Language Selector Dropdown in Dashboard Header */}
+          <div className="hidden sm:block">
+            <LanguageSelector />
+          </div>
+
+          <button className="navbar-icon-btn hidden md:flex" aria-label="Scan">
             <ScanLine className="h-4.5 w-4.5" />
           </button>
-          <button className="navbar-icon-btn" aria-label="Fullscreen">
+          <button className="navbar-icon-btn hidden md:flex" aria-label="Fullscreen">
             <Maximize2 className="h-4.5 w-4.5" />
           </button>
           <button

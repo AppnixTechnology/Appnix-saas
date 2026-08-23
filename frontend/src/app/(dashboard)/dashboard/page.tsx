@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { useAuth } from "@/lib/auth/auth-context";
+import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import {
   MessageSquare,
@@ -25,7 +27,6 @@ import {
   Calendar,
   CreditCard,
   UserPlus,
-  LayoutDashboard,
   LayoutGrid,
 } from "lucide-react";
 import {
@@ -38,39 +39,28 @@ import {
   CartesianGrid,
 } from "recharts";
 
-// ---------- Existing data (unchanged) ----------
-const stats = [
+const contactsChartData = [
+  { date: "18 Feb", contacts: 0 },
+  { date: "25 Feb", contacts: 1 },
+  { date: "04 Mar", contacts: 1 },
+  { date: "11 Mar", contacts: 1 },
+  { date: "18 Mar", contacts: 4 },
+];
+
+const recentCampaigns = [
   {
-    name: "Total Conversations",
-    value: "2,847",
-    change: "+12.5%",
-    icon: MessageSquare,
-    color: "bg-blue-500",
-    trend: "up",
+    id: 1,
+    name: "Spring Outreach 2026",
+    channel: "WhatsApp",
+    status: "Active",
+    reach: "1,240",
   },
   {
-    name: "Active Campaigns",
-    value: "24",
-    change: "+3",
-    icon: Send,
-    color: "bg-purple-500",
-    trend: "up",
-  },
-  {
-    name: "Bot Interactions",
-    value: "15,632",
-    change: "+8.2%",
-    icon: Bot,
-    color: "bg-green-500",
-    trend: "up",
-  },
-  {
-    name: "Automations Running",
-    value: "12",
-    change: "0",
-    icon: Zap,
-    color: "bg-orange-500",
-    trend: "neutral",
+    id: 2,
+    name: "Product Launch V2",
+    channel: "Email",
+    status: "Scheduled",
+    reach: "5,000",
   },
 ];
 
@@ -112,67 +102,6 @@ const recentActivity = [
   },
 ];
 
-const quickActions = [
-  {
-    name: "New Campaign",
-    description: "Create and track marketing campaigns and reports.",
-    buttonText: "Create Campaign",
-    href: "/dashboard/campaigns/new",
-    icon: Send,
-    color: "bg-purple-500",
-  },
-  {
-    name: "Create Bot",
-    description: "Create, edit and manage automation bots.",
-    buttonText: "Build a Bot",
-    href: "/dashboard/bots/new",
-    icon: Bot,
-    color: "bg-green-500",
-  },
-  {
-    name: "New Automation",
-    description: "Set up workflows that run automatically.",
-    buttonText: "Set Up Automation",
-    href: "/dashboard/automations/new",
-    icon: Zap,
-    color: "bg-orange-500",
-  },
-  {
-    name: "Import Contacts",
-    description: "Manage your customer contacts and segments.",
-    buttonText: "Import Now",
-    href: "/dashboard/contacts/import",
-    icon: Users,
-    color: "bg-blue-500",
-  },
-];
-
-// ---------- New data for the added sections ----------
-const contactsChartData = [
-  { date: "18 Feb", contacts: 0 },
-  { date: "25 Feb", contacts: 1 },
-  { date: "04 Mar", contacts: 1 },
-  { date: "11 Mar", contacts: 1 },
-  { date: "18 Mar", contacts: 4 },
-];
-
-const recentCampaigns = [
-  {
-    id: 1,
-    name: "Spring Outreach 2026",
-    channel: "WhatsApp",
-    status: "Active",
-    reach: "1,240",
-  },
-  {
-    id: 2,
-    name: "Product Launch V2",
-    channel: "Email",
-    status: "Scheduled",
-    reach: "5,000",
-  },
-];
-
 const subscription = {
   plan: "Professional",
   totalDays: 90,
@@ -181,6 +110,83 @@ const subscription = {
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { t } = useTranslation();
+
+  const stats = useMemo(
+    () => [
+      {
+        name: t.dashboard.totalConversations,
+        value: "2,847",
+        change: "+12.5%",
+        icon: MessageSquare,
+        color: "bg-blue-500",
+        trend: "up",
+      },
+      {
+        name: t.dashboard.activeCampaigns,
+        value: "24",
+        change: "+3",
+        icon: Send,
+        color: "bg-purple-500",
+        trend: "up",
+      },
+      {
+        name: t.dashboard.botInteractions,
+        value: "15,632",
+        change: "+8.2%",
+        icon: Bot,
+        color: "bg-green-500",
+        trend: "up",
+      },
+      {
+        name: t.dashboard.automationsRunning,
+        value: "12",
+        change: "0",
+        icon: Zap,
+        color: "bg-orange-500",
+        trend: "neutral",
+      },
+    ],
+    [t]
+  );
+
+  const quickActions = useMemo(
+    () => [
+      {
+        name: t.dashboard.startCampaign,
+        description: "Create and track marketing campaigns and reports.",
+        buttonText: t.dashboard.startCampaign,
+        href: "/dashboard/campaigns/new",
+        icon: Send,
+        color: "bg-purple-500",
+      },
+      {
+        name: t.dashboard.createBot,
+        description: "Create, edit and manage automation bots.",
+        buttonText: t.dashboard.createBot,
+        href: "/dashboard/bots/new",
+        icon: Bot,
+        color: "bg-green-500",
+      },
+      {
+        name: "New Automation",
+        description: "Set up workflows that run automatically.",
+        buttonText: "Set Up Automation",
+        href: "/dashboard/automations/new",
+        icon: Zap,
+        color: "bg-orange-500",
+      },
+      {
+        name: "Import Contacts",
+        description: "Manage your customer contacts and segments.",
+        buttonText: "Import Now",
+        href: "/dashboard/contacts/import",
+        icon: Users,
+        color: "bg-blue-500",
+      },
+    ],
+    [t]
+  );
 
   return (
     <div className="space-y-6">
@@ -188,10 +194,10 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Welcome back, {user?.name?.split(" ")[0] || "User"}!
+            {t.auth.welcomeBack}, {user?.name?.split(" ")[0] || "User"}!
           </h1>
           <p className="text-muted-foreground mt-1">
-            Here&apos;s what&apos;s happening in your workspace today.
+            {t.dashboard.subtitle}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -201,19 +207,19 @@ export default function DashboardPage() {
           >
             <Link href="/products">
               <LayoutGrid className="h-4 w-4" />
-              Products
+              {t.sidebar.products}
             </Link>
           </Button>
           <Button asChild>
-            <Link href="/dashboard/campaigns/new">Create Campaign</Link>
+            <Link href="/dashboard/campaigns/new">{t.dashboard.startCampaign}</Link>
           </Button>
           <Button asChild variant="outline">
-            <Link href="/dashboard/inbox">Open Inbox</Link>
+            <Link href="/dashboard/inbox">{t.dashboard.liveChat}</Link>
           </Button>
         </div>
       </div>
 
-      {/* Stats Grid (unchanged) */}
+      {/* Stats Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Card key={stat.name}>
@@ -254,17 +260,17 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* NEW: Two-column layout like the reference */}
+      {/* Two-column layout */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* LEFT COLUMN */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Contacts Overview (NEW) */}
+          {/* Contacts Overview */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <CardTitle className="flex items-center gap-2">
                   <UserPlus className="h-5 w-5 text-primary" />
-                  Contacts Overview
+                  {t.dashboard.contacts}
                 </CardTitle>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground border rounded-md px-3 py-1.5">
                   <Calendar className="h-4 w-4" />
@@ -275,7 +281,7 @@ export default function DashboardPage() {
             <CardContent className="space-y-4">
               <div className="inline-block rounded-lg border bg-accent/30 px-4 py-3">
                 <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                  Total Contacts Added
+                  {t.dashboard.contacts}
                 </p>
                 <p className="text-2xl font-bold">4</p>
               </div>
@@ -301,11 +307,11 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Recent Campaigns (NEW) */}
+          {/* Recent Campaigns */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Recent Campaigns</CardTitle>
+                <CardTitle>{t.dashboard.activeCampaigns}</CardTitle>
                 <Button asChild variant="ghost" size="sm">
                   <Link href="/dashboard/campaigns">View All</Link>
                 </Button>
@@ -347,11 +353,11 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Recent Activity (unchanged, moved into left column) */}
+          {/* Recent Activity */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Recent Activity</CardTitle>
+                <CardTitle>{t.dashboard.recentActivity}</CardTitle>
                 <Button asChild variant="ghost" size="sm">
                   <Link href="/dashboard/activity">View All</Link>
                 </Button>
@@ -432,7 +438,7 @@ export default function DashboardPage() {
 
         {/* RIGHT COLUMN */}
         <div className="space-y-6">
-          {/* Current Subscription (NEW) */}
+          {/* Current Subscription */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -464,12 +470,12 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Quick Actions (unchanged content, existing style) */}
+          {/* Quick Actions */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Zap className="h-5 w-5 text-primary" />
-                Quick Actions
+                {t.dashboard.quickActions}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -505,10 +511,10 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Workspace Overview (unchanged) */}
+          {/* Workspace Overview */}
           <Card>
             <CardHeader>
-              <CardTitle>Workspace Overview</CardTitle>
+              <CardTitle>{t.dashboard.title}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">

@@ -7,14 +7,15 @@ import {
   Palette,
   Server,
   ArrowRight,
-  Sparkles,
-  CheckCircle2,
   Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/lib/i18n";
 
 export function WhiteLabel({ onOpenDemoModal }: { onOpenDemoModal: () => void }) {
+  const { t } = useTranslation();
+
   return (
     <section id="white-label" className="py-20 sm:py-28 bg-gradient-to-b from-slate-950 via-[#0B1E5B] to-slate-950 text-white relative overflow-hidden">
       {/* Background Decorative Tech Grid */}
@@ -25,17 +26,13 @@ export function WhiteLabel({ onOpenDemoModal }: { onOpenDemoModal: () => void })
         <div className="mx-auto max-w-3xl text-center mb-16">
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold text-emerald-400 backdrop-blur-xs mb-4">
             <ShieldCheck className="h-4 w-4" />
-            White-Label & Agency Reseller Solution
+            {t.whiteLabel.badge}
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl text-balance">
-            Your Brand.
-            <br />
-            <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-              Your Messaging Platform.
-            </span>
+            {t.whiteLabel.title}
           </h2>
           <p className="mt-4 text-base sm:text-lg text-slate-300 text-balance leading-relaxed">
-            Launch a fully branded omnichannel messaging software with your own custom domain, brand styling, and isolated multi-tenant architecture. Resell under your agency and keep 100% recurring profit.
+            {t.whiteLabel.subtitle}
           </p>
         </div>
 
@@ -136,7 +133,7 @@ export function WhiteLabel({ onOpenDemoModal }: { onOpenDemoModal: () => void })
             size="lg"
             className="h-12 px-8 text-sm font-semibold bg-emerald-500 text-slate-950 hover:bg-emerald-400 gap-2 shadow-lg shadow-emerald-500/25"
           >
-            Explore White-Label Partner Program
+            {t.whiteLabel.cta}
             <ArrowRight className="h-4 w-4" />
           </Button>
         </div>

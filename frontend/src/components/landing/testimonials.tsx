@@ -1,8 +1,9 @@
 "use client";
 
-import { Star, ShieldCheck, CheckCircle2, Sparkles, Building2 } from "lucide-react";
+import { Star, CheckCircle2, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/lib/i18n";
 
 const testimonials = [
   {
@@ -47,6 +48,8 @@ const partners = [
 ];
 
 export function Testimonials() {
+  const { t } = useTranslation();
+
   return (
     <section id="testimonials" className="py-20 sm:py-28 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -54,13 +57,13 @@ export function Testimonials() {
         <div className="mx-auto max-w-3xl text-center mb-16">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary mb-3">
             <Sparkles className="h-3.5 w-3.5" />
-            Proven Customer Results
+            {t.testimonials.badge}
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-            Trusted by Growing Businesses
+            {t.testimonials.title}
           </h2>
           <p className="mt-4 text-base sm:text-lg text-muted-foreground text-balance">
-            See how modern high-growth companies use Appnix to streamline operations and scale revenue.
+            {t.testimonials.subtitle}
           </p>
         </div>
 

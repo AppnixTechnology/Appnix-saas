@@ -4,12 +4,15 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Headphones } from "lucide-react";
 import { WhatsAppIcon } from "@/components/landing/channel-icons";
+import { useTranslation } from "@/lib/i18n";
 
 interface StickyMobileCTAProps {
   onOpenDemoModal: () => void;
 }
 
 export function StickyMobileCTA({ onOpenDemoModal }: StickyMobileCTAProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/80 bg-background/95 backdrop-blur-md p-2.5 md:hidden shadow-2xl">
       <div className="flex items-center gap-2">
@@ -33,7 +36,7 @@ export function StickyMobileCTA({ onOpenDemoModal }: StickyMobileCTAProps) {
           className="flex-1 h-10 text-xs font-semibold border-border gap-1.5"
         >
           <Headphones className="h-3.5 w-3.5 text-primary" />
-          <span>Expert Demo</span>
+          <span>{t.stickyMobile.talkToTeam}</span>
         </Button>
 
         {/* Start Free */}
@@ -43,8 +46,7 @@ export function StickyMobileCTA({ onOpenDemoModal }: StickyMobileCTAProps) {
           className="flex-1 h-10 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 gap-1 shadow-xs"
         >
           <Link href="/signup">
-            <span>Free Trial</span>
-            <ArrowRight className="h-3.5 w-3.5" />
+            <span>{t.stickyMobile.startTrial}</span>
           </Link>
         </Button>
       </div>

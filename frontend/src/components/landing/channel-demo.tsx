@@ -246,7 +246,10 @@ const channelsData: ChannelConfig[] = [
   },
 ];
 
+import { useTranslation } from "@/lib/i18n";
+
 export function ChannelDemo({ onOpenDemoModal }: { onOpenDemoModal: () => void }) {
+  const { t } = useTranslation();
   const [selectedChannelId, setSelectedChannelId] = useState<ChannelId>("whatsapp");
   const [activeInputText, setActiveInputText] = useState("");
 
@@ -260,13 +263,13 @@ export function ChannelDemo({ onOpenDemoModal }: { onOpenDemoModal: () => void }
         <div className="mx-auto max-w-3xl text-center mb-14 sm:mb-18">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary mb-3">
             <Sparkles className="h-3.5 w-3.5" />
-            Unified Channel Architecture
+            {t.channelDemo.badge}
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-            One Inbox. Every Conversation.
+            {t.channelDemo.title}
           </h2>
           <p className="mt-4 text-base sm:text-lg text-muted-foreground text-balance">
-            Manage your business conversations across all major messaging channels from one place with official APIs and zero workarounds.
+            {t.channelDemo.subtitle}
           </p>
         </div>
 

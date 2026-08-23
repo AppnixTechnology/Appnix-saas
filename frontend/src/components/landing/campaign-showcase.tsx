@@ -16,7 +16,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { WhatsAppIcon, RCSIcon } from "@/components/landing/channel-icons";
 
+import { useTranslation } from "@/lib/i18n";
+
 export function CampaignShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => void }) {
+  const { t } = useTranslation();
+
   return (
     <section className="py-20 sm:py-28 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -114,15 +118,13 @@ export function CampaignShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => v
             <div>
               <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-3.5 py-1 text-xs font-semibold text-blue-700 dark:text-blue-400 mb-3">
                 <Send className="h-3.5 w-3.5" />
-                Targeted Multi-Channel Broadcasts
+                {t.campaignShowcase.badge}
               </div>
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-                Reach More Customers.
-                <br />
-                <span className="text-primary">With Less Effort.</span>
+                {t.campaignShowcase.title}
               </h2>
               <p className="mt-4 text-sm sm:text-base text-muted-foreground leading-relaxed">
-                Launch personalized bulk marketing campaigns, order status updates, and transactional alerts with enterprise speed and compliance.
+                {t.campaignShowcase.subtitle}
               </p>
             </div>
 
@@ -147,7 +149,7 @@ export function CampaignShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => v
                 size="lg"
                 className="h-11 px-7 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shadow-md"
               >
-                Create Your First Campaign
+                {t.campaignShowcase.cta}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>

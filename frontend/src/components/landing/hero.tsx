@@ -9,7 +9,6 @@ import {
   MessageSquare,
   Zap,
   UserCheck,
-  Sparkles,
   ChevronDown,
 } from "lucide-react";
 import {
@@ -18,6 +17,7 @@ import {
   RCSIcon,
   FacebookIcon,
 } from "@/components/landing/channel-icons";
+import { useTranslation } from "@/lib/i18n";
 
 interface HeroProps {
   onOpenDemoModal?: () => void;
@@ -26,6 +26,7 @@ interface HeroProps {
 type StoryStep = 1 | 2 | 3 | 4;
 
 export function Hero({ onOpenDemoModal }: HeroProps) {
+  const { t } = useTranslation();
   const [activeChannel, setActiveChannel] = useState<"whatsapp" | "instagram" | "rcs" | "facebook">("whatsapp");
   const [storyStep, setStoryStep] = useState<StoryStep>(1);
 
@@ -85,20 +86,20 @@ export function Hero({ onOpenDemoModal }: HeroProps) {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
               </span>
-              <span>New: RCS + Instagram Direct Support</span>
+              <span>{t.hero.announcement}</span>
             </div>
 
             {/* Main Primary Headline (Single H1) */}
             <h1 className="text-3xl sm:text-4xl lg:text-[2.6rem] xl:text-[2.9rem] font-extrabold tracking-tight text-foreground leading-[1.14]">
-              Turn Every Customer Conversation Into a{" "}
+              {t.hero.titleStart}{" "}
               <span className="text-primary dark:text-primary-foreground font-extrabold">
-                Business Opportunity.
+                {t.hero.titleHighlight}
               </span>
             </h1>
 
             {/* Subheading (Concise, Benefit-Oriented, Max-Width 580px) */}
             <p className="text-sm sm:text-base lg:text-[1.05rem] text-muted-foreground max-w-[560px] mx-auto lg:mx-0 font-normal leading-relaxed">
-              Connect WhatsApp, Instagram, RCS and Facebook with CRM, automation and campaigns — all in one powerful platform.
+              {t.hero.subtitle}
             </p>
 
             {/* CTA Group: Primary (Book a Demo) + Secondary (Start Free Trial) */}
@@ -109,7 +110,7 @@ export function Hero({ onOpenDemoModal }: HeroProps) {
                 onClick={() => onOpenDemoModal?.()}
                 className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm sm:text-base text-primary-foreground bg-primary hover:bg-primary/95 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer"
               >
-                <span>Book a Free Demo</span>
+                <span>{t.hero.ctaSecondary}</span>
                 <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
               </button>
 
@@ -118,7 +119,7 @@ export function Hero({ onOpenDemoModal }: HeroProps) {
                 href="/signup"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm sm:text-base text-foreground bg-background hover:bg-accent/60 border border-border shadow-2xs hover:border-primary/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
               >
-                <span>Start Free Trial</span>
+                <span>{t.hero.ctaPrimary}</span>
               </Link>
             </div>
 
@@ -127,20 +128,17 @@ export function Hero({ onOpenDemoModal }: HeroProps) {
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-1 text-xs font-medium text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                  Quick setup
+                  {t.hero.ctaHint.split("•")[0]?.trim() || "Quick setup"}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                  Multi-channel messaging
+                  {t.hero.ctaHint.split("•")[1]?.trim() || "No credit card required"}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                  CRM &amp; automation
+                  {t.hero.ctaHint.split("•")[2]?.trim() || "Instant setup"}
                 </span>
               </div>
-              <p className="text-[11px] sm:text-xs text-muted-foreground/80 text-center lg:text-left">
-                See how Appnix can help your business capture, manage and convert more leads.
-              </p>
             </div>
           </div>
 

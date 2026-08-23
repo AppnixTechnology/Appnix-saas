@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth/auth-context";
+import { useLanguage, SupportedLanguageCode } from "@/lib/i18n";
 import {
   User,
   Camera,
@@ -28,17 +29,19 @@ import {
 
 export default function ProfileSettingsPage() {
   const { user } = useAuth();
+  const { currentLanguage, setLanguage: setGlobalLanguage, supportedLanguages } = useLanguage();
   const [fullName, setFullName] = useState(user?.name || "Video Panel");
   const [email, setEmail] = useState(user?.email || "videopanel@1automations.com");
   const [phone, setPhone] = useState("+91 80627 65557");
   const [role] = useState("Workspace Owner");
-  const [language, setLanguage] = useState("english");
+  const [language, setLanguage] = useState<SupportedLanguageCode>(currentLanguage);
   const [timezone, setTimezone] = useState("Asia/Kolkata");
   const [bio, setBio] = useState("Workspace Administrator and Lead Architect at Appnix.");
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    setGlobalLanguage(language);
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);
   };
@@ -154,14 +157,16 @@ export default function ProfileSettingsPage() {
               <label className="text-xs font-medium text-muted-foreground">
                 Interface Language
               </label>
-              <Select value={language} onValueChange={setLanguage}>
+              <Select value={language} onValueChange={(val) => setLanguage(val as SupportedLanguageCode)}>
                 <SelectTrigger className="h-9 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="english">English (US)</SelectItem>
-                  <SelectItem value="hindi">Hindi (हिंदी)</SelectItem>
-                  <SelectItem value="spanish">Spanish (Español)</SelectItem>
+                  {supportedLanguages.map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code}>
+                      {lang.nativeName} ({lang.name})
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

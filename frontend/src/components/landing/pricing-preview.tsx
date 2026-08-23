@@ -1,83 +1,88 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import { CheckCircle2, ArrowRight, Sparkles, ShieldCheck, Zap } from "lucide-react";
+import { CheckCircle2, ArrowRight, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { useTranslation } from "@/lib/i18n";
 
 interface PricingPreviewProps {
   onOpenDemoModal: (interest?: string) => void;
 }
 
 export function PricingPreview({ onOpenDemoModal }: PricingPreviewProps) {
+  const { t } = useTranslation();
   const [annualBilling, setAnnualBilling] = useState(false);
 
-  const plans = [
-    {
-      id: "starter",
-      name: "Starter Tier",
-      priceMonthly: "₹999",
-      priceAnnual: "₹799",
-      period: "/month",
-      description: "For small businesses starting with omnichannel messaging.",
-      popular: false,
-      features: [
-        "Up to 2,000 monthly messages",
-        "2 WhatsApp / Social channels",
-        "1 Automation Botflow",
-        "2 Team Members",
-        "Community & Email Support",
-        "Standard CRM Contact Manager",
-      ],
-      ctaText: "Start 14-Day Free Trial",
-      ctaLink: "/signup",
-      isCustom: false,
-    },
-    {
-      id: "pro",
-      name: "Professional Tier",
-      priceMonthly: "₹2,999",
-      priceAnnual: "₹2,399",
-      period: "/month",
-      description: "For fast-scaling teams automating campaigns and customer care.",
-      popular: true,
-      features: [
-        "Up to 25,000 monthly messages",
-        "Unlimited Channels (WhatsApp, IG, FB, RCS)",
-        "5 Advanced AI Botflows",
-        "10 Team Member Seats",
-        "Priority Live Support & SLA",
-        "Custom Webhooks & REST API",
-        "Full Campaign & Broadcast Suite",
-      ],
-      ctaText: "Start 14-Day Free Trial",
-      ctaLink: "/signup",
-      isCustom: false,
-    },
-    {
-      id: "enterprise",
-      name: "Enterprise Custom",
-      priceMonthly: "₹8,999",
-      priceAnnual: "₹7,199",
-      period: "/month",
-      description: "Dedicated high-volume messaging infrastructure and SLA.",
-      popular: false,
-      features: [
-        "Unlimited Monthly Messages",
-        "Custom AI Voice Agent streaming",
-        "Unlimited Automation Botflows",
-        "Unlimited Team Seats & SSO",
-        "Dedicated Account Manager",
-        "Custom SLA & Dedicated IP Deployment",
-        "Full White-Label Platform Access",
-      ],
-      ctaText: "Contact Enterprise Sales",
-      ctaLink: "#",
-      isCustom: true,
-    },
-  ];
+  const plans = useMemo(
+    () => [
+      {
+        id: "starter",
+        name: t.pricing.starterPlan,
+        priceMonthly: "₹999",
+        priceAnnual: "₹799",
+        period: "/month",
+        description: t.pricing.starterDesc,
+        popular: false,
+        features: [
+          "Up to 2,000 monthly messages",
+          "2 WhatsApp / Social channels",
+          "1 Automation Botflow",
+          "2 Team Members",
+          "Community & Email Support",
+          "Standard CRM Contact Manager",
+        ],
+        ctaText: t.pricing.getStarted,
+        ctaLink: "/signup",
+        isCustom: false,
+      },
+      {
+        id: "pro",
+        name: t.pricing.proPlan,
+        priceMonthly: "₹2,999",
+        priceAnnual: "₹2,399",
+        period: "/month",
+        description: t.pricing.proDesc,
+        popular: true,
+        features: [
+          "Up to 25,000 monthly messages",
+          "Unlimited Channels (WhatsApp, IG, FB, RCS)",
+          "5 Advanced AI Botflows",
+          "10 Team Member Seats",
+          "Priority Live Support & SLA",
+          "Custom Webhooks & REST API",
+          "Full Campaign & Broadcast Suite",
+        ],
+        ctaText: t.pricing.getStarted,
+        ctaLink: "/signup",
+        isCustom: false,
+      },
+      {
+        id: "enterprise",
+        name: t.pricing.enterprisePlan,
+        priceMonthly: "₹8,999",
+        priceAnnual: "₹7,199",
+        period: "/month",
+        description: t.pricing.enterpriseDesc,
+        popular: false,
+        features: [
+          "Unlimited Monthly Messages",
+          "Custom AI Voice Agent streaming",
+          "Unlimited Automation Botflows",
+          "Unlimited Team Seats & SSO",
+          "Dedicated Account Manager",
+          "Custom SLA & Dedicated IP Deployment",
+          "Full White-Label Platform Access",
+        ],
+        ctaText: t.pricing.bookEnterprise,
+        ctaLink: "#",
+        isCustom: true,
+      },
+    ],
+    [t]
+  );
 
   return (
     <section id="pricing" className="py-20 sm:py-28 bg-muted/20 border-y border-border/60">
@@ -86,13 +91,13 @@ export function PricingPreview({ onOpenDemoModal }: PricingPreviewProps) {
         <div className="mx-auto max-w-3xl text-center mb-12">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary mb-3">
             <Zap className="h-3.5 w-3.5" />
-            Transparent Pricing
+            {t.pricing.badge}
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-            Simple Pricing. Powerful Platform.
+            {t.pricing.title}
           </h2>
           <p className="mt-4 text-base sm:text-lg text-muted-foreground text-balance">
-            Every plan includes a 14-day free trial. No credit card required. Upgrade, downgrade, or cancel anytime.
+            {t.pricing.subtitle}
           </p>
 
           {/* Billing Interval Toggle */}
@@ -103,7 +108,7 @@ export function PricingPreview({ onOpenDemoModal }: PricingPreviewProps) {
                 !annualBilling ? "text-foreground" : "text-muted-foreground"
               }`}
             >
-              Monthly Billing
+              {t.pricing.monthly}
             </span>
 
             <button
@@ -128,10 +133,7 @@ export function PricingPreview({ onOpenDemoModal }: PricingPreviewProps) {
                 annualBilling ? "text-foreground" : "text-muted-foreground"
               }`}
             >
-              Annual Billing
-              <span className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
-                Save 20%
-              </span>
+              {t.pricing.annual}
             </span>
           </div>
         </div>
@@ -152,7 +154,7 @@ export function PricingPreview({ onOpenDemoModal }: PricingPreviewProps) {
               >
                 {plan.popular && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-md">
-                    Most Popular Choice
+                    {t.pricing.popular}
                   </div>
                 )}
 
@@ -163,7 +165,7 @@ export function PricingPreview({ onOpenDemoModal }: PricingPreviewProps) {
                     </CardTitle>
                     {plan.popular && (
                       <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 text-[10px] font-bold">
-                        Recommended
+                        {t.pricing.popular}
                       </Badge>
                     )}
                   </div>
@@ -180,11 +182,6 @@ export function PricingPreview({ onOpenDemoModal }: PricingPreviewProps) {
                         {plan.period}
                       </span>
                     </div>
-                    {annualBilling && (
-                      <span className="text-[11px] text-emerald-600 font-semibold mt-0.5 block">
-                        Billed annually (Includes 20% discount)
-                      </span>
-                    )}
                   </div>
                 </CardHeader>
 
@@ -207,7 +204,7 @@ export function PricingPreview({ onOpenDemoModal }: PricingPreviewProps) {
                     <Button
                       onClick={() => onOpenDemoModal("Enterprise Tier Custom Solution")}
                       size="lg"
-                      className="w-full h-11 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shadow-sm"
+                      className="w-full h-11 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shadow-sm cursor-pointer"
                     >
                       {plan.ctaText}
                       <ArrowRight className="h-4 w-4" />

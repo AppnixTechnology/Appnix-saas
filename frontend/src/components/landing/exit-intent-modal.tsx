@@ -5,18 +5,19 @@ import Link from "next/link";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ArrowRight, Zap, CheckCircle2, ShieldCheck, X } from "lucide-react";
+import { ArrowRight, Zap, CheckCircle2 } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 interface ExitIntentModalProps {
   onOpenDemoModal: () => void;
 }
 
 export function ExitIntentModal({ onOpenDemoModal }: ExitIntentModalProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -80,9 +81,9 @@ export function ExitIntentModal({ onOpenDemoModal }: ExitIntentModalProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
             <Button
               onClick={handleDemoClick}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold gap-2 h-10 text-sm shadow-md"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold gap-2 h-10 text-sm shadow-md cursor-pointer"
             >
-              Book 10-Min Demo
+              {t.nav.bookDemo}
               <ArrowRight className="h-4 w-4" />
             </Button>
             <Button
@@ -90,14 +91,14 @@ export function ExitIntentModal({ onOpenDemoModal }: ExitIntentModalProps) {
               variant="outline"
               className="font-medium h-10 text-sm border-border hover:bg-accent"
             >
-              <Link href="/signup">Start Free Trial</Link>
+              <Link href="/signup">{t.nav.startFreeTrial}</Link>
             </Button>
           </div>
 
           <div className="text-center">
             <button
               onClick={() => setIsOpen(false)}
-              className="text-xs text-muted-foreground hover:text-foreground underline transition-colors"
+              className="text-xs text-muted-foreground hover:text-foreground underline transition-colors cursor-pointer"
             >
               Continue exploring website
             </button>

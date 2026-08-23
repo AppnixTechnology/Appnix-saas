@@ -12,6 +12,8 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/lib/auth/auth-context";
+import { useTranslation } from "@/lib/i18n";
+import { LanguageSelector } from "@/components/landing/language-selector";
 import { config } from "@/lib/config";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -64,6 +66,7 @@ function SignInContent() {
   const searchParams = useSearchParams();
   const { login } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -114,7 +117,12 @@ function SignInContent() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-center items-center bg-gradient-to-b from-slate-50 via-slate-50/80 to-blue-50/40 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen w-full flex flex-col justify-center items-center bg-gradient-to-b from-slate-50 via-slate-50/80 to-blue-50/40 p-4 sm:p-6 lg:p-8 relative">
+      {/* Top right language selector */}
+      <div className="absolute top-4 right-4 z-20">
+        <LanguageSelector />
+      </div>
+
       {/* Background ambient lighting effects */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-primary/8 rounded-full blur-3xl" />
@@ -140,10 +148,10 @@ function SignInContent() {
 
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-              Welcome back
+              {t.auth.welcomeBack}
             </h1>
             <p className="mt-1 text-sm text-slate-500">
-              Sign in to manage your unified CRM workspace
+              {t.auth.signInSubtitle}
             </p>
           </div>
         </div>
@@ -166,7 +174,7 @@ function SignInContent() {
             ) : (
               <>
                 <GoogleIcon />
-                <span>Sign in with Google</span>
+                <span>{t.auth.signInWithGoogle}</span>
               </>
             )}
           </Button>
@@ -175,7 +183,7 @@ function SignInContent() {
           <div className="my-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-slate-200" />
             <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-              or continue with email
+              {t.auth.orContinueWith}
             </span>
             <div className="h-px flex-1 bg-slate-200" />
           </div>
@@ -188,7 +196,7 @@ function SignInContent() {
                 htmlFor="email"
                 className="text-xs font-semibold text-slate-700 uppercase tracking-wide"
               >
-                Email Address
+                {t.auth.email}
               </Label>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -216,13 +224,13 @@ function SignInContent() {
                   htmlFor="password"
                   className="text-xs font-semibold text-slate-700 uppercase tracking-wide"
                 >
-                  Password
+                  {t.auth.password}
                 </Label>
                 <Link
                   href="/forgot-password"
                   className="text-xs font-medium text-primary hover:text-primary/80 hover:underline transition-colors"
                 >
-                  Forgot password?
+                  {t.auth.forgotPassword}
                 </Link>
               </div>
               <div className="relative">
@@ -276,24 +284,24 @@ function SignInContent() {
                 htmlFor="keepLoggedIn"
                 className="text-xs font-medium text-slate-600 cursor-pointer select-none"
               >
-                Remember this device for 30 days
+                {t.auth.rememberMe}
               </Label>
             </div>
 
             {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full h-11 font-semibold text-sm shadow-sm hover:shadow transition-all bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="w-full h-11 font-semibold text-sm shadow-sm hover:shadow transition-all bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer"
               disabled={isLoading || isGoogleLoading}
             >
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
+                  {t.auth.signingIn}
                 </>
               ) : (
                 <>
-                  <span>Sign In</span>
+                  <span>{t.auth.signInButton}</span>
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </>
               )}
@@ -304,12 +312,12 @@ function SignInContent() {
         {/* ================= FOOTER LINKS & SECURITY BADGE ================= */}
         <div className="space-y-4 text-center">
           <p className="text-sm text-slate-500">
-            Don&apos;t have an account?{" "}
+            {t.auth.dontHaveAccount}{" "}
             <Link
               href="/signup"
               className="font-semibold text-primary hover:text-primary/80 hover:underline transition-colors"
             >
-              Create free account
+              {t.auth.signUpButton}
             </Link>
           </p>
 

@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { WhatsAppIcon, RCSIcon, InstagramIcon } from "@/components/landing/channel-icons";
+import { useTranslation } from "@/lib/i18n";
 
 const mockContacts = [
   {
@@ -66,6 +67,8 @@ const crmHighlights = [
 ];
 
 export function CRMShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => void }) {
+  const { t } = useTranslation();
+
   return (
     <section id="crm" className="py-20 sm:py-28 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -129,34 +132,40 @@ export function CRMShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => void }
                           <div className="text-[10px] text-muted-foreground">{contact.company}</div>
                         </td>
                         <td className="p-3">
-                          <span className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-medium px-1.5 py-0.5 rounded text-[10px] inline-flex items-center gap-1">
-                            {contact.channel === "WhatsApp" && <WhatsAppIcon className="h-3 w-3 shrink-0" />}
-                            {contact.channel === "RCS API" && <RCSIcon className="h-3 w-3 shrink-0 text-blue-600" />}
-                            {contact.channel === "Instagram" && <InstagramIcon className="h-3 w-3 shrink-0 text-pink-600" />}
-                            {contact.channel}
-                          </span>
+                          <div className="flex items-center gap-1.5 font-medium text-foreground">
+                            {contact.channel === "WhatsApp" && (
+                              <WhatsAppIcon className="h-3.5 w-3.5 text-emerald-600" />
+                            )}
+                            {contact.channel === "RCS API" && (
+                              <RCSIcon className="h-3.5 w-3.5 text-blue-600" />
+                            )}
+                            {contact.channel === "Instagram" && (
+                              <InstagramIcon className="h-3.5 w-3.5 text-pink-600" />
+                            )}
+                            <span>{contact.channel}</span>
+                          </div>
                         </td>
-                        <td className="p-3 font-bold text-foreground">
+                        <td className="p-3 font-bold text-foreground font-mono">
                           {contact.dealValue}
                         </td>
                         <td className="p-3">
-                          <Badge variant="secondary" className="text-[9px] font-semibold">
+                          <span className="rounded-md bg-secondary px-2 py-0.5 text-[11px] font-semibold text-foreground">
                             {contact.stage}
-                          </Badge>
+                          </span>
                         </td>
                         <td className="p-3">
                           <div className="flex flex-wrap gap-1">
-                            {contact.tags.map((t, idx) => (
+                            {contact.tags.map((tag) => (
                               <span
-                                key={idx}
-                                className="bg-primary/10 text-primary text-[9px] font-medium px-1.5 py-0.2 rounded"
+                                key={tag}
+                                className="rounded bg-primary/10 text-primary px-1.5 py-0.2 text-[10px] font-medium"
                               >
-                                {t}
+                                {tag}
                               </span>
                             ))}
                           </div>
                         </td>
-                        <td className="p-3 pr-4 text-muted-foreground font-medium text-[11px]">
+                        <td className="p-3 pr-4 text-muted-foreground">
                           {contact.assignedTo}
                         </td>
                       </tr>
@@ -165,8 +174,8 @@ export function CRMShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => void }
                 </table>
               </div>
 
-              {/* Bottom Quick Contact Insight */}
-              <div className="p-3.5 bg-muted/20 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground">
+              {/* Bottom Footer Info */}
+              <div className="border-t border-border/60 bg-muted/30 px-4 py-2.5 flex items-center justify-between text-[11px] text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-3.5 w-3.5 text-primary" />
                   <span>Auto-sync with WhatsApp Business API & Webhooks</span>
@@ -181,13 +190,13 @@ export function CRMShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => void }
             <div>
               <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-3">
                 <DollarSign className="h-3.5 w-3.5" />
-                Revenue & Pipeline Acceleration
+                {t.crmShowcase.badge}
               </div>
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-                Turn Conversations Into Customers.
+                {t.crmShowcase.title}
               </h2>
               <p className="mt-4 text-sm sm:text-base text-muted-foreground leading-relaxed">
-                Stop letting hot prospects disappear in unstructured chat threads. Appnix transforms incoming customer messages across WhatsApp, Instagram, and RCS into organized, actionable CRM records.
+                {t.crmShowcase.subtitle}
               </p>
             </div>
 
@@ -206,7 +215,7 @@ export function CRMShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => void }
                 size="lg"
                 className="h-11 px-7 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shadow-md"
               >
-                See CRM in Action
+                {t.crmShowcase.cta}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>

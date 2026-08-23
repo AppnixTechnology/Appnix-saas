@@ -18,7 +18,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { WhatsAppIcon, RCSIcon } from "@/components/landing/channel-icons";
 
+import { useTranslation } from "@/lib/i18n";
+
 export function AutomationShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => void }) {
+  const { t } = useTranslation();
   const [activeBranch, setActiveBranch] = useState<"yes" | "no">("yes");
 
   return (
@@ -30,15 +33,13 @@ export function AutomationShowcase({ onOpenDemoModal }: { onOpenDemoModal: () =>
             <div>
               <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400 mb-3">
                 <Zap className="h-3.5 w-3.5" />
-                Visual Workflow Engine
+                {t.automationShowcase.badge}
               </div>
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-                Automate Conversations.
-                <br />
-                <span className="text-primary">Not Relationships.</span>
+                {t.automationShowcase.title}
               </h2>
               <p className="mt-4 text-sm sm:text-base text-muted-foreground leading-relaxed">
-                Empower your sales and support teams with 24/7 intelligent automations. Trigger instant responses, filter intent, and seamlessly pass hot opportunities to live agents.
+                {t.automationShowcase.subtitle}
               </p>
             </div>
 
@@ -63,7 +64,7 @@ export function AutomationShowcase({ onOpenDemoModal }: { onOpenDemoModal: () =>
                 size="lg"
                 className="h-11 px-7 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shadow-md"
               >
-                Explore Automation Builder
+                {t.automationShowcase.cta}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>

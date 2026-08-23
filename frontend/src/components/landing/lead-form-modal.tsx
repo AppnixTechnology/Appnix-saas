@@ -33,6 +33,7 @@ import {
   Send,
   Loader2,
 } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 interface LeadFormModalProps {
   isOpen: boolean;
@@ -59,6 +60,7 @@ export function LeadFormModal({
   defaultInterest = "Complete Platform (All-in-One)",
   source = "Landing Page Demo Modal",
 }: LeadFormModalProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -196,12 +198,12 @@ export function LeadFormModal({
                 <div className="space-y-1.5">
                   <Label htmlFor="lead-name" className="text-xs font-semibold flex items-center gap-1.5">
                     <User className="h-3.5 w-3.5 text-muted-foreground" />
-                    Full Name <span className="text-destructive">*</span>
+                    {t.leadModal.fullNameLabel} <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="lead-name"
                     required
-                    placeholder="Sarah Jenkins"
+                    placeholder={t.leadModal.fullNamePlaceholder}
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="h-10 text-sm bg-background"
@@ -211,12 +213,12 @@ export function LeadFormModal({
                 <div className="space-y-1.5">
                   <Label htmlFor="lead-company" className="text-xs font-semibold flex items-center gap-1.5">
                     <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                    Company Name <span className="text-destructive">*</span>
+                    {t.leadModal.companyLabel} <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="lead-company"
                     required
-                    placeholder="Acme Growth Inc."
+                    placeholder={t.leadModal.companyPlaceholder}
                     value={formData.company}
                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                     className="h-10 text-sm bg-background"
@@ -228,13 +230,13 @@ export function LeadFormModal({
                 <div className="space-y-1.5">
                   <Label htmlFor="lead-email" className="text-xs font-semibold flex items-center gap-1.5">
                     <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                    Work Email <span className="text-destructive">*</span>
+                    {t.leadModal.emailLabel} <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="lead-email"
                     type="email"
                     required
-                    placeholder="sarah@acmegrowth.com"
+                    placeholder={t.leadModal.emailPlaceholder}
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="h-10 text-sm bg-background"
@@ -244,13 +246,13 @@ export function LeadFormModal({
                 <div className="space-y-1.5">
                   <Label htmlFor="lead-phone" className="text-xs font-semibold flex items-center gap-1.5">
                     <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-                    Phone / WhatsApp <span className="text-destructive">*</span>
+                    {t.leadModal.phoneLabel} <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="lead-phone"
                     type="tel"
                     required
-                    placeholder="+1 (555) 019-2834"
+                    placeholder={t.leadModal.phonePlaceholder}
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     className="h-10 text-sm bg-background"
@@ -304,11 +306,11 @@ export function LeadFormModal({
                   {isSubmitting ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Submitting Request...
+                      {t.leadModal.submitting}
                     </>
                   ) : (
                     <>
-                      Request Live Product Demo
+                      {t.leadModal.submitButton}
                       <ArrowRight className="h-4 w-4" />
                     </>
                   )}

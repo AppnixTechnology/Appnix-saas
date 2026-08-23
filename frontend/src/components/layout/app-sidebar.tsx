@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/auth-context";
+import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -31,7 +32,6 @@ import {
   FileText,
   KeyRound,
   Contact,
-  Megaphone,
   ShieldCheck,
   Wallet,
   CreditCard,
@@ -52,113 +52,12 @@ interface SubItem {
 }
 
 interface MenuItem {
+  id: string;
   label: string;
   href: string;
   icon: React.ElementType;
   children?: SubItem[];
 }
-
-// Main navigation items shown under the "MENU" label.
-const menuItems: MenuItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  {
-    label: "Channels",
-    href: "/channels",
-    icon: ArrowLeftRight,
-    children: [
-      { label: "All Channels", href: "/channels", icon: LayoutGrid },
-      { label: "WhatsApp", href: "/channels/whatsapp", icon: MessageSquare },
-      { label: "Instagram", href: "/channels/instagram", icon: Camera },
-      { label: "Facebook", href: "/channels/facebook", icon: ScanLine },
-      { label: "RCS", href: "/channels/rcs", icon: Smartphone },
-    ],
-  },
-  {
-    label: "CRM",
-    href: "/crm",
-    icon: Users,
-    children: [
-      { label: "Contacts", href: "/crm/contacts", icon: Contact },
-      { label: "Bulk Campaign", href: "/crm/bulk-campaign", icon: Send },
-      { label: "Live Chat", href: "/crm/live-chat", icon: MessageSquare },
-    ],
-  },
-  { label: "Chatbots", href: "/chatbots", icon: Bot },
-  {
-    label: "Automations",
-    href: "/automations",
-    icon: Zap,
-    children: [
-      { label: "Analytics", href: "/automations/analytics", icon: BarChart3 },
-      { label: "Workflow", href: "/automations/workflow", icon: GitBranch },
-      { label: "Data Store", href: "/automations/datastore", icon: Database },
-      { label: "Templates", href: "/automations/templates", icon: FileText },
-      {
-        label: "App Authentications",
-        href: "/automations/app-authentications",
-        icon: KeyRound,
-      },
-    ],
-  },
-  {
-    label: "WhatsApp Mini-Apps",
-    href: "/whatsapp-mini-apps",
-    icon: Grid3x3,
-  },
-  { label: "Chat Widget", href: "/chat-widget", icon: MessageSquare },
-  { label: "Voice AI Agent", href: "/voice-ai-agent", icon: Headset },
-  {
-    label: "Department",
-    href: "/department",
-    icon: Building2,
-    children: [
-      { label: "Analytics", href: "/department/analytics", icon: BarChart3 },
-      { label: "Departments", href: "/department/departments", icon: Building2 },
-      { label: "Roles", href: "/department/roles", icon: ShieldCheck },
-    ],
-  },
-  {
-    label: "Workspace",
-    href: "/workspace",
-    icon: Share2,
-    children: [
-      {
-        label: "Account Settings",
-        href: "/workspace/account-settings",
-        icon: Settings,
-      },
-      {
-        label: "Wallet & Transactions",
-        href: "/workspace/wallet",
-        icon: Wallet,
-      },
-      {
-        label: "Billing",
-        href: "/workspace/billing",
-        icon: CreditCard,
-      },
-      {
-        label: "Support",
-        href: "/workspace/support",
-        icon: Headset,
-      },
-    ],
-  },
-  {
-    label: "Settings",
-    href: "/settings",
-    icon: Settings,
-    children: [
-      { label: "Profile", href: "/settings/profile", icon: User },
-      { label: "Notifications", href: "/settings/notifications", icon: Bell },
-      { label: "Security", href: "/settings/security", icon: Shield },
-      { label: "Appearance", href: "/settings/appearance", icon: Palette },
-      { label: "Integrations", href: "/settings/integrations", icon: Plug },
-      { label: "Activity Logs", href: "/settings/activity-logs", icon: History },
-      { label: "Account & Data", href: "/settings/account-data", icon: Database },
-    ],
-  },
-];
 
 interface AppSidebarProps {
   open: boolean;
@@ -169,12 +68,124 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout } = useAuth();
+  const { t } = useTranslation();
 
-  // Tracks which parent menu item (by label) is expanded.
+  // Tracks which parent menu item (by id/label) is expanded.
   const [expanded, setExpanded] = useState<string | null>(null);
 
+  // Main navigation items dynamically localized
+  const menuItems: MenuItem[] = useMemo(
+    () => [
+      { id: "dashboard", label: t.sidebar.dashboard, href: "/dashboard", icon: LayoutDashboard },
+      {
+        id: "channels",
+        label: t.sidebar.channels,
+        href: "/channels",
+        icon: ArrowLeftRight,
+        children: [
+          { label: "All Channels", href: "/channels", icon: LayoutGrid },
+          { label: "WhatsApp", href: "/channels/whatsapp", icon: MessageSquare },
+          { label: "Instagram", href: "/channels/instagram", icon: Camera },
+          { label: "Facebook", href: "/channels/facebook", icon: ScanLine },
+          { label: "RCS", href: "/channels/rcs", icon: Smartphone },
+        ],
+      },
+      {
+        id: "crm",
+        label: t.sidebar.crm,
+        href: "/crm",
+        icon: Users,
+        children: [
+          { label: "Contacts", href: "/crm/contacts", icon: Contact },
+          { label: "Bulk Campaign", href: "/crm/bulk-campaign", icon: Send },
+          { label: "Live Chat", href: "/crm/live-chat", icon: MessageSquare },
+        ],
+      },
+      { id: "chatbots", label: t.sidebar.chatbots, href: "/chatbots", icon: Bot },
+      {
+        id: "automations",
+        label: t.sidebar.automations,
+        href: "/automations",
+        icon: Zap,
+        children: [
+          { label: "Analytics", href: "/automations/analytics", icon: BarChart3 },
+          { label: "Workflow", href: "/automations/workflow", icon: GitBranch },
+          { label: "Data Store", href: "/automations/datastore", icon: Database },
+          { label: "Templates", href: "/automations/templates", icon: FileText },
+          {
+            label: "App Authentications",
+            href: "/automations/app-authentications",
+            icon: KeyRound,
+          },
+        ],
+      },
+      {
+        id: "whatsapp-mini-apps",
+        label: "WhatsApp Mini-Apps",
+        href: "/whatsapp-mini-apps",
+        icon: Grid3x3,
+      },
+      { id: "chat-widget", label: "Chat Widget", href: "/chat-widget", icon: MessageSquare },
+      { id: "voice-ai-agent", label: t.sidebar.voiceAi, href: "/voice-ai-agent", icon: Headset },
+      {
+        id: "department",
+        label: t.sidebar.department,
+        href: "/department",
+        icon: Building2,
+        children: [
+          { label: "Analytics", href: "/department/analytics", icon: BarChart3 },
+          { label: "Departments", href: "/department/departments", icon: Building2 },
+          { label: "Roles", href: "/department/roles", icon: ShieldCheck },
+        ],
+      },
+      {
+        id: "workspace",
+        label: t.sidebar.workspace,
+        href: "/workspace",
+        icon: Share2,
+        children: [
+          {
+            label: "Account Settings",
+            href: "/workspace/account-settings",
+            icon: Settings,
+          },
+          {
+            label: "Wallet & Transactions",
+            href: "/workspace/wallet",
+            icon: Wallet,
+          },
+          {
+            label: "Billing",
+            href: "/workspace/billing",
+            icon: CreditCard,
+          },
+          {
+            label: "Support",
+            href: "/workspace/support",
+            icon: Headset,
+          },
+        ],
+      },
+      {
+        id: "settings",
+        label: t.sidebar.settings,
+        href: "/settings",
+        icon: Settings,
+        children: [
+          { label: "Profile", href: "/settings/profile", icon: User },
+          { label: "Notifications", href: "/settings/notifications", icon: Bell },
+          { label: "Security", href: "/settings/security", icon: Shield },
+          { label: "Appearance", href: "/settings/appearance", icon: Palette },
+          { label: "Integrations", href: "/settings/integrations", icon: Plug },
+          { label: "Activity Logs", href: "/settings/activity-logs", icon: History },
+          { label: "Account & Data", href: "/settings/account-data", icon: Database },
+        ],
+      },
+    ],
+    [t]
+  );
+
   // Auto-expand the parent whose child route matches the current path
-  // (so refreshing on a sub-page keeps the section open).
   useEffect(() => {
     const activeParent = menuItems.find((item) =>
       pathname === item.href ||
@@ -186,17 +197,17 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
       ),
     );
     if (activeParent && activeParent.children?.length) {
-      setExpanded(activeParent.label);
+      setExpanded(activeParent.id);
     }
-  }, [pathname]);
+  }, [pathname, menuItems]);
 
   const handleLogout = async () => {
     await logout();
     router.push("/signin");
   };
 
-  const toggleExpand = (label: string) => {
-    setExpanded((prev) => (prev === label ? null : label));
+  const toggleExpand = (id: string) => {
+    setExpanded((prev) => (prev === id ? null : id));
   };
 
   return (
@@ -224,16 +235,16 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
             </div>
             <div>
               <p className="text-sm font-bold leading-tight text-foreground">
-                CRM Admin
+                Appnix CRM
               </p>
               <p className="text-[11px] leading-tight text-muted-foreground">
-                Management Console
+                {t.dashboard.title}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-accent"
+            className="rounded-md p-1.5 text-muted-foreground hover:bg-accent cursor-pointer"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />
@@ -245,7 +256,7 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
           {/* Scrollable menu */}
           <div className="flex-1 overflow-y-auto px-3 py-4">
             <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Menu
+              {t.sidebar.menu}
             </p>
             <nav className="space-y-1">
               {menuItems.map((item) => {
@@ -259,9 +270,9 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
                       pathname === c.href ||
                       (c.href !== item.href && pathname.startsWith(c.href + "/"))
                   );
-                const isOpen = expanded === item.label;
+                const isOpen = expanded === item.id;
 
-                // Item without children: render a plain link (unchanged behavior)
+                // Item without children: render a plain link
                 if (!hasChildren) {
                   const isActive =
                     pathname === item.href ||
@@ -286,12 +297,12 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
 
                 // Item with children: render an expandable button + submenu
                 return (
-                  <div key={item.label}>
+                  <div key={item.id}>
                     <button
                       type="button"
-                      onClick={() => toggleExpand(item.label)}
+                      onClick={() => toggleExpand(item.id)}
                       className={cn(
-                        "sidebar-nav-item w-full justify-between",
+                        "sidebar-nav-item w-full justify-between cursor-pointer",
                         isParentActive
                           ? "sidebar-nav-item-active"
                           : "sidebar-nav-item-inactive",
@@ -364,10 +375,10 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
             <button
               type="button"
               onClick={handleLogout}
-              className="sidebar-nav-item-danger w-full justify-start"
+              className="sidebar-nav-item-danger w-full justify-start cursor-pointer"
             >
               <LogOut className="h-4.5 w-4.5 shrink-0" />
-              <span>Logout</span>
+              <span>{t.sidebar.logout}</span>
             </button>
           </div>
         </div>

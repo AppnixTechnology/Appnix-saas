@@ -1,33 +1,39 @@
 "use client";
 
-import { Link2, Bot, TrendingUp, CheckCircle2, ArrowRight, Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
-
-const steps = [
-  {
-    step: "01",
-    title: "Connect Your Channels",
-    description: "Link WhatsApp, Instagram, RCS, and Facebook in minutes using official Meta & Google APIs.",
-    icon: Link2,
-    highlights: ["Official API connection", "Zero downtime setup"],
-  },
-  {
-    step: "02",
-    title: "Automate & Broadcast",
-    description: "Deploy 24/7 AI chatbots to triage inquiries and launch targeted broadcast campaigns.",
-    icon: Bot,
-    highlights: ["No-code bot builder", "99%+ broadcast delivery"],
-  },
-  {
-    step: "03",
-    title: "Convert & Close Deals",
-    description: "Track leads in your CRM pipeline, assign sales reps, and turn chats into repeat revenue.",
-    icon: TrendingUp,
-    highlights: ["Contact 360 profiles", "Team collaboration notes"],
-  },
-];
+import { useMemo } from "react";
+import { Link2, Bot, TrendingUp, CheckCircle2, Zap } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export function HowItWorks({ onOpenDemoModal }: { onOpenDemoModal: () => void }) {
+  const { t } = useTranslation();
+
+  const steps = useMemo(
+    () => [
+      {
+        step: t.howItWorks.step1Number,
+        title: t.howItWorks.step1Title,
+        description: t.howItWorks.step1Desc,
+        icon: Link2,
+        highlights: ["Official API connection", "Zero downtime setup"],
+      },
+      {
+        step: t.howItWorks.step2Number,
+        title: t.howItWorks.step2Title,
+        description: t.howItWorks.step2Desc,
+        icon: Bot,
+        highlights: ["No-code bot builder", "99%+ broadcast delivery"],
+      },
+      {
+        step: t.howItWorks.step3Number,
+        title: t.howItWorks.step3Title,
+        description: t.howItWorks.step3Desc,
+        icon: TrendingUp,
+        highlights: ["Contact 360 profiles", "Team collaboration notes"],
+      },
+    ],
+    [t]
+  );
+
   return (
     <section id="how-it-works" className="py-16 sm:py-24 bg-muted/20 border-y border-border/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -35,13 +41,13 @@ export function HowItWorks({ onOpenDemoModal }: { onOpenDemoModal: () => void })
         <div className="mx-auto max-w-3xl text-center mb-12 sm:mb-16">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary mb-3">
             <Zap className="h-3.5 w-3.5" />
-            Simple 3-Step Process
+            {t.howItWorks.badge}
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            From First Message to Loyal Customer
+            {t.howItWorks.title}
           </h2>
           <p className="mt-3 text-sm sm:text-base text-muted-foreground text-balance">
-            Get up and running in minutes without complex engineering setups.
+            {t.howItWorks.subtitle}
           </p>
         </div>
 
@@ -84,18 +90,6 @@ export function HowItWorks({ onOpenDemoModal }: { onOpenDemoModal: () => void })
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Action Button */}
-        <div className="mt-10 text-center">
-          <Button
-            onClick={onOpenDemoModal}
-            size="lg"
-            className="h-10 px-6 text-xs sm:text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shadow-xs"
-          >
-            See How Appnix Works
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Button>
         </div>
       </div>
     </section>

@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ShieldCheck, CheckCircle2, ArrowRight, Sparkles, Heart } from "lucide-react";
+import { ShieldCheck, CheckCircle2, ArrowRight } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n";
 
 import {
   WhatsAppIcon,
@@ -18,6 +18,8 @@ interface FooterProps {
 }
 
 export function Footer({ onOpenDemoModal }: FooterProps) {
+  const { t } = useTranslation();
+
   return (
     <footer className="border-t border-border/80 bg-card/60 pb-20 md:pb-12 pt-16 text-foreground">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -46,7 +48,7 @@ export function Footer({ onOpenDemoModal }: FooterProps) {
             </Link>
 
             <p className="max-w-sm text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              Enterprise omnichannel communication platform. Connect WhatsApp, RCS, Instagram, and Facebook with no-code bots and contact CRM.
+              {t.footer.tagline}
             </p>
 
             {/* Live Operational Status Badge */}
@@ -100,7 +102,7 @@ export function Footer({ onOpenDemoModal }: FooterProps) {
           {/* Column 2: Official Channels (2 cols) */}
           <div className="lg:col-span-2 space-y-3">
             <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
-              Channels
+              {t.footer.solutionsCol}
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
@@ -133,32 +135,32 @@ export function Footer({ onOpenDemoModal }: FooterProps) {
           {/* Column 3: Platform Features (2 cols) */}
           <div className="lg:col-span-2 space-y-3">
             <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
-              Platform
+              {t.footer.productCol}
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
                 <Link href="#features" className="hover:text-foreground transition-colors">
-                  Unified Inbox
+                  {t.nav.unifiedInbox}
                 </Link>
               </li>
               <li>
                 <Link href="#features" className="hover:text-foreground transition-colors">
-                  Broadcast Campaigns
+                  {t.nav.campaignManager}
                 </Link>
               </li>
               <li>
                 <Link href="#features" className="hover:text-foreground transition-colors">
-                  No-Code Chatbots
+                  {t.nav.botBuilder}
                 </Link>
               </li>
               <li>
                 <Link href="#crm" className="hover:text-foreground transition-colors">
-                  Contact CRM
+                  {t.nav.crmContact}
                 </Link>
               </li>
               <li>
                 <Link href="#features" className="hover:text-foreground transition-colors">
-                  Visual Workflows
+                  {t.nav.automationBuilder}
                 </Link>
               </li>
             </ul>
@@ -167,17 +169,17 @@ export function Footer({ onOpenDemoModal }: FooterProps) {
           {/* Column 4: Solutions & Portals (2 cols) */}
           <div className="lg:col-span-2 space-y-3">
             <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
-              Solutions
+              {t.footer.resourcesCol}
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
                 <Link href="#white-label" className="hover:text-foreground transition-colors">
-                  White-Label Portal
+                  {t.nav.whiteLabel}
                 </Link>
               </li>
               <li>
                 <Link href="#pricing" className="hover:text-foreground transition-colors">
-                  Pricing Plans
+                  {t.nav.pricing}
                 </Link>
               </li>
               <li>
@@ -185,17 +187,17 @@ export function Footer({ onOpenDemoModal }: FooterProps) {
                   onClick={onOpenDemoModal}
                   className="hover:text-foreground transition-colors text-left cursor-pointer"
                 >
-                  Book a Demo
+                  {t.nav.bookDemo}
                 </button>
               </li>
               <li>
                 <Link href="/signin" className="hover:text-foreground transition-colors">
-                  Client Login
+                  {t.nav.signIn}
                 </Link>
               </li>
               <li>
                 <Link href="/signup" className="hover:text-foreground transition-colors">
-                  Free 14-Day Trial
+                  {t.nav.startFreeTrial}
                 </Link>
               </li>
             </ul>
@@ -204,22 +206,22 @@ export function Footer({ onOpenDemoModal }: FooterProps) {
           {/* Column 5: Trust & Compliance (2 cols) */}
           <div className="lg:col-span-2 space-y-3">
             <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
-              Security
+              {t.footer.companyCol}
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
                 <Link href="#faq" className="hover:text-foreground transition-colors">
-                  FAQ & Help
+                  {t.nav.faq}
                 </Link>
               </li>
               <li>
                 <span className="hover:text-foreground transition-colors cursor-pointer">
-                  Privacy Policy
+                  {t.footer.privacyPolicy}
                 </span>
               </li>
               <li>
                 <span className="hover:text-foreground transition-colors cursor-pointer">
-                  Terms of Service
+                  {t.footer.termsOfService}
                 </span>
               </li>
               <li>
@@ -261,7 +263,7 @@ export function Footer({ onOpenDemoModal }: FooterProps) {
 
         {/* Bottom Copyright Strip */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} Appnix Technologies. All rights reserved.</p>
+          <p>{t.footer.copyright}</p>
           <p className="flex items-center gap-1 text-[11px]">
             Designed for high-scale enterprise communication
           </p>

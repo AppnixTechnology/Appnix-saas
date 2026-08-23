@@ -12,6 +12,8 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/lib/auth/auth-context";
+import { useTranslation } from "@/lib/i18n";
+import { LanguageSelector } from "@/components/landing/language-selector";
 import { config } from "@/lib/config";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -54,6 +56,7 @@ function SignUpContent() {
   const searchParams = useSearchParams();
   const { signup } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -127,8 +130,12 @@ function SignUpContent() {
   };
 
   return (
-    // "auth-shell" comes from globals.css — same gradient background as every other auth page
-    <div className="auth-shell lg:p-8">
+    <div className="auth-shell lg:p-8 relative">
+      {/* Top right language selector */}
+      <div className="absolute top-4 right-4 z-20">
+        <LanguageSelector />
+      </div>
+
       <div className="w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-2xl flex flex-col lg:flex-row">
         {/* ================= LEFT PANEL (Branding) ================= */}
         <div className="relative flex flex-col justify-between bg-primary p-8 sm:p-10 lg:w-[45%] lg:p-12">
@@ -181,22 +188,22 @@ function SignUpContent() {
         <div className="flex-1 p-6 sm:p-10 lg:p-12">
           <div className="mx-auto w-full max-w-md">
             <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-              Create Account
+              {t.auth.createAccount}
             </h2>
             <p className="mt-2 text-sm text-slate-500">
-              Enter your details to start your 14-day free trial.
+              {t.auth.signUpSubtitle}
             </p>
 
             <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
               {/* Full Name */}
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name">{t.auth.fullName}</Label>
                 <div className="relative">
                   <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Sam"
+                    placeholder="Sam Sharma"
                     className="pl-10"
                     {...register("name")}
                     disabled={isLoading}
@@ -210,7 +217,7 @@ function SignUpContent() {
 
               {/* Business Email */}
               <div className="space-y-2">
-                <Label htmlFor="email">Business Email</Label>
+                <Label htmlFor="email">{t.auth.email}</Label>
                 <div className="relative">
                   <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <Input
@@ -230,7 +237,7 @@ function SignUpContent() {
 
               {/* Workspace Name */}
               <div className="space-y-2">
-                <Label htmlFor="workspaceName">Workspace Name</Label>
+                <Label htmlFor="workspaceName">{t.auth.workspaceName}</Label>
                 <div className="relative">
                   <Building className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <Input
@@ -252,7 +259,7 @@ function SignUpContent() {
               {/* Password + Confirm Password */}
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t.auth.password}</Label>
                   <div className="relative">
                     <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <Input
@@ -287,7 +294,7 @@ function SignUpContent() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Label htmlFor="confirmPassword">{t.auth.confirmPassword}</Label>
                   <div className="relative">
                     <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <Input
@@ -343,15 +350,7 @@ function SignUpContent() {
                   htmlFor="termsAccepted"
                   className="text-sm font-normal leading-snug text-slate-600"
                 >
-                  I agree to the{" "}
-                  <Link href="/terms" className="auth-link">
-                    Terms of Service
-                  </Link>{" "}
-                  and{" "}
-                  <Link href="/privacy" className="auth-link">
-                    Privacy Policy
-                  </Link>
-                  .
+                  {t.auth.agreeTerms}
                 </Label>
               </div>
               {errors.termsAccepted && (
@@ -360,16 +359,16 @@ function SignUpContent() {
                 </p>
               )}
 
-              {/* Submit button — default Button variant already uses bg-primary */}
-              <Button type="submit" disabled={isLoading} className="w-full">
+              {/* Submit button */}
+              <Button type="submit" disabled={isLoading} className="w-full h-11 font-semibold cursor-pointer">
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account...
+                    {t.auth.creatingAccount}
                   </>
                 ) : (
                   <>
-                    Create Account
+                    {t.auth.signUpButton}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </>
                 )}
@@ -379,18 +378,18 @@ function SignUpContent() {
             {/* Divider */}
             <div className="my-6 flex items-center gap-3">
               <div className="h-px flex-1 bg-slate-200" />
-              <span className="text-xs font-medium text-slate-400">
-                OR SIGN UP WITH
+              <span className="text-xs font-medium text-slate-400 uppercase">
+                {t.auth.orContinueWith}
               </span>
               <div className="h-px flex-1 bg-slate-200" />
             </div>
 
-            {/* Social buttons: wired to real redirects (Google) */}
+            {/* Social button */}
             <div>
               <Button
                 type="button"
                 variant="outline"
-                className="w-full h-11 text-sm font-medium border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 shadow-sm transition-all duration-150 flex items-center justify-center"
+                className="w-full h-11 text-sm font-medium border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 shadow-sm transition-all duration-150 flex items-center justify-center cursor-pointer"
                 onClick={() => (window.location.href = config.auth.googleOAuthUrl || "/api/proxy/auth/google")}
                 disabled={isLoading}
               >
@@ -412,14 +411,14 @@ function SignUpContent() {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                   />
                 </svg>
-                Sign up with Google
+                {t.auth.signInWithGoogle}
               </Button>
             </div>
 
             <p className="mt-6 text-center text-sm text-slate-500">
-              Already have an account?{" "}
-              <Link href="/signin" className="auth-link">
-                Log in
+              {t.auth.alreadyHaveAccount}{" "}
+              <Link href="/signin" className="auth-link font-semibold text-primary">
+                {t.auth.signInButton}
               </Link>
             </p>
           </div>

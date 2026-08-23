@@ -1,14 +1,17 @@
 "use client";
 
-import { Headphones, ArrowUpRight } from "lucide-react";
+import { Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WhatsAppIcon } from "@/components/landing/channel-icons";
+import { useTranslation } from "@/lib/i18n";
 
 interface FloatingLeadTriggerProps {
   onClick: () => void;
 }
 
 export function FloatingLeadTrigger({ onClick }: FloatingLeadTriggerProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="fixed bottom-6 right-6 z-50 hidden md:flex flex-col items-end gap-3">
       {/* 1. Animated WhatsApp Floating Button (Message appears ONLY on hover) */}
@@ -41,7 +44,7 @@ export function FloatingLeadTrigger({ onClick }: FloatingLeadTriggerProps) {
       <div className="relative group">
         {/* Hover Tooltip (Appears ONLY on hover) */}
         <div className="absolute -top-9 right-0 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap rounded-lg bg-slate-900 text-white dark:bg-card dark:text-foreground px-3 py-1 text-xs font-semibold shadow-xl border border-white/10 flex items-center gap-1.5 translate-y-1 group-hover:translate-y-0">
-          <span>Book a 1-on-1 Product Demo</span>
+          <span>{t.nav.bookDemo}</span>
           <div className="absolute top-full right-6 border-4 border-transparent border-t-slate-900 dark:border-t-card" />
         </div>
 
@@ -58,7 +61,7 @@ export function FloatingLeadTrigger({ onClick }: FloatingLeadTriggerProps) {
           </span>
 
           <Headphones className="h-4 w-4 text-primary-foreground transition-transform duration-300 group-hover:rotate-12" />
-          <span>Talk to an Expert</span>
+          <span>{t.faq.talkToExpert}</span>
         </Button>
       </div>
     </div>

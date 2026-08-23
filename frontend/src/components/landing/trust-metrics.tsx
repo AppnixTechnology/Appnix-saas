@@ -1,62 +1,56 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { ShieldCheck, MessageSquare, Zap, Headphones, CheckCircle2 } from "lucide-react";
-
-interface MetricItem {
-  numericValue: number;
-  suffix: string;
-  decimals?: number;
-  label: string;
-  description: string;
-  icon: React.ElementType;
-  iconColor: string;
-  bgColor: string;
-}
-
-const metrics: MetricItem[] = [
-  {
-    numericValue: 10,
-    suffix: "K+",
-    label: "Businesses Connected",
-    description: "Empowering fast-growing brands & modern teams",
-    icon: ShieldCheck,
-    iconColor: "text-emerald-600",
-    bgColor: "bg-emerald-500/10",
-  },
-  {
-    numericValue: 1,
-    suffix: "B+",
-    label: "Messages Processed",
-    description: "High-throughput official API infrastructure",
-    icon: MessageSquare,
-    iconColor: "text-blue-600",
-    bgColor: "bg-blue-500/10",
-  },
-  {
-    numericValue: 99.9,
-    suffix: "%",
-    decimals: 1,
-    label: "Platform Uptime",
-    description: "Enterprise SLA with redundant global edge servers",
-    icon: Zap,
-    iconColor: "text-amber-600",
-    bgColor: "bg-amber-500/10",
-  },
-  {
-    numericValue: 24,
-    suffix: "/7",
-    label: "Dedicated Support",
-    description: "Fast-response technical and solutions assistance",
-    icon: Headphones,
-    iconColor: "text-purple-600",
-    bgColor: "bg-purple-500/10",
-  },
-];
+import { useEffect, useRef, useState, useMemo } from "react";
+import { ShieldCheck, MessageSquare, Zap, Headphones } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export function TrustMetrics() {
+  const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const metrics = useMemo(
+    () => [
+      {
+        numericValue: 10,
+        suffix: "K+",
+        label: t.trustMetrics.stat1Label,
+        description: t.trustMetrics.stat1Sub,
+        icon: ShieldCheck,
+        iconColor: "text-emerald-600",
+        bgColor: "bg-emerald-500/10",
+      },
+      {
+        numericValue: 1,
+        suffix: "B+",
+        label: t.trustMetrics.stat2Label,
+        description: t.trustMetrics.stat2Sub,
+        icon: MessageSquare,
+        iconColor: "text-blue-600",
+        bgColor: "bg-blue-500/10",
+      },
+      {
+        numericValue: 99.9,
+        suffix: "%",
+        decimals: 1,
+        label: t.trustMetrics.stat3Label,
+        description: t.trustMetrics.stat3Sub,
+        icon: Zap,
+        iconColor: "text-amber-600",
+        bgColor: "bg-amber-500/10",
+      },
+      {
+        numericValue: 24,
+        suffix: "/7",
+        label: t.trustMetrics.stat4Label,
+        description: t.trustMetrics.stat4Sub,
+        icon: Headphones,
+        iconColor: "text-purple-600",
+        bgColor: "bg-purple-500/10",
+      },
+    ],
+    [t]
+  );
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -80,7 +74,7 @@ export function TrustMetrics() {
     <section id="trust-metrics" ref={containerRef} className="border-y border-border/60 bg-muted/30 py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-6 md:grid-cols-4 lg:gap-8">
-          {metrics.map((item, idx) => (
+          {metrics.map((item) => (
             <div
               key={item.label}
               className="flex flex-col items-center text-center p-4 rounded-xl transition-all duration-300 hover:bg-background/80 hover:shadow-xs"

@@ -2,14 +2,10 @@
 
 import {
   Layers,
-  Sparkles,
-  Zap,
-  ShieldCheck,
-  TrendingUp,
-  Clock,
   CheckCircle2,
   XCircle,
 } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 const comparisons = [
   {
@@ -35,6 +31,8 @@ const comparisons = [
 ];
 
 export function WhyAppnix() {
+  const { t } = useTranslation();
+
   return (
     <section className="py-20 sm:py-28 bg-muted/20 border-y border-border/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -42,15 +40,13 @@ export function WhyAppnix() {
         <div className="mx-auto max-w-3xl text-center mb-16">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary mb-3">
             <Layers className="h-3.5 w-3.5" />
-            Strategic Business Advantage
+            {t.whyAppnix.badge}
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl text-balance">
-            Everything Your Business Needs.
-            <br />
-            <span className="text-primary">In One Platform.</span>
+            {t.whyAppnix.title}
           </h2>
           <p className="mt-4 text-base sm:text-lg text-muted-foreground text-balance leading-relaxed">
-            Eliminate messy multi-tab workflows and expensive fragmented subscriptions. Appnix delivers a complete, cohesive messaging stack built for high-growth operations.
+            {t.whyAppnix.subtitle}
           </p>
         </div>
 

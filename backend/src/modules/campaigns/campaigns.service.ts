@@ -5,6 +5,7 @@ import {
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
   CreateCampaignDto,
@@ -25,6 +26,8 @@ import {
   TestStatus,
   ChannelType,
   TemplateStatus,
+  AudienceStatus,
+  TemplateCategory,
 } from './dto/campaign.dto';
 
 @Injectable()
@@ -44,7 +47,7 @@ export class CampaignsService {
       },
     });
 
-    return this.mapToResponse(campaign);
+    return this.mapToResponse(campaign as unknown as Record<string, unknown>);
   }
 
   async findAll(tenantId: string, page = 1, limit = 20): Promise<PaginatedResponseDto<CampaignResponseDto>> {
@@ -59,7 +62,7 @@ export class CampaignsService {
     ]);
 
     return {
-      data: campaigns.map(this.mapToResponse),
+      data: campaigns.map((c) => this.mapToResponse(c as unknown as Record<string, unknown>)),
       total,
       page,
       limit,
@@ -78,7 +81,7 @@ export class CampaignsService {
       throw new ForbiddenException('Access denied');
     }
 
-    return this.mapToResponse(campaign);
+    return this.mapToResponse(campaign as unknown as Record<string, unknown>);
   }
 
   async update(tenantId: string, id: string, dto: UpdateCampaignDto): Promise<CampaignResponseDto> {
@@ -92,10 +95,10 @@ export class CampaignsService {
 
     const campaign = await this.prisma.campaign.update({
       where: { id },
-      data: updateData,
+      data: updateData as Prisma.CampaignUpdateInput,
     });
 
-    return this.mapToResponse(campaign);
+    return this.mapToResponse(campaign as unknown as Record<string, unknown>);
   }
 
   async selectAudience(tenantId: string, campaignId: string, dto: SelectAudienceDto): Promise<CampaignResponseDto> {
@@ -136,7 +139,7 @@ export class CampaignsService {
       },
     });
 
-    return this.mapToResponse(updated);
+    return this.mapToResponse(updated as unknown as Record<string, unknown>);
   }
 
   async selectChannel(tenantId: string, campaignId: string, dto: SelectChannelDto): Promise<CampaignResponseDto> {
@@ -166,7 +169,7 @@ export class CampaignsService {
       },
     });
 
-    return this.mapToResponse(updated);
+    return this.mapToResponse(updated as unknown as Record<string, unknown>);
   }
 
   async selectTemplate(tenantId: string, campaignId: string, dto: SelectTemplateDto): Promise<CampaignResponseDto> {
@@ -188,7 +191,8 @@ export class CampaignsService {
       throw new BadRequestException('Selected template is not approved');
     }
 
-    const variables = this.extractVariables(template.components);
+    const components = (Array.isArray(template.components) ? template.components : []) as Array<Record<string, unknown>>;
+    const variables = this.extractVariables(components);
 
     const updated = await this.prisma.campaign.update({
       where: { id: campaignId },
@@ -196,12 +200,12 @@ export class CampaignsService {
         metaTemplateId: template.id,
         metaTemplateName: template.name,
         metaTemplateLanguage: template.language,
-        templateVariables: variables,
+        templateVariables: variables as unknown as Prisma.InputJsonValue,
         status: variables.length > 0 ? CampaignStatus.READY_FOR_TEST : CampaignStatus.TEST_SENT,
       },
     });
 
-    return this.mapToResponse(updated);
+    return this.mapToResponse(updated as unknown as Record<string, unknown>);
   }
 
   async configureTemplate(tenantId: string, campaignId: string, dto: ConfigureTemplateDto): Promise<CampaignResponseDto> {
@@ -211,13 +215,16 @@ export class CampaignsService {
       throw new BadRequestException('Can only configure template for draft campaigns');
     }
 
-    if (!campaign.templateVariables || campaign.templateVariables.length === 0) {
+    const templateVars = (Array.isArray(campaign.templateVariables) ? campaign.templateVariables : []) as Array<Record<string, any>>;
+    if (templateVars.length === 0) {
       throw new BadRequestException('Selected template has no variables to configure');
     }
 
-    const requiredVariables = campaign.templateVariables.map((v: Record<string, unknown>) => v.name || v.variable).filter(Boolean);
-    const mappedVariables = dto.mappings.map(m => m.templateVariable);
-    const missingVariables = requiredVariables.filter(v => !mappedVariables.includes(v));
+    const requiredVariables = templateVars
+      .map((v) => String(v.name || v.variable || ''))
+      .filter(Boolean);
+    const mappedVariables = dto.mappings.map((m) => m.templateVariable);
+    const missingVariables = requiredVariables.filter((v) => !mappedVariables.includes(v));
 
     if (missingVariables.length > 0) {
       throw new BadRequestException(`Missing mappings for variables: ${missingVariables.join(', ')}`);
@@ -231,12 +238,12 @@ export class CampaignsService {
     const updated = await this.prisma.campaign.update({
       where: { id: campaignId },
       data: {
-        variableMappings,
+        variableMappings: variableMappings as unknown as Prisma.InputJsonValue,
         status: CampaignStatus.TEST_SENT,
       },
     });
 
-    return this.mapToResponse(updated);
+    return this.mapToResponse(updated as unknown as Record<string, unknown>);
   }
 
   async sendTest(tenantId: string, campaignId: string, dto: SendTestDto): Promise<{ messageId: string; status: TestStatus }> {
@@ -277,12 +284,15 @@ export class CampaignsService {
     if (campaign.audienceCount === 0) errors.push('Audience has no eligible contacts');
     if (!campaign.channel) errors.push('Channel not selected');
     if (!campaign.metaTemplateId) errors.push('Template not selected');
-    if (campaign.templateVariables && campaign.templateVariables.length > 0) {
-      if (!campaign.variableMappings || Object.keys(campaign.variableMappings).length === 0) {
+    if (campaign.templateVariables && Array.isArray(campaign.templateVariables) && campaign.templateVariables.length > 0) {
+      const mappings = (campaign.variableMappings as Record<string, string> | null) || {};
+      if (Object.keys(mappings).length === 0) {
         errors.push('Template variables not mapped');
       } else {
-        const requiredVariables = campaign.templateVariables.map((v: Record<string, unknown>) => v.name || v.variable).filter(Boolean);
-        const missingVariables = requiredVariables.filter(v => !campaign.variableMappings?.[v]);
+        const requiredVariables = (campaign.templateVariables as Array<Record<string, any>>)
+          .map((v) => String(v.name || v.variable || ''))
+          .filter(Boolean);
+        const missingVariables = requiredVariables.filter((v) => !mappings[v]);
         if (missingVariables.length > 0) {
           errors.push(`Missing mappings for variables: ${missingVariables.join(', ')}`);
         }
@@ -363,7 +373,7 @@ export class CampaignsService {
       await this.processLaunch(tenantId, campaignId);
     }
 
-    return this.mapToResponse(updated);
+    return this.mapToResponse(updated as unknown as Record<string, unknown>);
   }
 
   async scheduleCampaign(tenantId: string, campaignId: string, scheduledAt: Date): Promise<CampaignResponseDto> {
@@ -387,7 +397,7 @@ export class CampaignsService {
       },
     });
 
-    return this.mapToResponse(updated);
+    return this.mapToResponse(updated as unknown as Record<string, unknown>);
   }
 
   async getAudiences(tenantId: string): Promise<AudienceResponseDto[]> {
@@ -396,7 +406,7 @@ export class CampaignsService {
       orderBy: { name: 'asc' },
     });
 
-    return audiences.map(this.mapAudienceToResponse);
+    return audiences.map((a) => this.mapAudienceToResponse(a as unknown as Record<string, unknown>));
   }
 
   async getChannels(tenantId: string): Promise<ChannelConfigResponseDto[]> {
@@ -405,30 +415,26 @@ export class CampaignsService {
       orderBy: { channel: 'asc' },
     });
 
-    return channels.map(this.mapChannelToResponse);
+    return channels.map((c) => this.mapChannelToResponse(c as unknown as Record<string, unknown>));
   }
 
   async getTemplates(tenantId: string, channel?: ChannelType): Promise<MetaTemplateResponseDto[]> {
-    const where: Record<string, unknown> = {
+    const where: Prisma.MetaTemplateWhereInput = {
       tenantId,
       status: TemplateStatus.APPROVED,
     };
-
-    if (channel) {
-      where.channel = channel;
-    }
 
     const templates = await this.prisma.metaTemplate.findMany({
       where,
       orderBy: { name: 'asc' },
     });
 
-    return templates.map(this.mapTemplateToResponse);
+    return templates.map((t) => this.mapTemplateToResponse(t as unknown as Record<string, unknown>));
   }
 
   async refreshTemplates(tenantId: string, channel: ChannelType): Promise<MetaTemplateResponseDto[]> {
     const templates = await this.fetchTemplatesFromMeta(tenantId, channel);
-    return templates.map(this.mapTemplateToResponse);
+    return templates;
   }
 
   async delete(tenantId: string, id: string): Promise<void> {
@@ -469,7 +475,7 @@ export class CampaignsService {
     const variableRegex = /\{\{(\d+|[a-zA-Z_][a-zA-Z0-9_]*)\}\}/g;
 
     for (const component of components) {
-      if (component.type === 'BODY' && component.text) {
+      if (component.type === 'BODY' && typeof component.text === 'string') {
         const matches = component.text.matchAll(variableRegex);
         for (const match of matches) {
           variables.push({
@@ -479,7 +485,7 @@ export class CampaignsService {
           });
         }
       }
-      if (component.type === 'HEADER' && component.text) {
+      if (component.type === 'HEADER' && typeof component.text === 'string') {
         const matches = component.text.matchAll(variableRegex);
         for (const match of matches) {
           variables.push({
@@ -499,7 +505,6 @@ export class CampaignsService {
       return campaign.metaTemplateName || 'Static template';
     }
 
-    let preview = '';
     const template = { components: campaign.templateVariables };
 
     return this.renderTemplateWithVariables(template, campaign.variableMappings || {}, testName);
@@ -523,7 +528,7 @@ export class CampaignsService {
 
     let result = '';
     for (const component of template.components) {
-      if (component.type === 'BODY' && component.text) {
+      if (component.type === 'BODY' && typeof component.text === 'string') {
         result = component.text;
         for (const [variable, dataSource] of Object.entries(mappings)) {
           const value = sampleData[dataSource] || `{{${variable}}}`;

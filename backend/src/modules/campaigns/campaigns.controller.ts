@@ -30,12 +30,12 @@ import {
   PaginatedResponseDto,
   ChannelType,
 } from './dto/campaign.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
 import { TenantGuard } from '../../common/guards/tenant.guard';
 
 @ApiTags('Campaigns')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, TenantGuard)
+@UseGuards(JwtAccessGuard, TenantGuard)
 @Controller('api/campaigns')
 export class CampaignsController {
   constructor(private readonly campaignsService: CampaignsService) {}
@@ -47,7 +47,7 @@ export class CampaignsController {
     @Request() req: any,
     @Body() dto: CreateCampaignDto,
   ): Promise<CampaignResponseDto> {
-    return this.campaignsService.createDraft(req.user.tenantId, req.user.id, dto);
+    return this.campaignsService.createDraft(req.user.tenantId, req.user.userId || req.user.id, dto);
   }
 
   @Get()

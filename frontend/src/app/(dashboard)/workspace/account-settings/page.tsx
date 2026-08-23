@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useLanguage, SupportedLanguageCode } from "@/lib/i18n";
 import {
   Camera,
   ShieldCheck,
@@ -34,6 +35,7 @@ type Tab = (typeof TABS)[number];
 
 // ---------- Page ----------
 export default function AccountSettingsPage() {
+  const { currentLanguage, setLanguage, supportedLanguages } = useLanguage();
   const [activeTab, setActiveTab] = useState<Tab>("Personal Details");
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKeyCopied, setApiKeyCopied] = useState(false);
@@ -183,13 +185,19 @@ export default function AccountSettingsPage() {
                 </Field>
 
                 <Field label="Language">
-                  <Select defaultValue="english">
+                  <Select
+                    value={currentLanguage}
+                    onValueChange={(val) => setLanguage(val as SupportedLanguageCode)}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="english">English</SelectItem>
-                      <SelectItem value="hindi">Hindi</SelectItem>
+                      {supportedLanguages.map((lang) => (
+                        <SelectItem key={lang.code} value={lang.code}>
+                          {lang.nativeName} ({lang.name})
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </Field>

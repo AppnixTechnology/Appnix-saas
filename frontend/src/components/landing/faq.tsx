@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, HelpCircle, Sparkles, PhoneCall } from "lucide-react";
+import { ChevronDown, HelpCircle, PhoneCall } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n";
 
 interface FAQItem {
   question: string;
@@ -53,6 +54,7 @@ const faqs: FAQItem[] = [
 ];
 
 export function FAQ({ onOpenDemoModal }: { onOpenDemoModal: () => void }) {
+  const { t } = useTranslation();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggleAccordion = (idx: number) => {
@@ -66,13 +68,13 @@ export function FAQ({ onOpenDemoModal }: { onOpenDemoModal: () => void }) {
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary mb-3">
             <HelpCircle className="h-3.5 w-3.5" />
-            Clear Answers
+            {t.faq.badge}
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-            Frequently Asked Questions
+            {t.faq.title}
           </h2>
           <p className="mt-4 text-base text-muted-foreground text-balance">
-            Have questions about channels, bots, CRM, or white-labeling? Here are honest answers.
+            {t.faq.subtitle}
           </p>
         </div>
 
@@ -118,7 +120,7 @@ export function FAQ({ onOpenDemoModal }: { onOpenDemoModal: () => void }) {
         <div className="mt-12 rounded-2xl border border-border/80 bg-muted/30 p-6 sm:p-7 text-center flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-left">
             <h4 className="text-sm font-bold text-foreground">
-              Still have questions or custom API requirements?
+              {t.faq.stillQuestions}
             </h4>
             <p className="text-xs text-muted-foreground mt-0.5">
               Our engineering solutions team is available 24/7 to help design your deployment.
@@ -126,10 +128,10 @@ export function FAQ({ onOpenDemoModal }: { onOpenDemoModal: () => void }) {
           </div>
           <Button
             onClick={onOpenDemoModal}
-            className="h-10 px-5 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5 shrink-0"
+            className="h-10 px-5 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5 shrink-0 cursor-pointer"
           >
             <PhoneCall className="h-3.5 w-3.5" />
-            Talk to Solutions Expert
+            {t.faq.talkToExpert}
           </Button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -16,13 +16,21 @@ import {
   Zap,
   Users,
   BarChart3,
-  Smartphone,
   Layers,
   ShieldCheck,
   Star,
   HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
+import { LanguageSelector } from "@/components/landing/language-selector";
+import { LanguageSuggestionPopup } from "@/components/landing/language-suggestion-popup";
+import {
+  WhatsAppIcon,
+  InstagramIcon,
+  RCSIcon,
+  FacebookIcon,
+} from "@/components/landing/channel-icons";
 
 interface NavbarProps {
   onOpenDemoModal: () => void;
@@ -30,106 +38,8 @@ interface NavbarProps {
 
 type ActiveDropdown = "features" | "channels" | "crm-bots" | null;
 
-const featureItems = [
-  {
-    name: "Unified Inbox",
-    description: "Manage WhatsApp, Instagram, RCS & Facebook in one place",
-    href: "#features",
-    icon: MessageSquare,
-  },
-  {
-    name: "Campaign & Broadcast Manager",
-    description: "Multi-channel broadcast scheduler & delivery tracking",
-    href: "#features",
-    icon: Send,
-  },
-  {
-    name: "Automation Builder",
-    description: "Event-driven workflows with triggers, delays & conditions",
-    href: "#features",
-    icon: Zap,
-  },
-  {
-    name: "Analytics Dashboard",
-    description: "Real-time metrics on deliverability, reply speed & CSAT",
-    href: "#features",
-    icon: BarChart3,
-  },
-  {
-    name: "How It Works",
-    description: "Simple 3-step setup from first message to loyal customer",
-    href: "#how-it-works",
-    icon: Layers,
-  },
-  {
-    name: "White-Label Solution",
-    description: "Rebrand with your custom domain, logo & multi-tenancy",
-    href: "#white-label",
-    icon: ShieldCheck,
-  },
-  {
-    name: "Customer Testimonials",
-    description: "Real results and reviews from high-growth businesses",
-    href: "#testimonials",
-    icon: Star,
-  },
-  {
-    name: "FAQ & Help",
-    description: "Answers to common channel, API, and platform questions",
-    href: "#faq",
-    icon: HelpCircle,
-  },
-];
-
-import { WhatsAppIcon, InstagramIcon, RCSIcon, FacebookIcon } from "@/components/landing/channel-icons";
-
-const channelItems = [
-  {
-    name: "WhatsApp Business API",
-    description: "Official Meta Cloud API with green badge & templates",
-    href: "#channels",
-    icon: WhatsAppIcon,
-    badge: "Official API",
-  },
-  {
-    name: "RCS Business Messaging",
-    description: "Rich cards, action chips & Google verified senders",
-    href: "#channels",
-    icon: RCSIcon,
-    badge: "Google Verified",
-  },
-  {
-    name: "Instagram Direct",
-    description: "Automate DMs, story mentions & comment responses",
-    href: "#channels",
-    icon: InstagramIcon,
-    badge: "Meta Direct",
-  },
-  {
-    name: "Facebook Messenger",
-    description: "Connect Facebook Pages and Click-to-Messenger ads",
-    href: "#channels",
-    icon: FacebookIcon,
-    badge: "Meta API",
-  },
-];
-
-const crmBotItems = [
-  {
-    name: "CRM & Contact Management",
-    description: "Turn conversations into customers with 360° lead tracking",
-    href: "#crm",
-    icon: Users,
-  },
-  {
-    name: "No-Code Bot Builder",
-    description: "24/7 intelligent automated triage and instant qualification",
-    href: "#features",
-    icon: Bot,
-  },
-];
-
 export function Navbar({ onOpenDemoModal }: NavbarProps) {
+  const { t } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<ActiveDropdown>(null);
@@ -140,6 +50,113 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
   });
 
   const navRef = useRef<HTMLElement>(null);
+
+  // Dynamic feature items using active translation
+  const featureItems = useMemo(
+    () => [
+      {
+        name: t.nav.unifiedInbox,
+        description: t.nav.unifiedInboxDesc,
+        href: "#features",
+        icon: MessageSquare,
+      },
+      {
+        name: t.nav.campaignManager,
+        description: t.nav.campaignManagerDesc,
+        href: "#features",
+        icon: Send,
+      },
+      {
+        name: t.nav.automationBuilder,
+        description: t.nav.automationBuilderDesc,
+        href: "#features",
+        icon: Zap,
+      },
+      {
+        name: t.nav.analyticsDashboard,
+        description: t.nav.analyticsDashboardDesc,
+        href: "#features",
+        icon: BarChart3,
+      },
+      {
+        name: t.nav.howItWorks,
+        description: t.nav.howItWorksDesc,
+        href: "#how-it-works",
+        icon: Layers,
+      },
+      {
+        name: t.nav.whiteLabel,
+        description: t.nav.whiteLabelDesc,
+        href: "#white-label",
+        icon: ShieldCheck,
+      },
+      {
+        name: t.nav.testimonials,
+        description: t.nav.testimonialsDesc,
+        href: "#testimonials",
+        icon: Star,
+      },
+      {
+        name: t.nav.faq,
+        description: t.nav.faqDesc,
+        href: "#faq",
+        icon: HelpCircle,
+      },
+    ],
+    [t]
+  );
+
+  const channelItems = useMemo(
+    () => [
+      {
+        name: t.nav.whatsappApi,
+        description: t.nav.whatsappApiDesc,
+        href: "#channels",
+        icon: WhatsAppIcon,
+        badge: t.nav.officialApi,
+      },
+      {
+        name: t.nav.rcsMessaging,
+        description: t.nav.rcsMessagingDesc,
+        href: "#channels",
+        icon: RCSIcon,
+        badge: t.nav.googleVerified,
+      },
+      {
+        name: t.nav.instagramDirect,
+        description: t.nav.instagramDirectDesc,
+        href: "#channels",
+        icon: InstagramIcon,
+        badge: t.nav.metaDirect,
+      },
+      {
+        name: t.nav.facebookMessenger,
+        description: t.nav.facebookMessengerDesc,
+        href: "#channels",
+        icon: FacebookIcon,
+        badge: t.nav.metaApi,
+      },
+    ],
+    [t]
+  );
+
+  const crmBotItems = useMemo(
+    () => [
+      {
+        name: t.nav.crmContact,
+        description: t.nav.crmContactDesc,
+        href: "#crm",
+        icon: Users,
+      },
+      {
+        name: t.nav.botBuilder,
+        description: t.nav.botBuilderDesc,
+        href: "#features",
+        icon: Bot,
+      },
+    ],
+    [t]
+  );
 
   // Scroll detection for sticky header background transition
   useEffect(() => {
@@ -234,7 +251,7 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
               type="button"
               onClick={() => toggleDropdown("features")}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                "inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                 activeDropdown === "features"
                   ? "bg-muted text-foreground font-semibold"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
@@ -242,7 +259,7 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
               aria-expanded={activeDropdown === "features"}
               aria-haspopup="true"
             >
-              <span>Features</span>
+              <span>{t.nav.features}</span>
               <ChevronDown
                 className={cn(
                   "h-3.5 w-3.5 transition-transform duration-200",
@@ -286,7 +303,7 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
               type="button"
               onClick={() => toggleDropdown("channels")}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                "inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                 activeDropdown === "channels"
                   ? "bg-muted text-foreground font-semibold"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
@@ -294,7 +311,7 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
               aria-expanded={activeDropdown === "channels"}
               aria-haspopup="true"
             >
-              <span>Channels</span>
+              <span>{t.nav.channels}</span>
               <ChevronDown
                 className={cn(
                   "h-3.5 w-3.5 transition-transform duration-200",
@@ -343,7 +360,7 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
               type="button"
               onClick={() => toggleDropdown("crm-bots")}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                "inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                 activeDropdown === "crm-bots"
                   ? "bg-muted text-foreground font-semibold"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
@@ -351,7 +368,7 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
               aria-expanded={activeDropdown === "crm-bots"}
               aria-haspopup="true"
             >
-              <span>CRM & Bots</span>
+              <span>{t.nav.crmBots}</span>
               <ChevronDown
                 className={cn(
                   "h-3.5 w-3.5 transition-transform duration-200",
@@ -393,14 +410,20 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
           <Link
             href="#pricing"
             onClick={handleLinkClick}
-            className="px-3.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/60 rounded-lg"
+            className="px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/60 rounded-lg"
           >
-            Pricing
+            {t.nav.pricing}
           </Link>
         </nav>
 
-        {/* Right: EXACT 3 CTA / Action Items */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Right: Language Selector + Action CTAs */}
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          {/* Smart Language Selector & Suggestion Anchor */}
+          <div className="relative hidden md:block">
+            <LanguageSelector />
+            <LanguageSuggestionPopup />
+          </div>
+
           {/* Action 1: Book a Demo */}
           <Button
             variant="ghost"
@@ -409,7 +432,7 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
             className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary hover:bg-primary/10 h-9"
           >
             <PhoneCall className="h-3.5 w-3.5" />
-            Book a Demo
+            {t.nav.bookDemo}
           </Button>
 
           {/* Action 2: Sign In */}
@@ -417,17 +440,17 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
             href="/signin"
             className="hidden sm:inline-block text-xs sm:text-sm font-medium text-muted-foreground transition-colors hover:text-foreground px-2 py-1"
           >
-            Sign In
+            {t.nav.signIn}
           </Link>
 
           {/* Action 3: Start Free Trial */}
           <Button
             asChild
             size="sm"
-            className="h-9 px-4 text-xs sm:text-sm font-semibold shadow-sm bg-primary text-primary-foreground hover:bg-primary/90"
+            className="h-9 px-3.5 sm:px-4 text-xs sm:text-sm font-semibold shadow-sm bg-primary text-primary-foreground hover:bg-primary/90"
           >
             <Link href="/signup" className="flex items-center gap-1.5">
-              Start Free Trial
+              {t.nav.startFreeTrial}
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </Button>
@@ -448,6 +471,17 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
       {/* Mobile Navigation Drawer (Clean Accordions) */}
       {mobileMenuOpen && (
         <div className="md:hidden border-b border-border/80 bg-background/98 backdrop-blur-lg px-4 pt-3 pb-6 sm:px-6 shadow-2xl animate-in slide-in-from-top-4 duration-200 max-h-[85vh] overflow-y-auto">
+          {/* Mobile Language Selector Row & Suggestion */}
+          <div className="pb-3 border-b border-border/60 mb-3 space-y-2">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-xs font-semibold text-muted-foreground">
+                {t.languageSelector.label}
+              </span>
+              <LanguageSelector compact />
+            </div>
+            <LanguageSuggestionPopup variant="mobile-banner" />
+          </div>
+
           <div className="flex flex-col space-y-1 pb-4">
             {/* Features Accordion */}
             <div>
@@ -456,7 +490,7 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
                 onClick={() => toggleMobileAccordion("features")}
                 className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted rounded-lg transition-colors cursor-pointer"
               >
-                <span>Features</span>
+                <span>{t.nav.features}</span>
                 <ChevronDown
                   className={cn(
                     "h-4 w-4 text-muted-foreground transition-transform duration-200",
@@ -488,7 +522,7 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
                 onClick={() => toggleMobileAccordion("channels")}
                 className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted rounded-lg transition-colors cursor-pointer"
               >
-                <span>Channels</span>
+                <span>{t.nav.channels}</span>
                 <ChevronDown
                   className={cn(
                     "h-4 w-4 text-muted-foreground transition-transform duration-200",
@@ -520,7 +554,7 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
                 onClick={() => toggleMobileAccordion("crmBots")}
                 className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted rounded-lg transition-colors cursor-pointer"
               >
-                <span>CRM & Bots</span>
+                <span>{t.nav.crmBots}</span>
                 <ChevronDown
                   className={cn(
                     "h-4 w-4 text-muted-foreground transition-transform duration-200",
@@ -551,7 +585,7 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
               onClick={handleLinkClick}
               className="px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted rounded-lg transition-colors"
             >
-              Pricing
+              {t.nav.pricing}
             </Link>
           </div>
 
@@ -566,15 +600,15 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
               className="w-full justify-center text-sm font-semibold h-10"
             >
               <PhoneCall className="mr-2 h-4 w-4 text-primary" />
-              Book a Live Demo
+              {t.nav.bookDemo}
             </Button>
 
             <div className="grid grid-cols-2 gap-2">
               <Button asChild variant="ghost" className="w-full text-sm font-medium h-10">
-                <Link href="/signin">Sign In</Link>
+                <Link href="/signin">{t.nav.signIn}</Link>
               </Button>
               <Button asChild className="w-full text-sm font-semibold bg-primary text-primary-foreground h-10">
-                <Link href="/signup">Start Free Trial →</Link>
+                <Link href="/signup">{t.nav.startFreeTrial} →</Link>
               </Button>
             </div>
           </div>
