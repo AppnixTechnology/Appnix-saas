@@ -1,17 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
+  ArrowRight,
+  Play,
+  Star,
+  CheckCircle2,
+  Sparkles,
+  ShieldCheck,
+  Zap,
+  Bot,
   MessageSquare,
   Send,
-  ArrowRight,
-  CheckCircle2,
-  PhoneCall,
+  Users,
+  Activity,
+  Globe,
+  Lock,
+  Layers,
+  ChevronRight,
+  TrendingUp,
   CheckCheck,
-  Zap,
 } from "lucide-react";
 import {
   WhatsAppIcon,
@@ -21,399 +32,341 @@ import {
 } from "@/components/landing/channel-icons";
 
 interface HeroProps {
-  onOpenDemoModal: () => void;
+  onOpenDemoModal?: () => void;
 }
 
-interface ChatThread {
-  id: string;
-  name: string;
-  avatar: string;
-  avatarBg: string;
-  channel: "whatsapp" | "rcs" | "instagram" | "facebook";
-  channelLabel: string;
-  phone: string;
-  preview: string;
-  time: string;
-  messages: {
-    sender: "customer" | "agent" | "bot";
-    text: string;
-    time: string;
-    buttons?: string[];
-  }[];
-}
-
-const mockThreads: ChatThread[] = [
+const liveChannels = [
   {
-    id: "ankit",
-    name: "Ankit Bansal",
-    avatar: "AB",
-    avatarBg: "from-emerald-600 to-teal-600",
-    channel: "whatsapp",
-    channelLabel: "WhatsApp Cloud API",
-    phone: "+91 93286 12083",
-    preview: "Can you send the WhatsApp API pricing?",
+    name: "WhatsApp API",
+    icon: WhatsAppIcon,
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10 border-emerald-500/20",
+    badge: "Official Meta Tier",
+  },
+  {
+    name: "Google RCS",
+    icon: RCSIcon,
+    color: "text-blue-400",
+    bg: "bg-blue-500/10 border-blue-500/20",
+    badge: "Verified Sender",
+  },
+  {
+    name: "Instagram DM",
+    icon: InstagramIcon,
+    color: "text-pink-400",
+    bg: "bg-pink-500/10 border-pink-500/20",
+    badge: "Story & DMs",
+  },
+  {
+    name: "Facebook Messenger",
+    icon: FacebookIcon,
+    color: "text-indigo-400",
+    bg: "bg-indigo-500/10 border-indigo-500/20",
+    badge: "Omnichannel",
+  },
+];
+
+const mockToasts = [
+  {
+    id: 1,
+    channel: "WhatsApp",
+    icon: WhatsAppIcon,
+    iconColor: "text-emerald-400",
+    borderColor: "border-emerald-500/30",
+    glowColor: "shadow-emerald-500/10",
+    sender: "Ankit Bansal (Acme Corp)",
     time: "Just now",
-    messages: [
-      {
-        sender: "customer",
-        text: "Hi Appnix! We process 50,000 monthly customer inquiries. Can we automate triage and route chats to our 10 sales agents?",
-        time: "10:42 AM",
-      },
-      {
-        sender: "bot",
-        text: "Hello Ankit! Welcome to Appnix. Yes, our platform automatically routes incoming WhatsApp chats with SLA assignment and instant CRM sync.",
-        time: "10:43 AM",
-        buttons: ["📅 Book a Demo", "📦 View Pricing"],
-      },
-      {
-        sender: "agent",
-        text: "I've also reserved a 14-day dedicated sandbox with 10,000 test credits for your team.",
-        time: "10:44 AM",
-      },
-    ],
+    message: "Need 50,000 monthly WhatsApp API credits for CRM",
+    status: "⚡ Auto-routed to Sales • SLA: 2s",
   },
   {
-    id: "sarah",
-    name: "Sarah Jenkins",
-    avatar: "SJ",
-    avatarBg: "from-blue-600 to-indigo-600",
-    channel: "rcs",
-    channelLabel: "Google RCS Verified",
-    phone: "+1 (555) 304-9210",
-    preview: "RCS flight card looks great!",
-    time: "5m ago",
-    messages: [
-      {
-        sender: "customer",
-        text: "We want to replace standard SMS with Google RCS Rich Cards with verified checkmarks.",
-        time: "10:30 AM",
-      },
-      {
-        sender: "bot",
-        text: "RCS gives you 85%+ open rates with interactive carousels and verified sender branding. Here is our live sandbox:",
-        time: "10:31 AM",
-        buttons: ["📱 View Sample RCS Card"],
-      },
-    ],
+    id: 2,
+    channel: "Google RCS",
+    icon: RCSIcon,
+    iconColor: "text-blue-400",
+    borderColor: "border-blue-500/30",
+    glowColor: "shadow-blue-500/10",
+    sender: "Verified RCS Campaign",
+    time: "1m ago",
+    message: "Festive Flash Sale • 12,450 Rich Cards Delivered",
+    status: "📈 94.8% Open Rate • 3.2x ROI",
   },
   {
-    id: "chloe",
-    name: "Chloe Davenport",
-    avatar: "CD",
-    avatarBg: "from-pink-600 to-rose-600",
-    channel: "instagram",
-    channelLabel: "Instagram Direct",
-    phone: "@chloe_style",
-    preview: "Order placed via Instagram DM!",
-    time: "12m ago",
-    messages: [
-      {
-        sender: "customer",
-        text: "Loved the summer collection reels! Do you have size M available for the linen shirt?",
-        time: "10:15 AM",
-      },
-      {
-        sender: "bot",
-        text: "Hey Chloe! Linen Shirt (Size M) is in stock with 2-day express shipping! Use promo code APPNIX15 for 15% off at checkout.",
-        time: "10:16 AM",
-        buttons: ["🛍️ Buy with 15% Off"],
-      },
-    ],
+    id: 3,
+    channel: "Instagram DM",
+    icon: InstagramIcon,
+    iconColor: "text-pink-400",
+    borderColor: "border-pink-500/30",
+    glowColor: "shadow-pink-500/10",
+    sender: "Chloe Vance (Story Lead)",
+    time: "2m ago",
+    message: "Replied to story: 'Can we white-label this platform?'",
+    status: "🤖 AI Bot Qualified • Stage: Opportunity",
   },
 ];
 
 export function Hero({ onOpenDemoModal }: HeroProps) {
-  const [activeId, setActiveId] = useState("ankit");
+  const [activeToastIndex, setActiveToastIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const currentThread =
-    mockThreads.find((t) => t.id === activeId) || mockThreads[0];
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveToastIndex((prev) => (prev + 1) % mockToasts.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Ensure video plays smoothly
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {
+        // Autoplay policy fallback
+      });
+    }
+  }, []);
 
   return (
-    <section className="relative overflow-hidden pt-8 pb-16 sm:pt-14 sm:pb-24 lg:pt-18 lg:pb-32 bg-radial-[at_50%_0%] from-primary/8 via-background to-background">
-      {/* Background Decorative Tech Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+    <section className="relative overflow-hidden bg-[#070b14] text-white min-h-[92vh] flex items-center pt-24 pb-16 sm:pb-24 lg:pt-32 lg:pb-28">
+      {/* ─── 1. ATMOSPHERIC AMBIENT GLOWS & GRID ─── */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Glowing emerald primary beacon */}
+        <div className="absolute -top-32 left-1/4 w-[600px] h-[600px] bg-emerald-500/12 rounded-full blur-[140px] animate-pulse-glow" />
+        {/* Glowing cyan secondary beacon */}
+        <div className="absolute top-1/3 -right-20 w-[650px] h-[650px] bg-cyan-500/10 rounded-full blur-[160px]" />
+        {/* Deep blue bottom fill */}
+        <div className="absolute -bottom-40 left-1/3 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[140px]" />
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Top Announcement Badge */}
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-primary backdrop-blur-xs transition-all hover:bg-primary/10 mb-6 shadow-xs">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
-            <span>New: RCS Business Messaging + Instagram Direct Support</span>
-            <span className="text-muted-foreground">•</span>
-            <span className="font-medium text-emerald-600 dark:text-emerald-400">Live Now →</span>
-          </div>
+        {/* High-tech precision grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b18_1px,transparent_1px),linear-gradient(to_bottom,#1e293b18_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_40%,#000_65%,transparent_100%)] opacity-80" />
+      </div>
 
-          {/* Hero Headline */}
-          <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl text-balance leading-[1.12]">
-            Connect Every Customer Conversation.
-            <br />
-            <span className="bg-gradient-to-r from-primary via-emerald-600 to-indigo-600 bg-clip-text text-transparent">
-              From One Powerful Platform.
-            </span>
-          </h1>
+      <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 xl:gap-12 items-center">
+          
+          {/* ─── 2. LEFT COLUMN: HIGH-CONVERTING HERO COPY ─── */}
+          <div className="lg:col-span-6 space-y-7 text-center lg:text-left z-10">
+            
+            {/* Pill Badge */}
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-emerald-950/40 border border-emerald-500/25 backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.12)]">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+              </span>
+              <span className="text-xs sm:text-sm font-semibold tracking-wide text-emerald-300">
+                AI-Powered Customer Conversation Platform
+              </span>
+              <Sparkles className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+            </div>
 
-          {/* Hero Subheading */}
-          <p className="mx-auto mt-6 max-w-2xl text-base sm:text-lg text-muted-foreground leading-relaxed text-balance">
-            Connect with customers across <strong className="font-semibold text-foreground">WhatsApp, Instagram, RCS, and Facebook</strong>. Manage conversations, broadcast targeted campaigns, automate replies, and track leads from one enterprise-grade CRM.
-          </p>
+            {/* Headline */}
+            <h1 className="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
+              Connect Every Customer Conversation{" "}
+              <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent inline-block">
+                in One Powerful Platform
+              </span>
+            </h1>
 
-          {/* Hero CTA Actions */}
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5">
-            <Button
-              asChild
-              size="lg"
-              className="w-full sm:w-auto h-12 px-7 text-sm font-semibold shadow-lg shadow-primary/25 bg-primary text-primary-foreground hover:bg-primary/95 gap-2"
-            >
-              <Link href="/signup">
-                Start 14-Day Free Trial
-                <ArrowRight className="h-4 w-4" />
+            {/* Subheadline: 1 concise sentence, max 20 words */}
+            <p className="text-base sm:text-lg text-slate-300/90 max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
+              Unify WhatsApp, Instagram, Facebook, and RCS into an enterprise AI inbox that closes deals 3x faster.
+            </p>
+
+            {/* Channel Badges */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1">
+              {liveChannels.map((ch) => {
+                const Icon = ch.icon;
+                return (
+                  <div
+                    key={ch.name}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium backdrop-blur-sm transition-all duration-200 hover:scale-105 ${ch.bg} ${ch.color}`}
+                  >
+                    <Icon className="h-3.5 w-3.5 shrink-0" />
+                    <span>{ch.name}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Two Primary CTAs */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-4 pt-2">
+              {/* Primary solid brand green button */}
+              <Link
+                href="/signup"
+                className="group relative inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm sm:text-base text-slate-950 bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-500 hover:from-emerald-300 hover:to-teal-400 shadow-[0_0_35px_rgba(16,185,129,0.35)] hover:shadow-[0_0_50px_rgba(16,185,129,0.55)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+              >
+                <span>Start Free Trial</span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
-            </Button>
 
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={onOpenDemoModal}
-              className="w-full sm:w-auto h-12 px-7 text-sm font-semibold border-border hover:bg-accent gap-2"
-            >
-              <PhoneCall className="h-4 w-4 text-emerald-600" />
-              Book a Personalized Demo
-            </Button>
-          </div>
-
-          {/* Trust Guarantees */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-              No credit card required
-            </span>
-            <span className="flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-              14-day free trial
-            </span>
-            <span className="flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-              Official Meta & Google APIs
-            </span>
-          </div>
-        </div>
-
-        {/* Clean, Minimalist & Spacious SaaS Dashboard Preview */}
-        <div className="relative mt-12 lg:mt-16 mx-auto max-w-4xl">
-          {/* Subtle Ambient Glow */}
-          <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-primary/25 via-emerald-500/15 to-indigo-500/25 blur-xl opacity-60 pointer-events-none" />
-
-          {/* Main Dashboard Window Container */}
-          <div className="relative rounded-2xl border border-border/80 bg-card shadow-2xl overflow-hidden">
-            {/* Window Bar */}
-            <div className="flex items-center justify-between border-b border-border/70 bg-muted/60 px-4 py-3">
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1.5">
-                  <span className="h-3 w-3 rounded-full bg-red-400/90 inline-block" />
-                  <span className="h-3 w-3 rounded-full bg-yellow-400/90 inline-block" />
-                  <span className="h-3 w-3 rounded-full bg-emerald-400/90 inline-block" />
-                </div>
-                <span className="ml-2 text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <MessageSquare className="h-3.5 w-3.5 text-primary" />
-                  Appnix Unified Inbox
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[11px] font-medium border-emerald-500/20">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
-                  4 Channels Live
-                </Badge>
-              </div>
+              {/* Secondary outline/ghost personalized demo button */}
+              <button
+                type="button"
+                onClick={() => onOpenDemoModal?.()}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm sm:text-base text-slate-200 hover:text-white bg-slate-900/70 hover:bg-slate-800/90 border border-slate-700/80 hover:border-emerald-500/40 backdrop-blur-md transition-all duration-200 hover:scale-[1.01]"
+              >
+                <Play className="h-4 w-4 text-emerald-400 fill-emerald-400/20" />
+                <span>Book a Personalized Demo</span>
+              </button>
             </div>
 
-            {/* 2-Column Clean Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-12 min-h-[380px] bg-background">
-              {/* Left Column: Clean Conversation Feed (5 cols) */}
-              <div className="md:col-span-5 border-r border-border/70 p-3 bg-card/40 flex flex-col justify-between">
-                <div className="space-y-2">
-                  <div className="px-1 py-1">
-                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                      Active Conversations
-                    </span>
+            {/* Micro Trust Row */}
+            <div className="pt-3 border-t border-slate-800/80 space-y-2.5">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-slate-400">
+                {/* 5-Star rating */}
+                <div className="flex items-center gap-1.5">
+                  <div className="flex text-amber-400">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                    ))}
                   </div>
-
-                  {/* Conversation List */}
-                  <div className="space-y-1.5">
-                    {mockThreads.map((thread) => {
-                      const isSelected = thread.id === activeId;
-                      return (
-                        <button
-                          key={thread.id}
-                          onClick={() => setActiveId(thread.id)}
-                          className={`w-full text-left p-2.5 rounded-xl transition-all flex items-center gap-3 cursor-pointer ${
-                            isSelected
-                              ? "bg-primary/10 border border-primary/30 shadow-xs"
-                              : "hover:bg-muted/60 border border-transparent"
-                          }`}
-                        >
-                          <div className="relative shrink-0">
-                            <div className={`h-9 w-9 rounded-full bg-gradient-to-tr ${thread.avatarBg} text-white flex items-center justify-center font-bold text-xs shadow-xs`}>
-                              {thread.avatar}
-                            </div>
-                            <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-card" />
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-foreground truncate">
-                                {thread.name}
-                              </span>
-                              <span className="text-[10px] text-muted-foreground">
-                                {thread.time}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground truncate">
-                              {thread.preview}
-                            </p>
-                          </div>
-
-                          <div className="shrink-0">
-                            {thread.channel === "whatsapp" && (
-                              <WhatsAppIcon className="h-4 w-4 text-emerald-600" />
-                            )}
-                            {thread.channel === "rcs" && (
-                              <RCSIcon className="h-4 w-4 text-blue-600" />
-                            )}
-                            {thread.channel === "instagram" && (
-                              <InstagramIcon className="h-4 w-4 text-pink-600" />
-                            )}
-                            {thread.channel === "facebook" && (
-                              <FacebookIcon className="h-4 w-4 text-indigo-600" />
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <span className="font-semibold text-slate-200">4.9/5</span>
+                  <span>(500+ reviews)</span>
                 </div>
 
-                {/* Bottom Quick Indicator */}
-                <div className="p-2.5 rounded-lg bg-muted/40 border border-border/60 text-xs flex items-center justify-between text-muted-foreground">
-                  <span className="flex items-center gap-1.5 text-[11px]">
-                    <Zap className="h-3.5 w-3.5 text-amber-500" /> AI Bot Auto-Triage
-                  </span>
-                  <span className="font-semibold text-foreground text-[11px]">99.8% SLA</span>
+                <span className="hidden sm:inline text-slate-600">•</span>
+
+                {/* Key reassurance */}
+                <div className="flex items-center gap-1.5 text-slate-300">
+                  <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                  <span>Meta Verified API & Google RCS Partner</span>
                 </div>
               </div>
 
-              {/* Right Column: Spacious, Clean Chat View (7 cols) */}
-              <div className="md:col-span-7 p-4 sm:p-5 flex flex-col justify-between bg-muted/5">
-                {/* Active Chat Header */}
-                <div className="flex items-center justify-between border-b border-border/70 pb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className={`h-8 w-8 rounded-full bg-gradient-to-tr ${currentThread.avatarBg} text-white flex items-center justify-center font-bold text-xs`}>
-                      {currentThread.avatar}
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                        {currentThread.name}
-                        <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-                      </h4>
-                      <p className="text-[10px] text-muted-foreground">
-                        {currentThread.channelLabel} • {currentThread.phone}
-                      </p>
-                    </div>
-                  </div>
+              {/* Enterprise Guarantee */}
+              <p className="text-[11px] text-slate-400/90 text-center lg:text-left">
+                ✓ No credit card required • Instant 14-day dedicated sandbox • White-label ready
+              </p>
+            </div>
+          </div>
 
-                  <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                    Active Session
+          {/* ─── 3. RIGHT COLUMN: SOFT-GLASSMORPHISM PRODUCT VIDEO & FLOATING TOASTS ─── */}
+          <div className="lg:col-span-6 relative flex items-center justify-center">
+            
+            {/* Ambient halo glow behind the frame */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/20 via-teal-500/15 to-cyan-500/20 rounded-3xl blur-2xl transform scale-95 pointer-events-none" />
+
+            {/* Main Glassmorphism Browser Device Frame */}
+            <div className="relative w-full rounded-2xl border border-white/15 bg-slate-900/85 shadow-[0_25px_70px_-15px_rgba(16,185,129,0.22),0_0_40px_rgba(255,255,255,0.06)] backdrop-blur-xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
+              
+              {/* Browser Window Header Chrome */}
+              <div className="flex items-center justify-between px-4 py-3 bg-slate-950/80 border-b border-white/10 select-none">
+                {/* Window control dots */}
+                <div className="flex items-center gap-1.5">
+                  <div className="h-3 w-3 rounded-full bg-rose-500/80 ring-1 ring-rose-600/30" />
+                  <div className="h-3 w-3 rounded-full bg-amber-500/80 ring-1 ring-amber-600/30" />
+                  <div className="h-3 w-3 rounded-full bg-emerald-500/80 ring-1 ring-emerald-600/30" />
+                </div>
+
+                {/* URL Bar */}
+                <div className="flex items-center gap-2 px-3.5 py-1 rounded-md bg-slate-900/90 border border-white/5 text-[11px] text-slate-300 font-mono tracking-tight max-w-[260px] truncate shadow-inner">
+                  <Lock className="h-3 w-3 text-emerald-400" />
+                  <span className="text-slate-400">appnix.io/</span>
+                  <span className="text-emerald-300 font-medium">unified-inbox-live</span>
+                </div>
+
+                {/* Live Stream Pill */}
+                <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
+                  <span>Live CRM Stream</span>
+                </div>
+              </div>
+
+              {/* Product Video Container */}
+              <div className="relative aspect-[16/10] w-full bg-slate-950 overflow-hidden flex items-center justify-center">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  poster="/logo-favicon.png"
+                  className="w-full h-full object-cover object-center"
+                >
+                  <source src="/video/A_clean_modern_SaaS_product_d.mp4" type="video/mp4" />
+                  <source src="/videos/A_clean_modern_SaaS_product_d.mp4" type="video/mp4" />
+                  Your browser does not support HTML5 video streaming.
+                </video>
+
+                {/* Subtle bottom vignette gradient for depth */}
+                <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent pointer-events-none" />
+
+                {/* Live Channel Quick Indicators in bottom-left of video */}
+                <div className="absolute bottom-3 left-3 hidden sm:flex items-center gap-1.5 p-1.5 rounded-lg bg-slate-950/85 border border-white/10 backdrop-blur-md text-[11px] text-slate-300">
+                  <span className="text-slate-400 font-medium pl-1">Streams:</span>
+                  <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold">
+                    <WhatsAppIcon className="h-3 w-3" /> WhatsApp
+                  </span>
+                  <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-semibold">
+                    <RCSIcon className="h-3 w-3" /> RCS
+                  </span>
+                  <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-300 font-semibold">
+                    <InstagramIcon className="h-3 w-3" /> IG
                   </span>
                 </div>
 
-                {/* Messages Feed */}
-                <div className="space-y-3 py-4">
-                  {currentThread.messages.map((msg, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex flex-col ${
-                        msg.sender === "customer" ? "items-start" : "items-end"
-                      }`}
-                    >
-                      <div
-                        className={`max-w-[85%] rounded-2xl p-3 text-xs shadow-xs space-y-1.5 ${
-                          msg.sender === "customer"
-                            ? "bg-card border border-border text-foreground rounded-tl-xs"
-                            : "bg-primary text-primary-foreground rounded-tr-xs"
-                        }`}
-                      >
-                        <p className="leading-relaxed">{msg.text}</p>
-
-                        {/* Action buttons */}
-                        {msg.buttons && (
-                          <div className="pt-1 flex flex-wrap gap-1.5">
-                            {msg.buttons.map((btn, bIdx) => (
-                              <span
-                                key={bIdx}
-                                className="bg-white/15 text-white text-[10px] font-semibold px-2 py-0.5 rounded border border-white/20"
-                              >
-                                {btn}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-
-                        <div
-                          className={`flex items-center justify-end gap-1 text-[9px] ${
-                            msg.sender === "customer"
-                              ? "text-muted-foreground"
-                              : "text-primary-foreground/75"
-                          }`}
-                        >
-                          <span>{msg.time}</span>
-                          {msg.sender !== "customer" && (
-                            <CheckCheck className="h-3 w-3 text-emerald-300" />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Clean Input Composer */}
-                <div className="rounded-xl border border-border/80 bg-card p-2 flex items-center gap-2 shadow-xs">
-                  <input
-                    readOnly
-                    value="Type a reply or select an automated template..."
-                    className="flex-1 bg-transparent text-xs text-muted-foreground outline-none border-none cursor-default px-2"
-                  />
-                  <Button size="sm" className="h-7 px-3 text-xs bg-primary text-primary-foreground gap-1">
-                    <Send className="h-3 w-3" />
-                    Send
-                  </Button>
+                {/* Live KPI Metric in bottom-right of video */}
+                <div className="absolute bottom-3 right-3 hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-emerald-950/90 border border-emerald-500/30 backdrop-blur-md text-[11px] font-semibold text-emerald-300 shadow-lg">
+                  <Zap className="h-3.5 w-3.5 text-emerald-400" />
+                  <span>SLA: 1.2s • 99.8% Resolution</span>
                 </div>
               </div>
             </div>
+
+            {/* ─── FLOATING LIVE NOTIFICATION CARD 1 (Top Left Overlapping) ─── */}
+            <div className="absolute -top-6 -left-4 sm:-left-8 z-20 animate-float-slow max-w-[270px] sm:max-w-[310px] pointer-events-none sm:pointer-events-auto">
+              <div className="rounded-xl border border-emerald-500/40 bg-slate-900/95 p-3.5 shadow-[0_15px_35px_rgba(0,0,0,0.5),0_0_25px_rgba(16,185,129,0.15)] backdrop-blur-xl space-y-1.5 transition-all hover:scale-105">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/20 text-emerald-400">
+                      <WhatsAppIcon className="h-3.5 w-3.5" />
+                    </div>
+                    <span className="text-[11px] font-bold text-white">WhatsApp Cloud API</span>
+                  </div>
+                  <span className="text-[10px] text-emerald-400 font-medium bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                    Live Deal
+                  </span>
+                </div>
+                <p className="text-xs text-slate-200 font-medium line-clamp-2">
+                  &ldquo;Need 50,000 WhatsApp API credits &amp; automated lead routing for 10 agents.&rdquo;
+                </p>
+                <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
+                  <span className="font-semibold text-emerald-300 flex items-center gap-1">
+                    <CheckCheck className="h-3 w-3 text-emerald-400" /> Auto-assigned to Sales
+                  </span>
+                  <span>2s ago</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ─── FLOATING LIVE NOTIFICATION CARD 2 (Bottom Right Overlapping) ─── */}
+            <div className="absolute -bottom-8 -right-4 sm:-right-8 z-20 animate-float-reverse max-w-[260px] sm:max-w-[290px] pointer-events-none sm:pointer-events-auto">
+              <div className="rounded-xl border border-blue-500/40 bg-slate-900/95 p-3.5 shadow-[0_15px_35px_rgba(0,0,0,0.5),0_0_25px_rgba(59,130,246,0.15)] backdrop-blur-xl space-y-1.5 transition-all hover:scale-105">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-500/20 text-blue-400">
+                      <RCSIcon className="h-3.5 w-3.5" />
+                    </div>
+                    <span className="text-[11px] font-bold text-white">Google RCS Verified</span>
+                  </div>
+                  <span className="text-[10px] text-blue-400 font-medium bg-blue-500/10 px-1.5 py-0.5 rounded">
+                    Campaign
+                  </span>
+                </div>
+                <p className="text-xs text-slate-200 font-medium">
+                  12,450 Verified Rich Cards Broadcasted
+                </p>
+                <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
+                  <span className="font-semibold text-blue-300 flex items-center gap-1">
+                    <TrendingUp className="h-3 w-3 text-blue-400" /> 94.8% Open Rate
+                  </span>
+                  <span>1m ago</span>
+                </div>
+              </div>
+            </div>
+
           </div>
 
-          {/* 2 Clean Floating Badges */}
-          <div className="hidden sm:flex absolute -bottom-5 -left-5 rounded-xl border border-border bg-card/95 backdrop-blur-md p-3 shadow-lg items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-              <WhatsAppIcon className="h-4 w-4" />
-            </div>
-            <div>
-              <span className="text-xs font-bold text-foreground">WhatsApp Cloud API</span>
-              <p className="text-[10px] text-muted-foreground">Meta Verified & Synced</p>
-            </div>
-          </div>
-
-          <div className="hidden sm:flex absolute -top-4 -right-4 rounded-xl border border-border bg-card/95 backdrop-blur-md p-3 shadow-lg items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 border border-blue-500/20">
-              <RCSIcon className="h-4 w-4" />
-            </div>
-            <div>
-              <span className="text-xs font-bold text-foreground">RCS Business Messaging</span>
-              <p className="text-[10px] text-muted-foreground">Google Verified Active</p>
-            </div>
-          </div>
         </div>
       </div>
     </section>
