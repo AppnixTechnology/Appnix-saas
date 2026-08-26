@@ -15,14 +15,13 @@ import {
   ChevronRight,
   Key,
   Webhook,
-  MessageSquare,
-  Camera,
-  ScanLine,
   Smartphone,
   Eye,
   EyeOff,
   ExternalLink,
 } from "lucide-react";
+
+import { FaWhatsapp, FaInstagram, FaFacebookF } from "react-icons/fa";
 
 interface IntegrationItem {
   id: string;
@@ -39,8 +38,9 @@ const integrations: IntegrationItem[] = [
     id: "whatsapp",
     name: "WhatsApp Official Cloud API",
     category: "Messaging Channel",
-    description: "Enterprise direct BSP connection with Meta Graph API for template messages and chatbots.",
-    icon: MessageSquare,
+    description:
+      "Enterprise direct BSP connection with Meta Graph API for template messages and chatbots.",
+    icon: FaWhatsapp,
     status: "Connected",
     lastSync: "Synced 2 mins ago",
   },
@@ -48,8 +48,9 @@ const integrations: IntegrationItem[] = [
     id: "instagram",
     name: "Instagram Direct Graph API",
     category: "Messaging Channel",
-    description: "Receive direct messages, story mentions, and automated DM campaign flows.",
-    icon: Camera,
+    description:
+      "Receive direct messages, story mentions, and automated DM campaign flows.",
+    icon: FaInstagram,
     status: "Connected",
     lastSync: "Synced 15 mins ago",
   },
@@ -57,8 +58,9 @@ const integrations: IntegrationItem[] = [
     id: "facebook",
     name: "Facebook Messenger",
     category: "Messaging Channel",
-    description: "Connect Facebook brand pages for omnichannel live chat and automated triage.",
-    icon: ScanLine,
+    description:
+      "Connect Facebook brand pages for omnichannel live chat and automated triage.",
+    icon: FaFacebookF,
     status: "Connected",
     lastSync: "Synced 1 hour ago",
   },
@@ -66,7 +68,8 @@ const integrations: IntegrationItem[] = [
     id: "rcs",
     name: "Google RCS Business Messaging",
     category: "Messaging Channel",
-    description: "Verified agent with rich cards, suggestion chips, and OTP fallback routing.",
+    description:
+      "Verified agent with rich cards, suggestion chips, and OTP fallback routing.",
     icon: Smartphone,
     status: "Connected",
     lastSync: "Synced today",
@@ -75,7 +78,8 @@ const integrations: IntegrationItem[] = [
     id: "webhooks",
     name: "Real-time Event Webhooks",
     category: "Developer API",
-    description: "Trigger external HTTP endpoints on new inbound messages, campaign completions, and ticket updates.",
+    description:
+      "Trigger external HTTP endpoints on new inbound messages, campaign completions, and ticket updates.",
     icon: Webhook,
     status: "Configured",
     lastSync: "3 active subscriptions",
@@ -84,7 +88,8 @@ const integrations: IntegrationItem[] = [
     id: "google-auth",
     name: "Google OAuth 2.0 / SSO",
     category: "Authentication",
-    description: "Single sign-on for team members and workspace access delegation.",
+    description:
+      "Single sign-on for team members and workspace access delegation.",
     icon: Key,
     status: "Configured",
     lastSync: "Active",
@@ -125,7 +130,8 @@ export default function IntegrationsSettingsPage() {
           Connected Integrations & API Keys
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Manage omnichannel messaging gateways, developer REST API tokens, and webhook endpoints.
+          Manage omnichannel messaging gateways, developer REST API tokens, and
+          webhook endpoints.
         </p>
       </div>
 
@@ -135,7 +141,9 @@ export default function IntegrationsSettingsPage() {
           <div className="flex items-center justify-between border-b pb-3">
             <div className="flex items-center gap-2">
               <Key className="h-5 w-5 text-primary" />
-              <h2 className="text-base font-bold text-foreground">REST API Secret Token</h2>
+              <h2 className="text-base font-bold text-foreground">
+                REST API Secret Token
+              </h2>
             </div>
             <Button
               variant="outline"
@@ -148,7 +156,11 @@ export default function IntegrationsSettingsPage() {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            Include this token in the <code className="font-mono bg-muted px-1.5 py-0.5 rounded text-foreground">Authorization: Bearer &lt;TOKEN&gt;</code> header to invoke Appnix REST APIs.
+            Include this token in the{" "}
+            <code className="font-mono bg-muted px-1.5 py-0.5 rounded text-foreground">
+              Authorization: Bearer &lt;TOKEN&gt;
+            </code>{" "}
+            header to invoke Appnix REST APIs.
           </p>
 
           <div className="flex items-center gap-2 max-w-xl">
@@ -164,7 +176,11 @@ export default function IntegrationsSettingsPage() {
               onClick={() => setApiKeyVisible(!apiKeyVisible)}
               className="shrink-0"
             >
-              {apiKeyVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {apiKeyVisible ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </Button>
             <Button
               variant="outline"
@@ -180,7 +196,9 @@ export default function IntegrationsSettingsPage() {
 
         {/* Channels & Integrations Grid */}
         <div className="space-y-3">
-          <h2 className="text-base font-bold text-foreground">Supported Channel Integrations</h2>
+          <h2 className="text-base font-bold text-foreground">
+            Supported Channel Integrations
+          </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {integrations.map((item) => {
@@ -192,7 +210,7 @@ export default function IntegrationsSettingsPage() {
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
+                      {/* <div className="flex items-center gap-2.5">
                         <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                           <Icon className="h-5 w-5" />
                         </div>
@@ -200,14 +218,44 @@ export default function IntegrationsSettingsPage() {
                           <h3 className="text-sm font-bold text-foreground">{item.name}</h3>
                           <span className="text-[10px] text-muted-foreground">{item.category}</span>
                         </div>
+                      </div> */}
+
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className={cn(
+                            "h-9 w-9 rounded-lg flex items-center justify-center shrink-0",
+                            item.id === "whatsapp" &&
+                              "bg-[#25D366]/10 text-[#25D366]",
+                            item.id === "instagram" &&
+                              "bg-gradient-to-br from-amber-400/20 via-pink-500/20 to-purple-600/20 text-pink-600",
+                            item.id === "facebook" &&
+                              "bg-[#1877F2]/10 text-[#1877F2]",
+                            !["whatsapp", "instagram", "facebook"].includes(
+                              item.id,
+                            ) && "bg-primary/10 text-primary",
+                          )}
+                        >
+                          <Icon className="h-5 w-5" />
+                        </div>
+
+                        <div>
+                          <h3 className="text-sm font-bold text-foreground">
+                            {item.name}
+                          </h3>
+                          <span className="text-[10px] text-muted-foreground">
+                            {item.category}
+                          </span>
+                        </div>
                       </div>
 
                       <Badge
                         variant="secondary"
                         className={cn(
                           "text-[10px] font-semibold",
-                          item.status === "Connected" && "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
-                          item.status === "Configured" && "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300"
+                          item.status === "Connected" &&
+                            "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+                          item.status === "Configured" &&
+                            "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300",
                         )}
                       >
                         {item.status}
@@ -220,7 +268,9 @@ export default function IntegrationsSettingsPage() {
                   </div>
 
                   <div className="flex items-center justify-between border-t pt-3 text-xs">
-                    <span className="text-[11px] text-muted-foreground">{item.lastSync}</span>
+                    <span className="text-[11px] text-muted-foreground">
+                      {item.lastSync}
+                    </span>
                     <Button
                       variant="ghost"
                       size="sm"

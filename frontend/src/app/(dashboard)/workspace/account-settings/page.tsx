@@ -346,7 +346,7 @@ export default function AccountSettingsPage() {
       {activeTab === "Beta Access" && (
         <div className="rounded-xl border bg-card p-6 shadow-xs space-y-4">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-amber-500" />
+            {/* <Sparkles className="h-5 w-5 text-amber-500" /> */}
             <h3 className="text-base font-bold text-foreground">Beta Feature Previews</h3>
           </div>
           <p className="text-sm text-muted-foreground">

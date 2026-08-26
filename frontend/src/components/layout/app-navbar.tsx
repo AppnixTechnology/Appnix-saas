@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { FaWhatsapp } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,9 +31,8 @@ import {
   Briefcase,
   Sliders,
   Clock,
-  Send,
   MessageSquare,
-  CreditCard,
+  Wallet,
   Inbox,
 } from "lucide-react";
 
@@ -68,7 +68,7 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
     <header className="app-surface sticky top-0 z-30 flex h-16 items-stretch border-b">
       {/* Brand column: width-matched to the sidebar (w-64) on desktop so the
           right border lines up with the sidebar's border below it. */}
-      <div className="flex shrink-0 items-center gap-2 border-r border-border px-4 lg:w-64">
+      <div className="hidden shrink-0 items-center gap-2 border-r border-border px-4 lg:flex lg:w-64">
         <div className="brand-box">
           <Users className="h-4 w-4 text-primary-foreground" />
         </div>
@@ -102,7 +102,7 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
           />
         </div>
 
-{/* Right-side icons + language selector + user */}
+        {/* Right-side icons + language selector + user */}
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
           {/* Language Selector Dropdown in Dashboard Header */}
           <div className="hidden sm:block">
@@ -133,12 +133,17 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
               <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive sm:right-1.5 sm:top-1.5 ring-2 ring-background animate-pulse" />
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-80 sm:w-96 p-2 shadow-xl z-50">
+            <DropdownMenuContent
+              align="end"
+              className="w-80 sm:w-96 p-2 shadow-xl z-50"
+            >
               {/* Header with Title & Badge */}
               <div className="flex items-center justify-between px-2 py-1.5 border-b pb-2">
                 <div className="flex items-center gap-2">
                   <Bell className="h-4 w-4 text-primary" />
-                  <span className="font-bold text-sm text-foreground">Notifications</span>
+                  <span className="font-bold text-sm text-foreground">
+                    Notifications
+                  </span>
                   <Badge className="bg-primary/10 text-primary text-[10px] font-bold px-1.5 py-0.2">
                     3 New
                   </Badge>
@@ -155,7 +160,10 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
               {/* 45-Day Retention Notice */}
               <div className="mx-1 my-2 rounded-lg bg-amber-500/10 border border-amber-500/20 p-2 text-[11px] text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5 text-amber-600 shrink-0" />
-                <span>Notifications are automatically removed after <strong>45 days</strong>.</span>
+                <span>
+                  Notifications are automatically removed after{" "}
+                  <strong>45 days</strong>.
+                </span>
               </div>
 
               {/* Recent Notifications Quick Stream */}
@@ -165,13 +173,19 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
                     href="/crm/campaigns"
                     className="flex items-start gap-2.5 p-2 rounded-lg cursor-pointer hover:bg-accent focus:bg-accent transition-colors"
                   >
-                    <div className="h-7 w-7 rounded-md bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center shrink-0 mt-0.5 text-emerald-600">
-                      <Send className="h-3.5 w-3.5" />
+                    <div className="h-7 w-7 rounded-md bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center shrink-0 mt-0.5 text-[#25D366]">
+                      <FaWhatsapp className="h-3.5 w-3.5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-foreground truncate">Meta WhatsApp Campaign Completed</p>
-                      <p className="text-[11px] text-muted-foreground line-clamp-1">Dispatched to 12,450 recipients (98.4% delivered)</p>
-                      <span className="text-[10px] text-muted-foreground/80">10 mins ago</span>
+                      <p className="text-xs font-semibold text-foreground truncate">
+                        Meta WhatsApp Campaign Completed
+                      </p>
+                      <p className="text-[11px] text-muted-foreground line-clamp-1">
+                        Dispatched to 12,450 recipients (98.4% delivered)
+                      </p>
+                      <span className="text-[10px] text-muted-foreground/80">
+                        10 mins ago
+                      </span>
                     </div>
                   </Link>
                 </DropdownMenuItem>
@@ -185,9 +199,15 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
                       <MessageSquare className="h-3.5 w-3.5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-foreground truncate">Customer Escalation in Live Chat</p>
-                      <p className="text-[11px] text-muted-foreground line-clamp-1">Nourin Sodawala requested live human assistance</p>
-                      <span className="text-[10px] text-muted-foreground/80">45 mins ago</span>
+                      <p className="text-xs font-semibold text-foreground truncate">
+                        Customer Escalation in Live Chat
+                      </p>
+                      <p className="text-[11px] text-muted-foreground line-clamp-1">
+                        Nourin Sodawala requested live human assistance
+                      </p>
+                      <span className="text-[10px] text-muted-foreground/80">
+                        45 mins ago
+                      </span>
                     </div>
                   </Link>
                 </DropdownMenuItem>
@@ -198,12 +218,18 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
                     className="flex items-start gap-2.5 p-2 rounded-lg cursor-pointer hover:bg-accent focus:bg-accent transition-colors"
                   >
                     <div className="h-7 w-7 rounded-md bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center shrink-0 mt-0.5 text-indigo-600">
-                      <CreditCard className="h-3.5 w-3.5" />
+                      <Wallet className="h-3.5 w-3.5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-foreground truncate">Wallet Top-up Successful</p>
-                      <p className="text-[11px] text-muted-foreground line-clamp-1">₹5,000 added via UPI. Balance: ₹12,450</p>
-                      <span className="text-[10px] text-muted-foreground/80">2 hours ago</span>
+                      <p className="text-xs font-semibold text-foreground truncate">
+                        Wallet Top-up Successful
+                      </p>
+                      <p className="text-[11px] text-muted-foreground line-clamp-1">
+                        ₹5,000 added via UPI. Balance: ₹12,450
+                      </p>
+                      <span className="text-[10px] text-muted-foreground/80">
+                        2 hours ago
+                      </span>
                     </div>
                   </Link>
                 </DropdownMenuItem>
@@ -278,7 +304,9 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
                     <User className="h-4 w-4 text-muted-foreground" />
                     <div className="flex flex-col">
                       <span className="font-medium text-xs">Profile</span>
-                      <span className="text-[10px] text-muted-foreground">Personal details & credentials</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        Personal details & credentials
+                      </span>
                     </div>
                   </Link>
                 </DropdownMenuItem>
@@ -291,8 +319,12 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
                   >
                     <Users className="h-4 w-4 text-muted-foreground" />
                     <div className="flex flex-col">
-                      <span className="font-medium text-xs">Manage Members</span>
-                      <span className="text-[10px] text-muted-foreground">Team seats, roles & access</span>
+                      <span className="font-medium text-xs">
+                        Manage Members
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
+                        Team seats, roles & access
+                      </span>
                     </div>
                   </Link>
                 </DropdownMenuItem>
@@ -305,8 +337,12 @@ export function AppNavbar({ onMenuClick }: AppNavbarProps) {
                   >
                     <Briefcase className="h-4 w-4 text-muted-foreground" />
                     <div className="flex flex-col">
-                      <span className="font-medium text-xs">Workspace Settings</span>
-                      <span className="text-[10px] text-muted-foreground">Plan, billing & API keys</span>
+                      <span className="font-medium text-xs">
+                        Workspace Settings
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
+                        Plan, billing & API keys
+                      </span>
                     </div>
                   </Link>
                 </DropdownMenuItem>

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { FaWhatsapp, FaInstagram, FaFacebook } from "react-icons/fa";
 import {
   LayoutDashboard,
   ArrowLeftRight,
@@ -42,6 +43,10 @@ import {
   Plug,
   History,
   Send,
+  Radio,
+  Briefcase,
+  MessageCircle,
+  LifeBuoy,
 } from "lucide-react";
 
 // Sub-item type for expandable menu sections
@@ -76,17 +81,26 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
   // Main navigation items dynamically localized
   const menuItems: MenuItem[] = useMemo(
     () => [
-      { id: "dashboard", label: t.sidebar.dashboard, href: "/dashboard", icon: LayoutDashboard },
+      {
+        id: "dashboard",
+        label: t.sidebar.dashboard,
+        href: "/dashboard",
+        icon: LayoutDashboard,
+      },
       {
         id: "channels",
         label: t.sidebar.channels,
         href: "/channels",
-        icon: ArrowLeftRight,
+        icon: Radio, // was ArrowLeftRight — "channels/broadcast" ke liye zyada sahi
         children: [
           { label: "All Channels", href: "/channels", icon: LayoutGrid },
-          { label: "WhatsApp", href: "/channels/whatsapp", icon: MessageSquare },
-          { label: "Instagram", href: "/channels/instagram", icon: Camera },
-          { label: "Facebook", href: "/channels/facebook", icon: ScanLine },
+          { label: "WhatsApp", href: "/channels/whatsapp", icon: FaWhatsapp }, // was MessageSquare
+          {
+            label: "Instagram",
+            href: "/channels/instagram",
+            icon: FaInstagram,
+          }, // was Camera
+          { label: "Facebook", href: "/channels/facebook", icon: FaFacebook }, // was ScanLine
           { label: "RCS", href: "/channels/rcs", icon: Smartphone },
         ],
       },
@@ -101,17 +115,34 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
           { label: "Live Chat", href: "/crm/live-chat", icon: MessageSquare },
         ],
       },
-      { id: "chatbots", label: t.sidebar.chatbots, href: "/chatbots", icon: Bot },
+      {
+        id: "chatbots",
+        label: t.sidebar.chatbots,
+        href: "/chatbots",
+        icon: Bot,
+      },
       {
         id: "automations",
         label: t.sidebar.automations,
         href: "/automations",
         icon: Zap,
         children: [
-          { label: "Analytics", href: "/automations/analytics", icon: BarChart3 },
+          {
+            label: "Analytics",
+            href: "/automations/analytics",
+            icon: BarChart3,
+          },
           { label: "Workflow", href: "/automations/workflow", icon: GitBranch },
-          { label: "Data Store", href: "/automations/datastore", icon: Database },
-          { label: "Templates", href: "/automations/templates", icon: FileText },
+          {
+            label: "Data Store",
+            href: "/automations/datastore",
+            icon: Database,
+          },
+          {
+            label: "Templates",
+            href: "/automations/templates",
+            icon: FileText,
+          },
           {
             label: "App Authentications",
             href: "/automations/app-authentications",
@@ -125,16 +156,34 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
         href: "/whatsapp-mini-apps",
         icon: Grid3x3,
       },
-      { id: "chat-widget", label: "Chat Widget", href: "/chat-widget", icon: MessageSquare },
-      { id: "voice-ai-agent", label: t.sidebar.voiceAi, href: "/voice-ai-agent", icon: Headset },
+      {
+        id: "chat-widget",
+        label: "Chat Widget",
+        href: "/chat-widget",
+        icon: MessageCircle,
+      }, // was MessageSquare (duplicate with CRM > Live Chat)
+      {
+        id: "voice-ai-agent",
+        label: t.sidebar.voiceAi,
+        href: "/voice-ai-agent",
+        icon: Headset,
+      },
       {
         id: "department",
         label: t.sidebar.department,
         href: "/department",
         icon: Building2,
         children: [
-          { label: "Analytics", href: "/department/analytics", icon: BarChart3 },
-          { label: "Departments", href: "/department/departments", icon: Building2 },
+          {
+            label: "Analytics",
+            href: "/department/analytics",
+            icon: BarChart3,
+          },
+          {
+            label: "Departments",
+            href: "/department/departments",
+            icon: Building2,
+          },
           { label: "Roles", href: "/department/roles", icon: ShieldCheck },
         ],
       },
@@ -142,7 +191,7 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
         id: "workspace",
         label: t.sidebar.workspace,
         href: "/workspace",
-        icon: Share2,
+        icon: Briefcase, // was Share2 — workspace ke liye zyada sahi
         children: [
           {
             label: "Account Settings",
@@ -154,16 +203,8 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
             href: "/workspace/wallet",
             icon: Wallet,
           },
-          {
-            label: "Billing",
-            href: "/workspace/billing",
-            icon: CreditCard,
-          },
-          {
-            label: "Support",
-            href: "/workspace/support",
-            icon: Headset,
-          },
+          { label: "Billing", href: "/workspace/billing", icon: CreditCard },
+          { label: "Support", href: "/workspace/support", icon: LifeBuoy }, // was Headset (duplicate with Voice AI Agent)
         ],
       },
       {
@@ -173,28 +214,41 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
         icon: Settings,
         children: [
           { label: "Profile", href: "/settings/profile", icon: User },
-          { label: "Notifications", href: "/settings/notifications", icon: Bell },
+          {
+            label: "Notifications",
+            href: "/settings/notifications",
+            icon: Bell,
+          },
           { label: "Security", href: "/settings/security", icon: Shield },
           { label: "Appearance", href: "/settings/appearance", icon: Palette },
           { label: "Integrations", href: "/settings/integrations", icon: Plug },
-          { label: "Activity Logs", href: "/settings/activity-logs", icon: History },
-          { label: "Account & Data", href: "/settings/account-data", icon: Database },
+          {
+            label: "Activity Logs",
+            href: "/settings/activity-logs",
+            icon: History,
+          },
+          {
+            label: "Account & Data",
+            href: "/settings/account-data",
+            icon: Database,
+          },
         ],
       },
     ],
-    [t]
+    [t],
   );
 
   // Auto-expand the parent whose child route matches the current path
   useEffect(() => {
-    const activeParent = menuItems.find((item) =>
-      pathname === item.href ||
-      (item.href !== "/dashboard" && pathname.startsWith(item.href + "/")) ||
-      item.children?.some(
-        (child) =>
-          pathname === child.href ||
-          (child.href !== item.href && pathname.startsWith(child.href + "/"))
-      ),
+    const activeParent = menuItems.find(
+      (item) =>
+        pathname === item.href ||
+        (item.href !== "/dashboard" && pathname.startsWith(item.href + "/")) ||
+        item.children?.some(
+          (child) =>
+            pathname === child.href ||
+            (child.href !== item.href && pathname.startsWith(child.href + "/")),
+        ),
     );
     if (activeParent && activeParent.children?.length) {
       setExpanded(activeParent.id);
@@ -264,11 +318,13 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
                 const hasChildren = !!item.children?.length;
                 const isParentActive =
                   pathname === item.href ||
-                  (item.href !== "/dashboard" && pathname.startsWith(item.href + "/")) ||
+                  (item.href !== "/dashboard" &&
+                    pathname.startsWith(item.href + "/")) ||
                   item.children?.some(
                     (c) =>
                       pathname === c.href ||
-                      (c.href !== item.href && pathname.startsWith(c.href + "/"))
+                      (c.href !== item.href &&
+                        pathname.startsWith(c.href + "/")),
                   );
                 const isOpen = expanded === item.id;
 
