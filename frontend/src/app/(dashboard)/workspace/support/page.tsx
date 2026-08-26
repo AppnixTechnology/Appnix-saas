@@ -13,10 +13,13 @@ import {
   Plus,
   Search,
   Filter,
-  LifeBuoy,
+  Ticket,
   MessageSquare,
   Clock,
+  CircleDot,
+  RefreshCw,
   CheckCircle2,
+  Archive,
   AlertCircle,
   Paperclip,
   Send,
@@ -25,7 +28,6 @@ import {
   ShieldCheck,
   FileText,
   ArrowUpRight,
-  HelpCircle,
   Sparkles,
   Download,
 } from "lucide-react";
@@ -232,15 +234,15 @@ const priorityStyles: Record<TicketPriority, { badge: string; dot: string }> = {
 const statusStyles: Record<TicketStatus, { badge: string; icon: React.ElementType }> = {
   Open: {
     badge: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border-blue-200",
-    icon: Clock,
+    icon: CircleDot,
   },
   "In Progress": {
     badge: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border-amber-200",
-    icon: Sparkles,
+    icon: RefreshCw,
   },
   "Waiting for Customer": {
     badge: "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 border-purple-200",
-    icon: HelpCircle,
+    icon: Clock,
   },
   Resolved: {
     badge: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-200",
@@ -248,7 +250,7 @@ const statusStyles: Record<TicketStatus, { badge: string; icon: React.ElementTyp
   },
   Closed: {
     badge: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-200",
-    icon: CheckCircle2,
+    icon: Archive,
   },
 };
 
@@ -395,49 +397,50 @@ export default function SupportTicketsPage() {
       </div>
 
       {/* Ticket Metric Cards */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border bg-card p-4 shadow-xs">
-          <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-            <LifeBuoy className="h-4.5 w-4.5 text-primary" />
-          </div>
-          <p className="text-xs text-muted-foreground">Total Tickets Raised</p>
-          <p className="text-2xl font-bold mt-0.5 text-foreground">{tickets.length}</p>
-          <p className="text-xs text-muted-foreground mt-1">All time history</p>
-        </div>
+   {/* Ticket Metric Cards */}
+<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+  <div className="rounded-xl border bg-card p-4 shadow-xs">
+    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+      <Ticket className="h-4.5 w-4.5 text-primary" />
+    </div>
+    <p className="text-xs text-muted-foreground">Total Tickets Raised</p>
+    <p className="text-2xl font-bold mt-0.5 text-foreground">{tickets.length}</p>
+    <p className="text-xs text-muted-foreground mt-1">All time history</p>
+  </div>
 
-        <div className="rounded-xl border bg-card p-4 shadow-xs">
-          <div className="h-9 w-9 rounded-lg bg-amber-100 dark:bg-amber-950 flex items-center justify-center mb-3">
-            <Sparkles className="h-4.5 w-4.5 text-amber-600 dark:text-amber-400" />
-          </div>
-          <p className="text-xs text-muted-foreground">In Progress & Open</p>
-          <p className="text-2xl font-bold mt-0.5 text-foreground">
-            {tickets.filter((t) => t.status === "Open" || t.status === "In Progress").length}
-          </p>
-          <p className="text-xs text-amber-600 font-medium mt-1">Active priority queue</p>
-        </div>
+  <div className="rounded-xl border bg-card p-4 shadow-xs">
+    <div className="h-9 w-9 rounded-lg bg-amber-100 dark:bg-amber-950 flex items-center justify-center mb-3">
+      <RefreshCw className="h-4.5 w-4.5 text-amber-600 dark:text-amber-400" />
+    </div>
+    <p className="text-xs text-muted-foreground">In Progress & Open</p>
+    <p className="text-2xl font-bold mt-0.5 text-foreground">
+      {tickets.filter((t) => t.status === "Open" || t.status === "In Progress").length}
+    </p>
+    <p className="text-xs text-amber-600 font-medium mt-1">Active priority queue</p>
+  </div>
 
-        <div className="rounded-xl border bg-card p-4 shadow-xs">
-          <div className="h-9 w-9 rounded-lg bg-purple-100 dark:bg-purple-950 flex items-center justify-center mb-3">
-            <HelpCircle className="h-4.5 w-4.5 text-purple-600 dark:text-purple-400" />
-          </div>
-          <p className="text-xs text-muted-foreground">Waiting for You</p>
-          <p className="text-2xl font-bold mt-0.5 text-foreground">
-            {tickets.filter((t) => t.status === "Waiting for Customer").length}
-          </p>
-          <p className="text-xs text-purple-600 font-medium mt-1">Response requested</p>
-        </div>
+  <div className="rounded-xl border bg-card p-4 shadow-xs">
+    <div className="h-9 w-9 rounded-lg bg-purple-100 dark:bg-purple-950 flex items-center justify-center mb-3">
+      <Clock className="h-4.5 w-4.5 text-purple-600 dark:text-purple-400" />
+    </div>
+    <p className="text-xs text-muted-foreground">Waiting for You</p>
+    <p className="text-2xl font-bold mt-0.5 text-foreground">
+      {tickets.filter((t) => t.status === "Waiting for Customer").length}
+    </p>
+    <p className="text-xs text-purple-600 font-medium mt-1">Response requested</p>
+  </div>
 
-        <div className="rounded-xl border bg-card p-4 shadow-xs">
-          <div className="h-9 w-9 rounded-lg bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center mb-3">
-            <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <p className="text-xs text-muted-foreground">Resolved Tickets</p>
-          <p className="text-2xl font-bold mt-0.5 text-foreground">
-            {tickets.filter((t) => t.status === "Resolved" || t.status === "Closed").length}
-          </p>
-          <p className="text-xs text-emerald-600 font-medium mt-1">100% SLA compliance</p>
-        </div>
-      </div>
+  <div className="rounded-xl border bg-card p-4 shadow-xs">
+    <div className="h-9 w-9 rounded-lg bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center mb-3">
+      <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
+    </div>
+    <p className="text-xs text-muted-foreground">Resolved Tickets</p>
+    <p className="text-2xl font-bold mt-0.5 text-foreground">
+      {tickets.filter((t) => t.status === "Resolved" || t.status === "Closed").length}
+    </p>
+    <p className="text-xs text-emerald-600 font-medium mt-1">100% SLA compliance</p>
+  </div>
+</div>
 
       {/* Filter Tabs & Search */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border rounded-xl bg-card p-3 shadow-xs">
