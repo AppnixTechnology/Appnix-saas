@@ -1158,6 +1158,9 @@ import {
   FileText,
   CheckCircle2,
   Filter,
+  Calendar,
+  ArrowUpDown,
+  ChevronDown,
 } from "lucide-react";
 
 // Lucide 1.0 removed all brand/logo icons (Facebook, WhatsApp, etc.) for
@@ -1637,7 +1640,11 @@ export default function LiveChatPage() {
   const getDisplayName = (conv: Conversation) =>
     customNames[conv.id]?.trim() || conv.identifier;
 
-  // Filter conversations strictly based on the top Channel filter & search query
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
+  const [selectedYear, setSelectedYear] = useState<string>("2026");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+
+  // Filter conversations strictly based on the top Channel filter, search query, month, and date sorting
   const filteredConversations = conversations.filter((conv) => {
     const matchesChannel =
       selectedChannel === "all" || conv.channel === selectedChannel;
@@ -1827,17 +1834,81 @@ export default function LiveChatPage() {
               )}
             </div>
 
+            {/* Month & Year Dropdown Selector + Sort Order Toggle */}
+            <div className="flex items-center gap-1.5 pt-0.5">
+              {/* Month Dropdown */}
+              <div className="relative flex-1">
+                <div className="absolute left-2 top-2 pointer-events-none text-muted-foreground">
+                  <Calendar className="h-3.5 w-3.5" />
+                </div>
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="w-full h-8 pl-7 pr-6 rounded-lg border border-slate-200 dark:border-slate-800 bg-background text-[11px] font-medium text-slate-800 dark:text-slate-200 cursor-pointer appearance-none shadow-2xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                >
+                  <option value="all">All Months</option>
+                  <option value="1">January</option>
+                  <option value="2">February</option>
+                  <option value="3">March</option>
+                  <option value="4">April</option>
+                  <option value="5">May</option>
+                  <option value="6">June</option>
+                  <option value="7">July</option>
+                  <option value="8">August</option>
+                  <option value="9">September</option>
+                  <option value="10">October</option>
+                  <option value="11">November</option>
+                  <option value="12">December</option>
+                </select>
+                <ChevronDown className="absolute right-2 top-2.5 h-3 w-3 pointer-events-none text-muted-foreground/60" />
+              </div>
+
+              {/* Year Selector */}
+              <div className="relative w-18 shrink-0">
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="w-full h-8 px-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-background text-[11px] font-medium text-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                >
+                  <option value="2026">2026</option>
+                  <option value="2025">2025</option>
+                  <option value="2024">2024</option>
+                </select>
+              </div>
+
+              {/* Sort Toggle Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSortOrder((s) => (s === "desc" ? "asc" : "desc"))}
+                title={sortOrder === "desc" ? "Sorted: Newest first" : "Sorted: Oldest first"}
+                className={cn(
+                  "h-8 px-2 text-[11px] font-medium gap-1 shrink-0 rounded-lg border-slate-200 dark:border-slate-800 shadow-2xs",
+                  sortOrder === "asc"
+                    ? "bg-primary/10 text-primary border-primary/30"
+                    : "text-slate-700 dark:text-slate-300"
+                )}
+              >
+                <ArrowUpDown className="h-3 w-3" />
+                <span className="hidden sm:inline">{sortOrder === "desc" ? "Newest" : "Oldest"}</span>
+              </Button>
+            </div>
+
             <div className="flex items-center justify-between text-[11px] text-muted-foreground px-1">
               <span>
                 Showing {filteredConversations.length} conversation
                 {filteredConversations.length !== 1 ? "s" : ""}
               </span>
-              {selectedChannel !== "all" && (
+              {(selectedChannel !== "all" || selectedMonth !== "all" || searchQuery) && (
                 <button
-                  onClick={() => setSelectedChannel("all")}
-                  className="text-primary hover:underline"
+                  onClick={() => {
+                    setSelectedChannel("all");
+                    setSelectedMonth("all");
+                    setSearchQuery("");
+                  }}
+                  className="text-primary hover:underline font-semibold text-[10px]"
                 >
-                  Show All
+                  Reset
                 </button>
               )}
             </div>

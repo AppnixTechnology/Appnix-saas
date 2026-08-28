@@ -102,16 +102,56 @@ const WORKFLOWS: WorkflowRow[] = [
 const TOTAL_RESULTS = 32;
 const TOTAL_PAGES = 3;
 
+import { CreateWorkflowModal } from "@/components/automations/CreateWorkflowModal";
+import { UnlockWorkflowModal } from "@/components/automations/UnlockWorkflowModal";
+
 // ---------- Page ----------
 export default function WorkflowPage() {
   const [activeFolder, setActiveFolder] = useState("all");
+  const [folders, setFolders] = useState(FOLDERS);
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState(WORKFLOWS);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
 
   const toggleRow = (id: string) =>
     setRows((prev) =>
       prev.map((r) => (r.id === id ? { ...r, active: !r.active } : r))
     );
+
+  const handleWorkflowCreated = (newWf: any) => {
+    const newRow: WorkflowRow = {
+      id: newWf.id,
+      active: true,
+      apps: [{ icon: Sparkles, bg: "bg-emerald-500/10 border", color: "text-emerald-600" }],
+      title: newWf.title,
+      tags: newWf.tags || "General",
+      folder: newWf.folder || "All",
+      createdOn: "Just now",
+    };
+    setRows([newRow, ...rows]);
+  };
+
+  const handleWorkflowUnlocked = (unlockedWf: any) => {
+    const newRow: WorkflowRow = {
+      id: unlockedWf.id,
+      active: true,
+      apps: [
+        { icon: Sparkles, bg: "bg-amber-500/10 border", color: "text-amber-600" },
+        { icon: Zap, bg: "bg-emerald-600", color: "text-white" },
+      ],
+      title: unlockedWf.title,
+      tags: typeof unlockedWf.tags === "string" ? unlockedWf.tags : (unlockedWf.tags?.join(", ") || "Premium, Unlocked"),
+      folder: unlockedWf.folder || "All",
+      createdOn: "Just now",
+    };
+    setRows([newRow, ...rows]);
+  };
+
+  const handleFolderCreated = (name: string) => {
+    const newId = `folder_${Date.now()}`;
+    setFolders((prev) => [...prev, { id: newId, name, count: null }]);
+  };
 
   return (
     <div className="space-y-6">
@@ -134,12 +174,18 @@ export default function WorkflowPage() {
           WORKFLOW
         </h1>
         <div className="flex items-center gap-3">
-          <Button>
-            <Plus className="h-4 w-4" />
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+          >
+            <Plus className="h-4 w-4 mr-1" />
             Create Workflow
           </Button>
-          <Button variant="outline">
-            <Lock className="h-4 w-4" />
+          <Button
+            variant="outline"
+            onClick={() => setIsUnlockModalOpen(true)}
+          >
+            <Lock className="h-4 w-4 mr-1" />
             Unlock Workflow
           </Button>
         </div>
@@ -332,6 +378,22 @@ export default function WorkflowPage() {
           <MessageSquare className="h-5 w-5" />
         </Button>
       </div>
+
+      {/* Create Workflow Modal */}
+      <CreateWorkflowModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={handleWorkflowCreated}
+        folders={folders}
+        onFolderCreated={handleFolderCreated}
+      />
+
+      {/* Unlock Workflow Modal */}
+      <UnlockWorkflowModal
+        isOpen={isUnlockModalOpen}
+        onClose={() => setIsUnlockModalOpen(false)}
+        onWorkflowUnlocked={handleWorkflowUnlocked}
+      />
     </div>
   );
 }

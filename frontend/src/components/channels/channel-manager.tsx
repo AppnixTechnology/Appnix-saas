@@ -297,14 +297,13 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
                 <span className="hidden sm:inline">Conversation Statistics</span>
               </Button>
             </Link>
-            <Button variant="outline" className="shrink-0">
-              <Wallet className="h-4 w-4 sm:mr-1" />
-              <span className="hidden sm:inline">Total Balance</span>
-            </Button>
-            <Button variant="outline" className="shrink-0">
-              <Zap className="h-4 w-4 sm:mr-1" />
-              <span className="hidden sm:inline">Bulk Action</span>
-            </Button>
+            <Link href="/channels/balance">
+              <Button variant="outline" className="shrink-0">
+                <Wallet className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Total Balance</span>
+              </Button>
+            </Link>
+           
           </div>
         </div>
       </div>

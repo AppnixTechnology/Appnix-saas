@@ -164,6 +164,108 @@ model MetaTemplate {
   @@map("meta_templates")
 }
 
+model Folder {
+  id          String     @id @default(uuid())
+  tenantId    String?
+  name        String
+  workflows   Workflow[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("folders")
+}
+
+model Workflow {
+  id          String         @id @default(uuid())
+  tenantId    String?
+  title       String
+  status      Boolean        @default(true)
+  folderId    String?
+  folder      Folder?        @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  triggerType TriggerType    @default(INBOUND_MESSAGE)
+  tags        String[]       @default([])
+  nodes       Json           @default("[]")
+  edges       Json           @default("[]")
+  isLocked    Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([folderId])
+  @@map("workflows")
+}
+
+model WorkflowLicense {
+  id          String    @id @default(uuid())
+  key         String    @unique
+  workflowId  String?
+  workflowTitle String?
+  redeemedBy  String?
+  isRedeemed  Boolean   @default(false)
+  redeemedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("workflow_licenses")
+}
+
+model DataStore {
+  id          String            @id @default(uuid())
+  tenantId    String?
+  name        String
+  slug        String            @unique
+  description String?
+  keyType     String            @default("STRING")
+  ttlSeconds  Int?              // Optional time-to-live for transient data
+  recordLimit Int               @default(10000)
+  records     DataStoreRecord[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@map("data_stores")
+}
+
+model DataStoreRecord {
+  id          String    @id @default(uuid())
+  dataStoreId String
+  dataStore   DataStore @relation(fields: [dataStoreId], references: [id], onDelete: Cascade)
+  key         String    // Unique lookup key per store (e.g. phone or userId)
+  value       Json      // Structured JSON record payload
+  expiresAt   DateTime? // Computed from TTL
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([dataStoreId, key])
+  @@index([dataStoreId, key])
+  @@index([expiresAt])
+  @@map("data_store_records")
+}
+
+model WorkflowTemplate {
+  id           String   @id @default(uuid())
+  title        String
+  slug         String   @unique
+  description  String
+  category     String   // E_COMMERCE, SUPPORT, MARKETING, LEAD_GEN, UTILITY
+  channels     String[] // WHATSAPP, RCS, FACEBOOK, INSTAGRAM
+  apps         String[] // SHOPIFY, WEBHOOK, GOOGLE_SHEETS, AI_AGENT
+  nodes        Json     @default("[]")
+  edges        Json     @default("[]")
+  isPremium    Boolean  @default(false)
+  installCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("workflow_templates")
+}
+
+enum TriggerType {
+  INBOUND_MESSAGE
+  WEBHOOK_EVENT
+  SCHEDULED_CRON
+  FORM_SUBMISSION
+}
+
 enum CampaignStatus {
   DRAFT
   READY_FOR_TEST

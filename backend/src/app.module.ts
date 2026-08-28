@@ -9,6 +9,9 @@ import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { MailModule } from './modules/mail/mail.module';
 import { SupportModule } from './modules/support/support.module';
 import { WhatsAppTemplatesModule } from './modules/whatsapp-templates/whatsapp-templates.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { WorkflowsModule } from './modules/workflows/workflows.module';
+import { DataStoreModule } from './modules/data-store/data-store.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -23,6 +26,9 @@ import { PrismaModule } from './prisma/prisma.module';
     CrmContactsModule,
     CampaignsModule,
     WhatsAppTemplatesModule,
+    ChatModule,
+    WorkflowsModule,
+    DataStoreModule,
     SupportModule,
   ],
 })
