@@ -8,6 +8,7 @@ import { CrmContactsModule } from './modules/crm/crm.module';
 import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { MailModule } from './modules/mail/mail.module';
 import { SupportModule } from './modules/support/support.module';
+import { WhatsAppTemplatesModule } from './modules/whatsapp-templates/whatsapp-templates.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -21,6 +22,7 @@ import { PrismaModule } from './prisma/prisma.module';
     BillingModule,
     CrmContactsModule,
     CampaignsModule,
+    WhatsAppTemplatesModule,
     SupportModule,
   ],
 })

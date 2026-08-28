@@ -487,16 +487,62 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
 
                 {/* Action Icons toolbar */}
                 <div className="flex items-center gap-1 px-3 py-2 border-t bg-muted/20 overflow-x-auto">
-                  {channel.actions.map((ActionIcon, idx) => (
-                    <Button
-                      key={idx}
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted"
-                    >
-                      <ActionIcon className="h-3.5 w-3.5" />
-                    </Button>
-                  ))}
+                  {channel.actions.map((ActionIcon, idx) => {
+                    let title = "Channel Action";
+                    let href = "";
+
+                    if (ActionIcon === FileText) {
+                      title = "Message Templates (Meta Approval)";
+                      href = channel.type === "whatsapp" ? "/channels/whatsapp/templates" : "/automations/templates";
+                    } else if (ActionIcon === Bot) {
+                      title = "Chatbot Automation Builder";
+                      href = "/chatbots";
+                    } else if (ActionIcon === MessageSquare) {
+                      title = "Live Chat & Broadcast";
+                      href = "/crm/live-chat";
+                    } else if (ActionIcon === BarChart3) {
+                      title = "Conversation Statistics";
+                      href = "/automations/analytics";
+                    } else if (ActionIcon === Link2) {
+                      title = "Webhook & API Integration";
+                    } else if (ActionIcon === CreditCard) {
+                      title = "Channel Balance & Wallet";
+                      href = "/billing";
+                    } else if (ActionIcon === Zap) {
+                      title = "Workflow Automation";
+                      href = "/automations/workflow";
+                    }
+
+                    if (href) {
+                      return (
+                        <Link key={idx} href={href} title={title}>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className={cn(
+                              "h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors",
+                              ActionIcon === FileText && channel.type === "whatsapp" && "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/60"
+                            )}
+                          >
+                            <ActionIcon className="h-3.5 w-3.5" />
+                          </Button>
+                        </Link>
+                      );
+                    }
+
+                    return (
+                      <Button
+                        key={idx}
+                        size="icon"
+                        variant="ghost"
+                        title={title}
+                        onClick={() => alert(`${title} for ${channel.name}`)}
+                        className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      >
+                        <ActionIcon className="h-3.5 w-3.5" />
+                      </Button>
+                    );
+                  })}
 
                   <div className="ml-auto">
                     <Badge

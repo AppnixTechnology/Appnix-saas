@@ -609,6 +609,12 @@ import {
   CreditCard,
   UserPlus,
   LayoutGrid,
+  Activity,
+  BarChart3,
+  ChevronRight,
+  CircleCheck,
+  Headphones,
+  Sparkles,
 } from "lucide-react";
 import {
   LineChart,
@@ -700,7 +706,8 @@ export default function DashboardPage() {
         value: "2,847",
         change: "+12.5%",
         icon: MessageSquare,
-        color: "bg-blue-500",
+        iconClass: "bg-sky-500/10 text-sky-600 dark:bg-sky-400/15 dark:text-sky-300",
+        accentClass: "bg-sky-500",
         trend: "up",
       },
       {
@@ -708,7 +715,8 @@ export default function DashboardPage() {
         value: "24",
         change: "+3",
         icon: Send,
-        color: "bg-purple-500",
+        iconClass: "bg-violet-500/10 text-violet-600 dark:bg-violet-400/15 dark:text-violet-300",
+        accentClass: "bg-violet-500",
         trend: "up",
       },
       {
@@ -716,7 +724,8 @@ export default function DashboardPage() {
         value: "15,632",
         change: "+8.2%",
         icon: Bot,
-        color: "bg-green-500",
+        iconClass: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/15 dark:text-emerald-300",
+        accentClass: "bg-emerald-500",
         trend: "up",
       },
       {
@@ -724,7 +733,8 @@ export default function DashboardPage() {
         value: "12",
         change: "0",
         icon: Zap,
-        color: "bg-orange-500",
+        iconClass: "bg-amber-500/10 text-amber-600 dark:bg-amber-400/15 dark:text-amber-300",
+        accentClass: "bg-amber-500",
         trend: "neutral",
       },
     ],
@@ -739,7 +749,8 @@ export default function DashboardPage() {
         buttonText: t.dashboard.startCampaign,
         href: "/dashboard/campaigns/new",
         icon: Send,
-        color: "bg-purple-500",
+        iconClass: "bg-violet-500/10 text-violet-600 dark:bg-violet-400/15 dark:text-violet-300",
+        buttonClass: "bg-violet-600 hover:bg-violet-700",
       },
       {
         name: t.dashboard.createBot,
@@ -747,7 +758,8 @@ export default function DashboardPage() {
         buttonText: t.dashboard.createBot,
         href: "/dashboard/bots/new",
         icon: Bot,
-        color: "bg-green-500",
+        iconClass: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/15 dark:text-emerald-300",
+        buttonClass: "bg-emerald-600 hover:bg-emerald-700",
       },
       {
         name: "New Automation",
@@ -755,7 +767,8 @@ export default function DashboardPage() {
         buttonText: "Set Up Automation",
         href: "/dashboard/automations/new",
         icon: Zap,
-        color: "bg-orange-500",
+        iconClass: "bg-amber-500/10 text-amber-600 dark:bg-amber-400/15 dark:text-amber-300",
+        buttonClass: "bg-amber-600 hover:bg-amber-700",
       },
       {
         name: "Import Contacts",
@@ -763,64 +776,79 @@ export default function DashboardPage() {
         buttonText: "Import Now",
         href: "/dashboard/contacts/import",
         icon: Users,
-        color: "bg-blue-500",
+        iconClass: "bg-sky-500/10 text-sky-600 dark:bg-sky-400/15 dark:text-sky-300",
+        buttonClass: "bg-sky-600 hover:bg-sky-700",
       },
     ],
     [t]
   );
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-3 sm:px-0">
+    <div className="space-y-5 sm:space-y-7 px-3 sm:px-0 pb-4">
       {/* Welcome Header */}
-      <div className="flex flex-col gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground break-words">
+      <div className="relative overflow-hidden rounded-2xl border border-border/70 bg-gradient-to-br from-card via-card to-primary/5 px-4 py-5 shadow-sm sm:px-6 sm:py-6">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="max-w-2xl">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+              <span className="flex h-5 w-5 items-center justify-center rounded-md bg-primary/10">
+                <Sparkles className="h-3.5 w-3.5" />
+              </span>
+              Workspace overview
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl break-words">
             {t.auth.welcomeBack}, {user?.name?.split(" ")[0] || "User"}!
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">
-            {t.dashboard.subtitle}
-          </p>
-        </div>
-        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
+            </h1>
+            <p className="mt-1.5 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
+              {t.dashboard.subtitle}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:justify-end items-center gap-2">
           <Button
             asChild
-            className="col-span-2 sm:col-span-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold gap-1.5 shadow-sm w-full sm:w-auto"
+            className="col-span-2 sm:col-span-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold gap-1.5 shadow-md shadow-emerald-600/15 w-full sm:w-auto"
           >
             <Link href="/products">
               <LayoutGrid className="h-4 w-4" />
               {t.sidebar.products}
             </Link>
           </Button>
-          <Button asChild className="w-full sm:w-auto">
+          <Button asChild className="w-full sm:w-auto gap-1.5 shadow-sm">
             <Link href="/dashboard/campaigns/new">
+              <Send className="h-4 w-4" />
               {t.dashboard.startCampaign}
             </Link>
           </Button>
-          <Button asChild variant="outline" className="w-full sm:w-auto">
-            <Link href="/crm/live-chat">{t.dashboard.liveChat}</Link>
+          <Button asChild variant="outline" className="w-full sm:w-auto gap-1.5 bg-background/70">
+            <Link href="/crm/live-chat">
+              <Headphones className="h-4 w-4" />
+              {t.dashboard.liveChat}
+            </Link>
           </Button>
+          </div>
         </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 w-full min-w-0">
         {stats.map((stat) => (
-          <Card key={stat.name} className="min-w-0 overflow-hidden">
-            <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground leading-tight min-w-0 break-words">
+          <Card key={stat.name} className="group relative min-w-0 overflow-hidden border-border/70 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+            <div className={cn("absolute inset-x-0 top-0 h-0.5", stat.accentClass)} />
+            <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2 px-4 sm:px-5 pt-4 sm:pt-5">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground leading-tight min-w-0 break-words">
                 {stat.name}
               </CardTitle>
               <div
                 className={cn(
-                  "h-8 w-8 sm:h-10 sm:w-10 rounded-lg flex items-center justify-center shrink-0",
-                  stat.color,
+                  "h-9 w-9 sm:h-10 sm:w-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105",
+                  stat.iconClass,
                 )}
               >
-                <stat.icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                <stat.icon className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
             </CardHeader>
-            <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6 min-w-0">
-              <div className="text-xl sm:text-2xl font-bold truncate">
+            <CardContent className="px-4 sm:px-5 pb-4 sm:pb-5 min-w-0">
+              <div className="text-2xl sm:text-[1.75rem] font-bold tracking-tight truncate">
                 {stat.value}
               </div>
               <p
@@ -834,7 +862,7 @@ export default function DashboardPage() {
                 {stat.trend === "up" ? (
                   <span className="flex items-center flex-wrap gap-1">
                     <TrendingUp className="h-3 w-3 shrink-0" />
-                    <span>{stat.change} vs last month</span>
+                  <span>{stat.change} from last month</span>
                   </span>
                 ) : (
                   "No change vs last month"
@@ -850,28 +878,30 @@ export default function DashboardPage() {
         {/* LEFT COLUMN */}
         <div className="lg:col-span-2 space-y-4 sm:space-y-6 min-w-0">
           {/* Contacts Overview */}
-          <Card className="min-w-0">
-            <CardHeader className="px-3 sm:px-6">
+          <Card className="min-w-0 border-border/70 shadow-sm">
+            <CardHeader className="px-4 sm:px-6 pb-4">
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                  <UserPlus className="h-5 w-5 text-primary shrink-0" />
+                <CardTitle className="flex items-center gap-2.5 text-base sm:text-lg font-semibold tracking-tight">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <UserPlus className="h-4 w-4 shrink-0" />
+                  </span>
                   {t.dashboard.contacts}
                 </CardTitle>
-                <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground border rounded-md px-2.5 sm:px-3 py-1.5 whitespace-nowrap">
+                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground border rounded-lg bg-muted/40 px-2.5 sm:px-3 py-1.5 whitespace-nowrap">
                   <Calendar className="h-4 w-4 shrink-0" />
                   <span>18-Feb-2026 to 18-Mar-2026</span>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4 px-3 sm:px-6">
-              <div className="inline-block rounded-lg border bg-accent/30 px-4 py-3">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+            <CardContent className="space-y-4 px-4 sm:px-6">
+              <div className="inline-block rounded-xl border border-primary/10 bg-primary/5 px-4 py-3">
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.12em]">
                   {t.dashboard.contacts}
                 </p>
-                <p className="text-2xl font-bold">4</p>
+                <p className="mt-0.5 text-2xl font-bold tracking-tight">4</p>
               </div>
 
-              <div className="h-56 sm:h-64 w-full max-w-full min-w-0 rounded-lg border bg-accent/10 p-2 overflow-hidden">
+              <div className="h-56 sm:h-64 w-full max-w-full min-w-0 rounded-xl border border-border/70 bg-gradient-to-b from-primary/[0.04] to-transparent p-2 overflow-hidden">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
                     data={contactsChartData}
@@ -906,19 +936,22 @@ export default function DashboardPage() {
           </Card>
 
           {/* Recent Campaigns */}
-          <Card>
-            <CardHeader className="px-3 sm:px-6">
+          <Card className="border-border/70 shadow-sm">
+            <CardHeader className="px-4 sm:px-6 pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base sm:text-lg">
+                <CardTitle className="flex items-center gap-2.5 text-base sm:text-lg font-semibold tracking-tight">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:bg-violet-400/15 dark:text-violet-300">
+                    <Send className="h-4 w-4" />
+                  </span>
                   {t.dashboard.activeCampaigns}
                 </CardTitle>
-                <Button asChild variant="ghost" size="sm">
-                  <Link href="/dashboard/campaigns">View All</Link>
+                <Button asChild variant="ghost" size="sm" className="gap-1 text-primary hover:text-primary">
+                  <Link href="/dashboard/campaigns">View all <ChevronRight className="h-4 w-4" /></Link>
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="px-3 sm:px-6">
-              <div className="overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0">
+            <CardContent className="px-4 sm:px-6">
+              <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
                 <Table className="min-w-[560px] sm:min-w-0">
                   <TableHeader>
                     <TableRow>
@@ -960,27 +993,30 @@ export default function DashboardPage() {
           </Card>
 
           {/* Recent Activity */}
-          <Card>
-            <CardHeader className="px-3 sm:px-6">
+          <Card className="border-border/70 shadow-sm">
+            <CardHeader className="px-4 sm:px-6 pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base sm:text-lg">
+                <CardTitle className="flex items-center gap-2.5 text-base sm:text-lg font-semibold tracking-tight">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:bg-sky-400/15 dark:text-sky-300">
+                    <Activity className="h-4 w-4" />
+                  </span>
                   {t.dashboard.recentActivity}
                 </CardTitle>
-                <Button asChild variant="ghost" size="sm">
-                  <Link href="/dashboard/activity">View All</Link>
+                <Button asChild variant="ghost" size="sm" className="gap-1 text-primary hover:text-primary">
+                  <Link href="/dashboard/activity">View all <ChevronRight className="h-4 w-4" /></Link>
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="px-3 sm:px-6">
+            <CardContent className="px-4 sm:px-6">
               <div className="space-y-3 sm:space-y-4">
                 {recentActivity.map((activity) => (
                   <div
                     key={activity.id}
                     className={cn(
-                      "flex items-start gap-3 p-3 sm:p-4 rounded-lg transition-colors",
+                      "flex items-start gap-3 p-3 sm:p-4 rounded-xl border border-transparent transition-colors",
                       activity.status === "unread"
-                        ? "bg-accent/50"
-                        : "hover:bg-accent/30",
+                        ? "bg-primary/5 border-primary/10"
+                        : "hover:bg-muted/50 hover:border-border/70",
                     )}
                   >
                     <div
@@ -1051,28 +1087,30 @@ export default function DashboardPage() {
         {/* RIGHT COLUMN */}
         <div className="space-y-4 sm:space-y-6">
           {/* Current Subscription */}
-          <Card>
-            <CardHeader className="px-3 sm:px-6">
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <CreditCard className="h-5 w-5 text-primary shrink-0" />
+          <Card className="border-border/70 shadow-sm">
+            <CardHeader className="px-4 sm:px-6 pb-3">
+              <CardTitle className="flex items-center gap-2.5 text-base sm:text-lg font-semibold tracking-tight">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/15 dark:text-emerald-300">
+                  <CreditCard className="h-4 w-4 shrink-0" />
+                </span>
                 Current Subscription
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 px-3 sm:px-6">
+            <CardContent className="space-y-3 px-4 sm:px-6">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
-                  <p className="text-2xl font-bold">
+                  <p className="text-3xl font-bold tracking-tight">
                     {subscription.totalDays}
                   </p>
                   <p className="text-xs text-muted-foreground">Total Days</p>
                 </div>
-                <Badge className="bg-green-700 hover:bg-green-700">
+                <Badge className="bg-emerald-600 hover:bg-emerald-600 shadow-sm">
                   {subscription.remainingDays} Days Remaining
                 </Badge>
               </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div className="h-2.5 bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-green-700 rounded-full"
+                  className="h-full bg-emerald-600 rounded-full"
                   style={{
                     width: `${(subscription.remainingDays / subscription.totalDays) * 100}%`,
                   }}
@@ -1086,22 +1124,26 @@ export default function DashboardPage() {
           </Card>
 
           {/* Quick Actions */}
-          <Card>
-            <CardHeader className="px-3 sm:px-6">
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Zap className="h-5 w-5 text-primary shrink-0" />
+          <Card className="border-border/70 shadow-sm">
+            <CardHeader className="px-4 sm:px-6 pb-3">
+              <CardTitle className="flex items-center gap-2.5 text-base sm:text-lg font-semibold tracking-tight">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:bg-amber-400/15 dark:text-amber-300">
+                  <Zap className="h-4 w-4 shrink-0" />
+                </span>
                 {t.dashboard.quickActions}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
+            <CardContent className="space-y-3 px-4 sm:px-6">
               {quickActions.map((action) => (
                 <div
                   key={action.name}
-                  className="rounded-lg border p-3 sm:p-4 space-y-3"
+                  className="group rounded-xl border border-border/70 bg-muted/[0.18] p-3 sm:p-4 space-y-3 transition-all hover:border-primary/25 hover:bg-primary/[0.03]"
                 >
                   <div className="flex items-center gap-2">
-                    <action.icon className="h-4 w-4 text-foreground shrink-0" />
-                    <span className="font-medium text-foreground text-sm sm:text-base">
+                    <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg shrink-0", action.iconClass)}>
+                      <action.icon className="h-4 w-4" />
+                    </span>
+                    <span className="font-semibold text-foreground text-sm sm:text-base">
                       {action.name}
                     </span>
                   </div>
@@ -1111,9 +1153,8 @@ export default function DashboardPage() {
                   <Button
                     asChild
                     className={cn(
-                      "w-full justify-between text-white",
-                      action.color,
-                      "hover:opacity-90",
+                      "w-full justify-between text-white shadow-sm",
+                      action.buttonClass,
                     )}
                   >
                     <Link href={action.href}>
@@ -1127,20 +1168,23 @@ export default function DashboardPage() {
           </Card>
 
           {/* Workspace Overview */}
-          <Card>
-            <CardHeader className="px-3 sm:px-6">
-              <CardTitle className="text-base sm:text-lg">
+          <Card className="border-border/70 shadow-sm">
+            <CardHeader className="px-4 sm:px-6 pb-3">
+              <CardTitle className="flex items-center gap-2.5 text-base sm:text-lg font-semibold tracking-tight">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:bg-sky-400/15 dark:text-sky-300">
+                  <BarChart3 className="h-4 w-4" />
+                </span>
                 {t.dashboard.title}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 px-3 sm:px-6">
+            <CardContent className="space-y-4 px-4 sm:px-6">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <p className="text-sm text-muted-foreground">Plan</p>
                   <p className="font-medium text-foreground">Professional</p>
                 </div>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/dashboard/billing">Upgrade</Link>
+                <Button variant="outline" size="sm" asChild className="gap-1">
+                  <Link href="/dashboard/billing">Upgrade <ChevronRight className="h-3.5 w-3.5" /></Link>
                 </Button>
               </div>
               <div className="space-y-3">
@@ -1153,7 +1197,7 @@ export default function DashboardPage() {
                       1,247 / 10,000
                     </span>
                   </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-2.5 bg-muted rounded-full overflow-hidden">
                     <div
                       className="h-full bg-primary rounded-full"
                       style={{ width: "12.47%" }}
@@ -1167,7 +1211,7 @@ export default function DashboardPage() {
                     </span>
                     <span className="font-medium shrink-0">5 / 10</span>
                   </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-2.5 bg-muted rounded-full overflow-hidden">
                     <div
                       className="h-full bg-green-500 rounded-full"
                       style={{ width: "50%" }}
@@ -1181,7 +1225,7 @@ export default function DashboardPage() {
                     </span>
                     <span className="font-medium shrink-0">3 / 5</span>
                   </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-2.5 bg-muted rounded-full overflow-hidden">
                     <div
                       className="h-full bg-purple-500 rounded-full"
                       style={{ width: "60%" }}

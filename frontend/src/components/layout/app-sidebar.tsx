@@ -95,6 +95,7 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
         children: [
           { label: "All Channels", href: "/channels", icon: LayoutGrid },
           { label: "WhatsApp", href: "/channels/whatsapp", icon: FaWhatsapp }, // was MessageSquare
+          { label: "WhatsApp Templates", href: "/channels/whatsapp/templates", icon: FileText },
           {
             label: "Instagram",
             href: "/channels/instagram",
