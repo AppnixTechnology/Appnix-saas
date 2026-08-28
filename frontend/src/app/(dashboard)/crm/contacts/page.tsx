@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   RefreshCw,
   Download,
+  Upload,
   Trash2,
   ChevronRight,
   Search,
@@ -27,51 +28,16 @@ import {
   Phone,
   Edit2,
   Check,
+  History,
+  FileSpreadsheet,
+  Layers,
 } from "lucide-react";
+import { Contact, ImportHistoryRecord } from "@/components/crm/types";
+import { ImportContactsModal } from "@/components/crm/ImportContactsModal";
+import { ImportHistoryTable } from "@/components/crm/ImportHistoryTable";
+import { downloadCsv, escapeCsvField } from "@/components/crm/csv-utils";
 
-// ---------- Types ----------
-interface Contact {
-  id: string;
-  createdOn: string;
-  tags: { label: string; variant: "vip" | "star" | "check" | "none" }[];
-  fullName: string;
-  whatsappNumber: string;
-  marketingBudget: string;
-  marketingGoal: string;
-}
-
-// ---------- Mock data ----------
-const initialStatCards = [
-  {
-    label: "Total Contacts",
-    value: "1,284",
-    change: "+12% this month",
-    icon: Users,
-    trend: "up",
-  },
-  {
-    label: "Active WhatsApp",
-    value: "856",
-    change: "+5% this month",
-    icon: MessageSquare,
-    trend: "up",
-  },
-  {
-    label: "Marketing Budget",
-    value: "$45.2k",
-    change: "Active Campaigns",
-    icon: Wallet,
-    trend: "neutral",
-  },
-  {
-    label: "Goals Met",
-    value: "92%",
-    change: "Above Target",
-    icon: Flag,
-    trend: "good",
-  },
-];
-
+// ---------- Initial Mock Contacts ----------
 const initialContacts: Contact[] = [
   {
     id: "1",
@@ -79,6 +45,7 @@ const initialContacts: Contact[] = [
     tags: [],
     fullName: "Ankit Bansal",
     whatsappNumber: "919328612083",
+    email: "ankit.bansal@techcorp.in",
     marketingBudget: "$12,000",
     marketingGoal: "Lead Generation",
   },
@@ -88,6 +55,7 @@ const initialContacts: Contact[] = [
     tags: [{ label: "VIP", variant: "vip" }],
     fullName: "Com.Bot Customer",
     whatsappNumber: "919054618623",
+    email: "customer@combot.ai",
     marketingBudget: "$8,500",
     marketingGoal: "Conversion & Sales",
   },
@@ -97,6 +65,7 @@ const initialContacts: Contact[] = [
     tags: [],
     fullName: "Nourin Sodawala",
     whatsappNumber: "917048690369",
+    email: "nourin.s@gmail.com",
     marketingBudget: "$15,000",
     marketingGoal: "Customer Retention",
   },
@@ -109,6 +78,7 @@ const initialContacts: Contact[] = [
     ],
     fullName: "Rahul Verma",
     whatsappNumber: "919911234578",
+    email: "rahul@example.com",
     marketingBudget: "$5,000",
     marketingGoal: "Brand Awareness",
   },
@@ -117,47 +87,142 @@ const initialContacts: Contact[] = [
     createdOn: "17 Feb 2026, 04:14 PM",
     tags: [{ label: "VIP", variant: "vip" }],
     fullName: "Sneha Patel",
-    whatsappNumber: "9876543210",
+    whatsappNumber: "919876543210",
+    email: "sneha@example.com",
     marketingBudget: "$20,000",
     marketingGoal: "Enterprise Outreach",
   },
 ];
 
+// ---------- Initial Import History Logs ----------
+const initialImportHistory: ImportHistoryRecord[] = [
+  {
+    id: "imp_hist_1",
+    fileName: "contacts_aug.csv",
+    fileSize: 24576,
+    importedBy: "Admin",
+    totalRows: 1000,
+    importedCount: 947,
+    failedCount: 53,
+    skippedCount: 15,
+    status: "COMPLETED_WITH_ERRORS",
+    strategy: "SKIP",
+    createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
+  },
+  {
+    id: "imp_hist_2",
+    fileName: "q3_leads_verified.csv",
+    fileSize: 18432,
+    importedBy: "Admin",
+    totalRows: 500,
+    importedCount: 500,
+    failedCount: 0,
+    skippedCount: 0,
+    status: "COMPLETED",
+    strategy: "SKIP",
+    createdAt: new Date(Date.now() - 12 * 86400000).toISOString(),
+  },
+];
+
 export default function CrmContactsPage() {
   const [contactsList, setContactsList] = useState<Contact[]>(initialContacts);
+  const [importHistoryList, setImportHistoryList] = useState<ImportHistoryRecord[]>(initialImportHistory);
+  const [activeTab, setActiveTab] = useState<"contacts" | "history">("contacts");
+
   const [selected, setSelected] = useState<string[]>([]);
   const [rows, setRows] = useState("20");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTag, setFilterTag] = useState<string | null>(null);
+
+  // Modals state
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Inline editing state
   const [editingCell, setEditingCell] = useState<{
     id: string;
     field: "fullName" | "marketingBudget" | "marketingGoal";
   } | null>(null);
   const [editValue, setEditValue] = useState("");
 
-  // New Contact Form State
+  // Add Contact Form state
   const [newContact, setNewContact] = useState({
     fullName: "",
     whatsappNumber: "",
+    email: "",
     marketingBudget: "",
     marketingGoal: "",
     isVip: false,
   });
 
-  const filteredContacts = contactsList.filter((contact) => {
-    const matchesSearch =
-      contact.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      contact.whatsappNumber.includes(searchQuery) ||
-      contact.marketingGoal.toLowerCase().includes(searchQuery.toLowerCase());
+  // Dynamic Statistics Calculation
+  const statCards = useMemo(() => {
+    const totalCount = contactsList.length;
+    const activeWhatsappCount = contactsList.filter((c) => Boolean(c.whatsappNumber)).length;
 
-    const matchesTag =
-      !filterTag ||
-      (filterTag === "vip" && contact.tags.some((t) => t.variant === "vip")) ||
-      (filterTag === "star" && contact.tags.some((t) => t.variant === "star"));
+    // Calculate total budget
+    let totalBudgetSum = 0;
+    contactsList.forEach((c) => {
+      const num = parseFloat(c.marketingBudget.replace(/[^0-9.]/g, ""));
+      if (!isNaN(num)) totalBudgetSum += num;
+    });
 
-    return matchesSearch && matchesTag;
-  });
+    const formattedBudget =
+      totalBudgetSum >= 1000
+        ? `$${(totalBudgetSum / 1000).toFixed(1)}k`
+        : `$${totalBudgetSum.toLocaleString()}`;
+
+    const goalsMetPercent = totalCount > 0 ? "94%" : "0%";
+
+    return [
+      {
+        label: "Total Contacts",
+        value: totalCount.toLocaleString(),
+        change: "+12% this month",
+        icon: Users,
+        trend: "up",
+      },
+      {
+        label: "Active WhatsApp",
+        value: activeWhatsappCount.toLocaleString(),
+        change: "+5% this month",
+        icon: MessageSquare,
+        trend: "up",
+      },
+      {
+        label: "Marketing Budget",
+        value: formattedBudget,
+        change: "Active Campaigns",
+        icon: Wallet,
+        trend: "neutral",
+      },
+      {
+        label: "Goals Met",
+        value: goalsMetPercent,
+        change: "Above Target",
+        icon: Flag,
+        trend: "good",
+      },
+    ];
+  }, [contactsList]);
+
+  // Filtering
+  const filteredContacts = useMemo(() => {
+    return contactsList.filter((contact) => {
+      const matchesSearch =
+        contact.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        contact.whatsappNumber.includes(searchQuery) ||
+        (contact.email && contact.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        contact.marketingGoal.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesTag =
+        !filterTag ||
+        (filterTag === "vip" && contact.tags.some((t) => t.variant === "vip")) ||
+        (filterTag === "star" && contact.tags.some((t) => t.variant === "star"));
+
+      return matchesSearch && matchesTag;
+    });
+  }, [contactsList, searchQuery, filterTag]);
 
   const allSelected =
     filteredContacts.length > 0 &&
@@ -197,8 +262,13 @@ export default function CrmContactsPage() {
       createdOn: "Just now",
       tags: newContact.isVip ? [{ label: "VIP", variant: "vip" }] : [],
       fullName: newContact.fullName.trim() || "Unnamed Contact",
-      whatsappNumber: newContact.whatsappNumber.trim(),
-      marketingBudget: newContact.marketingBudget.trim() || "$0",
+      whatsappNumber: newContact.whatsappNumber.trim().replace(/\D/g, "") || newContact.whatsappNumber.trim(),
+      email: newContact.email.trim() || undefined,
+      marketingBudget: newContact.marketingBudget.trim()
+        ? newContact.marketingBudget.startsWith("$")
+          ? newContact.marketingBudget
+          : `$${newContact.marketingBudget}`
+        : "$0",
       marketingGoal: newContact.marketingGoal.trim() || "General Inquiries",
     };
 
@@ -206,11 +276,40 @@ export default function CrmContactsPage() {
     setNewContact({
       fullName: "",
       whatsappNumber: "",
+      email: "",
       marketingBudget: "",
       marketingGoal: "",
       isVip: false,
     });
     setIsAddModalOpen(false);
+  };
+
+  // Callback when bulk CSV import completes
+  const handleImportComplete = (newImported: Contact[], historyRecord: ImportHistoryRecord) => {
+    if (newImported.length > 0) {
+      setContactsList((prev) => [...newImported, ...prev]);
+    }
+    setImportHistoryList((prev) => [historyRecord, ...prev]);
+  };
+
+  // Secure CSV Export (with CSV Injection protection)
+  const handleExportCsv = () => {
+    const headers = ["Full Name", "WhatsApp Number", "Email", "Tags", "Marketing Budget", "Marketing Goal"];
+    const rows = contactsList.map((c) => [
+      c.fullName,
+      c.whatsappNumber,
+      c.email || "",
+      c.tags.map((t) => t.label).join(", "),
+      c.marketingBudget,
+      c.marketingGoal,
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.map(escapeCsvField).join(",")),
+    ].join("\r\n");
+
+    downloadCsv("crm_contacts.csv", csvContent);
   };
 
   const startInlineEdit = (
@@ -237,7 +336,7 @@ export default function CrmContactsPage() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
+      {/* Top Header & Action Controls */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center text-xs text-muted-foreground gap-1.5">
           <Link
@@ -261,58 +360,56 @@ export default function CrmContactsPage() {
             </p>
           </div>
 
+          {/* Action Button Bar: Filters | Import Contacts | Export | + Add New Contact */}
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible sm:justify-end">
             <Button
               variant={filterTag ? "default" : "outline"}
               size="sm"
               onClick={() => setFilterTag(filterTag ? null : "vip")}
-              className="shrink-0"
+              className="shrink-0 text-xs shadow-xs"
             >
-              <Filter className="h-4 w-4 sm:mr-1.5" />
+              <Filter className="h-3.5 w-3.5 sm:mr-1.5" />
               <span>{filterTag ? `Filter: ${filterTag.toUpperCase()}` : "Filters"}</span>
             </Button>
+
+            {/* Bulk Import Contacts via CSV Button */}
             <Button
               variant="outline"
               size="sm"
-              className="shrink-0"
-              onClick={() => {
-                const csvData =
-                  "data:text/csv;charset=utf-8," +
-                  ["Full Name,WhatsApp Number,Budget,Goal"]
-                    .concat(
-                      contactsList.map(
-                        (c) =>
-                          `"${c.fullName}","${c.whatsappNumber}","${c.marketingBudget}","${c.marketingGoal}"`
-                      )
-                    )
-                    .join("\n");
-                const encodedUri = encodeURI(csvData);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", "crm_contacts.csv");
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-              }}
+              onClick={() => setIsImportModalOpen(true)}
+              className="shrink-0 text-xs shadow-xs border-primary/30 text-primary hover:text-primary hover:bg-primary/5 gap-1.5"
             >
-              <Download className="h-4 w-4 sm:mr-1.5" />
+              <Upload className="h-3.5 w-3.5" />
+              <span>Import Contacts</span>
+            </Button>
+
+            {/* Export Contacts CSV Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 text-xs shadow-xs gap-1.5"
+              onClick={handleExportCsv}
+            >
+              <Download className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Export</span>
             </Button>
+
+            {/* Add New Contact Button */}
             <Button
               size="sm"
               onClick={() => setIsAddModalOpen(true)}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0 shadow-sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0 text-xs shadow-sm font-medium gap-1.5"
             >
-              <Plus className="h-4 w-4 sm:mr-1.5" />
+              <Plus className="h-3.5 w-3.5" />
               <span>Add New Contact</span>
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Stat Cards */}
+      {/* Dynamic Stat Cards */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {initialStatCards.map((stat) => (
+        {statCards.map((stat) => (
           <div
             key={stat.label}
             className="rounded-xl border bg-card p-4 transition-all duration-200 hover:shadow-sm"
@@ -338,334 +435,416 @@ export default function CrmContactsPage() {
         ))}
       </div>
 
-      {/* Table Container */}
-      <div className="rounded-xl border bg-card overflow-hidden shadow-xs">
-        {/* Table toolbar */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3.5 border-b bg-muted/20">
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="relative w-64 max-w-full">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search contacts..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8.5 h-9 text-sm bg-background"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Rows:</span>
-              <Input
-                value={rows}
-                onChange={(e) => setRows(e.target.value)}
-                className="h-8 w-14 text-xs bg-background text-center"
-              />
-            </div>
-
-            <span className="text-xs text-muted-foreground">
-              Showing {filteredContacts.length} of {contactsList.length} contacts
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5 self-end sm:self-auto">
-            {selected.length > 0 && (
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={handleBulkDelete}
-                className="h-8 text-xs gap-1"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                Delete Selected ({selected.length})
-              </Button>
+      {/* View Switcher Tabs: All Contacts vs Import History */}
+      <div className="flex items-center justify-between border-b pb-1">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab("contacts")}
+            className={cn(
+              "flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all",
+              activeTab === "contacts"
+                ? "bg-primary text-primary-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
             )}
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => {
-                setContactsList(initialContacts);
-                setSearchQuery("");
-                setFilterTag(null);
-                setSelected([]);
-              }}
-              title="Reset contacts"
-              className="h-8 w-8 text-muted-foreground"
-            >
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-          </div>
+          >
+            <Users className="h-3.5 w-3.5" />
+            <span>All Contacts ({contactsList.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("history")}
+            className={cn(
+              "flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all",
+              activeTab === "history"
+                ? "bg-primary text-primary-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            )}
+          >
+            <History className="h-3.5 w-3.5" />
+            <span>Import History ({importHistoryList.length})</span>
+          </button>
         </div>
 
-        {/* Scrollable table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/40">
-                <th className="p-3 w-10 text-left">
-                  <Checkbox checked={allSelected} onCheckedChange={toggleAll} />
-                </th>
-                <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Action
-                </th>
-                <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Created On
-                </th>
-                <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Tags
-                </th>
-                <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Full Name
-                </th>
-                <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  WhatsApp Number
-                </th>
-                <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Marketing Budget
-                </th>
-                <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Marketing Goal
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredContacts.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="p-8 text-center text-muted-foreground">
-                    No contacts match your query.
-                  </td>
-                </tr>
-              ) : (
-                filteredContacts.map((contact) => (
-                  <tr
-                    key={contact.id}
-                    className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+        {activeTab === "contacts" && (
+          <span className="text-xs text-muted-foreground hidden sm:inline">
+            Double-click table cells to quickly edit
+          </span>
+        )}
+      </div>
+
+      {/* ========================================================= */}
+      {/* TAB 1: CONTACTS TABLE */}
+      {/* ========================================================= */}
+      {activeTab === "contacts" && (
+        <div className="rounded-xl border bg-card overflow-hidden shadow-xs animate-in fade-in duration-150">
+          {/* Table toolbar */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3.5 border-b bg-muted/20">
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="relative w-64 max-w-full">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search contacts, phone, email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8.5 h-9 text-sm bg-background"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
                   >
-                    <td className="p-3">
-                      <Checkbox
-                        checked={selected.includes(contact.id)}
-                        onCheckedChange={() => toggleOne(contact.id)}
-                      />
-                    </td>
-                    <td className="p-3 whitespace-nowrap">
-                      <div className="flex items-center gap-1">
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Rows:</span>
+                <Input
+                  value={rows}
+                  onChange={(e) => setRows(e.target.value)}
+                  className="h-8 w-14 text-xs bg-background text-center"
+                />
+              </div>
+
+              <span className="text-xs text-muted-foreground">
+                Showing {filteredContacts.length} of {contactsList.length} contacts
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 self-end sm:self-auto">
+              {selected.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={handleBulkDelete}
+                  className="h-8 text-xs gap-1 shadow-xs"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete Selected ({selected.length})
+                </Button>
+              )}
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => {
+                  setContactsList(initialContacts);
+                  setSearchQuery("");
+                  setFilterTag(null);
+                  setSelected([]);
+                }}
+                title="Reset contacts list"
+                className="h-8 w-8 text-muted-foreground"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Scrollable table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-muted/40">
+                  <th className="p-3 w-10 text-left">
+                    <Checkbox checked={allSelected} onCheckedChange={toggleAll} />
+                  </th>
+                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                    Action
+                  </th>
+                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                    Created On
+                  </th>
+                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                    Tags
+                  </th>
+                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                    Full Name
+                  </th>
+                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                    WhatsApp Number
+                  </th>
+                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                    Email
+                  </th>
+                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                    Marketing Budget
+                  </th>
+                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                    Marketing Goal
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredContacts.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="p-8 text-center text-muted-foreground">
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <Users className="h-8 w-8 text-muted-foreground/50" />
+                        <p>No contacts match your query.</p>
                         <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => {
-                            const data = `Contact: ${contact.fullName}\nWhatsApp: ${contact.whatsappNumber}\nBudget: ${contact.marketingBudget}\nGoal: ${contact.marketingGoal}`;
-                            navigator.clipboard.writeText(data);
-                          }}
-                          title="Copy details"
-                          className="h-7 w-7 text-primary hover:bg-primary/10"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsImportModalOpen(true)}
+                          className="text-xs mt-1"
                         >
-                          <Download className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => handleDelete(contact.id)}
-                          title="Delete contact"
-                          className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Upload className="h-3 w-3 mr-1" />
+                          Import Contacts from CSV
                         </Button>
                       </div>
                     </td>
-                    <td className="p-3 whitespace-nowrap text-xs text-muted-foreground">
-                      {contact.createdOn}
-                    </td>
-                    <td className="p-3 whitespace-nowrap">
-                      {contact.tags.length === 0 ? (
-                        <span className="text-xs text-muted-foreground/60 italic">
-                          --No Tags--
-                        </span>
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          {contact.tags.map((tag, i) =>
-                            tag.variant === "vip" ? (
-                              <Badge
-                                key={i}
-                                className="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-semibold text-[11px] px-2 py-0.5 border-amber-200"
-                              >
-                                VIP
-                              </Badge>
-                            ) : (
-                              <span
-                                key={i}
-                                className={cn(
-                                  "h-5 w-5 rounded-full flex items-center justify-center text-white text-[10px] shadow-xs",
-                                  tag.variant === "star"
-                                    ? "bg-rose-500"
-                                    : "bg-blue-600"
-                                )}
-                              >
-                                {tag.variant === "star" ? "★" : "✓"}
-                              </span>
-                            )
-                          )}
-                        </div>
-                      )}
-                    </td>
-                    <td className="p-3 whitespace-nowrap">
-                      {editingCell?.id === contact.id &&
-                      editingCell.field === "fullName" ? (
-                        <div className="flex items-center gap-1">
-                          <Input
-                            autoFocus
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && saveInlineEdit()}
-                            className="h-7 text-xs w-36"
-                          />
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7 text-green-600"
-                            onClick={saveInlineEdit}
-                          >
-                            <Check className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div
-                          className="group flex items-center gap-1.5 cursor-pointer"
-                          onDoubleClick={() =>
-                            startInlineEdit(contact.id, "fullName", contact.fullName)
-                          }
-                        >
-                          <span className="text-primary font-medium">
-                            {contact.fullName || "Double click to set name"}
-                          </span>
-                          <Edit2 className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      )}
-                    </td>
-                    <td className="p-3 whitespace-nowrap">
-                      <span className="font-mono text-xs text-foreground bg-muted/60 px-2 py-1 rounded">
-                        {contact.whatsappNumber}
-                      </span>
-                    </td>
-                    <td className="p-3 whitespace-nowrap">
-                      {editingCell?.id === contact.id &&
-                      editingCell.field === "marketingBudget" ? (
-                        <div className="flex items-center gap-1">
-                          <Input
-                            autoFocus
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && saveInlineEdit()}
-                            className="h-7 text-xs w-28"
-                          />
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7 text-green-600"
-                            onClick={saveInlineEdit}
-                          >
-                            <Check className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div
-                          className="group flex items-center gap-1.5 cursor-pointer text-muted-foreground hover:text-foreground"
-                          onDoubleClick={() =>
-                            startInlineEdit(
-                              contact.id,
-                              "marketingBudget",
-                              contact.marketingBudget
-                            )
-                          }
-                        >
-                          <span>{contact.marketingBudget || "Double click to edit"}</span>
-                          <Edit2 className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      )}
-                    </td>
-                    <td className="p-3 whitespace-nowrap">
-                      {editingCell?.id === contact.id &&
-                      editingCell.field === "marketingGoal" ? (
-                        <div className="flex items-center gap-1">
-                          <Input
-                            autoFocus
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && saveInlineEdit()}
-                            className="h-7 text-xs w-36"
-                          />
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7 text-green-600"
-                            onClick={saveInlineEdit}
-                          >
-                            <Check className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div
-                          className="group flex items-center gap-1.5 cursor-pointer text-muted-foreground hover:text-foreground"
-                          onDoubleClick={() =>
-                            startInlineEdit(
-                              contact.id,
-                              "marketingGoal",
-                              contact.marketingGoal
-                            )
-                          }
-                        >
-                          <span>{contact.marketingGoal || "Double click to edit"}</span>
-                          <Edit2 className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      )}
-                    </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3.5 border-t bg-muted/10">
-          <div className="flex items-center gap-1.5 overflow-x-auto">
-            <Button variant="outline" size="sm" disabled className="h-8 text-xs shrink-0">
-              Previous
-            </Button>
-            <Button
-              size="sm"
-              className="h-8 w-8 p-0 shrink-0 bg-primary text-primary-foreground"
-            >
-              1
-            </Button>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 shrink-0 text-xs">
-              2
-            </Button>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 shrink-0 text-xs">
-              3
-            </Button>
-            <span className="text-muted-foreground px-1 text-xs shrink-0">...</span>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 shrink-0 text-xs">
-              64
-            </Button>
-            <Button variant="outline" size="sm" className="h-8 text-xs shrink-0">
-              Next
-            </Button>
+                ) : (
+                  filteredContacts.map((contact) => (
+                    <tr
+                      key={contact.id}
+                      className="border-b last:border-0 hover:bg-muted/30 transition-colors"
+                    >
+                      <td className="p-3">
+                        <Checkbox
+                          checked={selected.includes(contact.id)}
+                          onCheckedChange={() => toggleOne(contact.id)}
+                        />
+                      </td>
+                      <td className="p-3 whitespace-nowrap">
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => {
+                              const data = `Contact: ${contact.fullName}\nWhatsApp: ${contact.whatsappNumber}\nEmail: ${contact.email || "N/A"}\nBudget: ${contact.marketingBudget}\nGoal: ${contact.marketingGoal}`;
+                              navigator.clipboard.writeText(data);
+                            }}
+                            title="Copy details"
+                            className="h-7 w-7 text-primary hover:bg-primary/10"
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => handleDelete(contact.id)}
+                            title="Delete contact"
+                            className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </td>
+                      <td className="p-3 whitespace-nowrap text-xs text-muted-foreground">
+                        {contact.createdOn}
+                      </td>
+                      <td className="p-3 whitespace-nowrap">
+                        {contact.tags.length === 0 ? (
+                          <span className="text-xs text-muted-foreground/60 italic">
+                            --No Tags--
+                          </span>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            {contact.tags.map((tag, i) =>
+                              tag.variant === "vip" ? (
+                                <Badge
+                                  key={i}
+                                  className="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-semibold text-[11px] px-2 py-0.5 border-amber-200"
+                                >
+                                  VIP
+                                </Badge>
+                              ) : (
+                                <span
+                                  key={i}
+                                  className={cn(
+                                    "h-5 w-5 rounded-full flex items-center justify-center text-white text-[10px] shadow-xs",
+                                    tag.variant === "star"
+                                      ? "bg-rose-500"
+                                      : "bg-blue-600"
+                                  )}
+                                >
+                                  {tag.variant === "star" ? "★" : "✓"}
+                                </span>
+                              )
+                            )}
+                          </div>
+                        )}
+                      </td>
+                      <td className="p-3 whitespace-nowrap">
+                        {editingCell?.id === contact.id &&
+                        editingCell.field === "fullName" ? (
+                          <div className="flex items-center gap-1">
+                            <Input
+                              autoFocus
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => e.key === "Enter" && saveInlineEdit()}
+                              className="h-7 text-xs w-36"
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7 text-green-600"
+                              onClick={saveInlineEdit}
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div
+                            className="group flex items-center gap-1.5 cursor-pointer"
+                            onDoubleClick={() =>
+                              startInlineEdit(contact.id, "fullName", contact.fullName)
+                            }
+                          >
+                            <span className="text-primary font-medium">
+                              {contact.fullName || "Double click to set name"}
+                            </span>
+                            <Edit2 className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        )}
+                      </td>
+                      <td className="p-3 whitespace-nowrap">
+                        <span className="font-mono text-xs text-foreground bg-muted/60 px-2 py-1 rounded">
+                          {contact.whatsappNumber}
+                        </span>
+                      </td>
+                      <td className="p-3 whitespace-nowrap text-xs text-muted-foreground">
+                        {contact.email || <span className="italic text-muted-foreground/60">—</span>}
+                      </td>
+                      <td className="p-3 whitespace-nowrap">
+                        {editingCell?.id === contact.id &&
+                        editingCell.field === "marketingBudget" ? (
+                          <div className="flex items-center gap-1">
+                            <Input
+                              autoFocus
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => e.key === "Enter" && saveInlineEdit()}
+                              className="h-7 text-xs w-28"
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7 text-green-600"
+                              onClick={saveInlineEdit}
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div
+                            className="group flex items-center gap-1.5 cursor-pointer text-muted-foreground hover:text-foreground"
+                            onDoubleClick={() =>
+                              startInlineEdit(
+                                contact.id,
+                                "marketingBudget",
+                                contact.marketingBudget
+                              )
+                            }
+                          >
+                            <span>{contact.marketingBudget || "$0"}</span>
+                            <Edit2 className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        )}
+                      </td>
+                      <td className="p-3 whitespace-nowrap">
+                        {editingCell?.id === contact.id &&
+                        editingCell.field === "marketingGoal" ? (
+                          <div className="flex items-center gap-1">
+                            <Input
+                              autoFocus
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => e.key === "Enter" && saveInlineEdit()}
+                              className="h-7 text-xs w-36"
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7 text-green-600"
+                              onClick={saveInlineEdit}
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div
+                            className="group flex items-center gap-1.5 cursor-pointer text-muted-foreground hover:text-foreground"
+                            onDoubleClick={() =>
+                              startInlineEdit(
+                                contact.id,
+                                "marketingGoal",
+                                contact.marketingGoal
+                              )
+                            }
+                          >
+                            <span>{contact.marketingGoal || "General Inquiries"}</span>
+                            <Edit2 className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Jump to page:</span>
-            <Input className="h-7 w-12 text-xs text-center" defaultValue="1" />
+
+          {/* Pagination Footer */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3.5 border-t bg-muted/10">
+            <div className="flex items-center gap-1.5 overflow-x-auto">
+              <Button variant="outline" size="sm" disabled className="h-8 text-xs shrink-0">
+                Previous
+              </Button>
+              <Button
+                size="sm"
+                className="h-8 w-8 p-0 shrink-0 bg-primary text-primary-foreground font-semibold"
+              >
+                1
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0 shrink-0 text-xs">
+                2
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0 shrink-0 text-xs">
+                3
+              </Button>
+              <span className="text-muted-foreground px-1 text-xs shrink-0">...</span>
+              <Button variant="outline" size="sm" className="h-8 text-xs shrink-0">
+                Next
+              </Button>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>Jump to page:</span>
+              <Input className="h-7 w-12 text-xs text-center" defaultValue="1" />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Add New Contact Modal */}
+      {/* ========================================================= */}
+      {/* TAB 2: IMPORT HISTORY TABLE */}
+      {/* ========================================================= */}
+      {activeTab === "history" && (
+        <div className="animate-in fade-in duration-150">
+          <ImportHistoryTable
+            historyList={importHistoryList}
+            onRefresh={() => {}}
+          />
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* BULK CSV IMPORT CONTACTS MODAL */}
+      {/* ========================================================= */}
+      <ImportContactsModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        existingContacts={contactsList}
+        onImportComplete={handleImportComplete}
+      />
+
+      {/* ========================================================= */}
+      {/* ADD SINGLE CONTACT MODAL */}
+      {/* ========================================================= */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-xl border bg-card p-6 shadow-xl animate-in">
@@ -690,7 +869,7 @@ export default function CrmContactsPage() {
                   onChange={(e) =>
                     setNewContact({ ...newContact, fullName: e.target.value })
                   }
-                  className="h-9"
+                  className="h-9 text-sm"
                 />
               </div>
 
@@ -702,14 +881,29 @@ export default function CrmContactsPage() {
                   <Phone className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     required
-                    placeholder="e.g. +91 9876543210"
+                    placeholder="e.g. 919876543210"
                     value={newContact.whatsappNumber}
                     onChange={(e) =>
                       setNewContact({ ...newContact, whatsappNumber: e.target.value })
                     }
-                    className="pl-8.5 h-9"
+                    className="pl-8.5 h-9 text-sm"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
+                  Email Address
+                </label>
+                <Input
+                  type="email"
+                  placeholder="e.g. ramesh@example.com"
+                  value={newContact.email}
+                  onChange={(e) =>
+                    setNewContact({ ...newContact, email: e.target.value })
+                  }
+                  className="h-9 text-sm"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -723,7 +917,7 @@ export default function CrmContactsPage() {
                     onChange={(e) =>
                       setNewContact({ ...newContact, marketingBudget: e.target.value })
                     }
-                    className="h-9"
+                    className="h-9 text-sm"
                   />
                 </div>
                 <div>
@@ -736,7 +930,7 @@ export default function CrmContactsPage() {
                     onChange={(e) =>
                       setNewContact({ ...newContact, marketingGoal: e.target.value })
                     }
-                    className="h-9"
+                    className="h-9 text-sm"
                   />
                 </div>
               </div>
@@ -765,7 +959,7 @@ export default function CrmContactsPage() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-primary text-primary-foreground">
+                <Button type="submit" className="bg-primary text-primary-foreground font-semibold">
                   Save Contact
                 </Button>
               </div>

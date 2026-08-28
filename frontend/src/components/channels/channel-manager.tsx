@@ -291,10 +291,12 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
               <Plus className="h-4 w-4 sm:mr-1" />
               <span>Add New Channel</span>
             </Button>
-            <Button variant="outline" className="shrink-0">
-              <BarChart3 className="h-4 w-4 sm:mr-1" />
-              <span className="hidden sm:inline">Conversation Statistics</span>
-            </Button>
+            <Link href="/channels/statistics">
+              <Button variant="outline" className="shrink-0">
+                <BarChart3 className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Conversation Statistics</span>
+              </Button>
+            </Link>
             <Button variant="outline" className="shrink-0">
               <Wallet className="h-4 w-4 sm:mr-1" />
               <span className="hidden sm:inline">Total Balance</span>

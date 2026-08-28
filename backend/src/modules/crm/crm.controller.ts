@@ -3,7 +3,12 @@ import {
   Body, Param, UseGuards,
 } from '@nestjs/common';
 import { CrmContactsService } from './crm.service';
-import { CreateCrmContactDto, UpdateCrmContactDto } from './dto/crm-contact.dto';
+import {
+  CreateCrmContactDto,
+  UpdateCrmContactDto,
+  ValidateCsvDto,
+  BulkImportDto,
+} from './dto/crm-contact.dto';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -23,6 +28,27 @@ export class CrmContactsController {
   @Get()
   findAll(@CurrentUser() user: AuthUser) {
     return this.crmContactsService.findAll(user.tenantId);
+  }
+
+  @Post('validate-csv')
+  validateCsv(@CurrentUser() user: AuthUser, @Body() dto: ValidateCsvDto) {
+    return this.crmContactsService.validateCsv(user.tenantId, dto);
+  }
+
+  @Post('bulk-import')
+  bulkImport(@CurrentUser() user: AuthUser, @Body() dto: BulkImportDto) {
+    return this.crmContactsService.bulkImport(user.tenantId, user.userId || user.email || 'Admin', dto);
+  }
+
+  @Get('import-history')
+  getImportHistory(@CurrentUser() user: AuthUser) {
+    return this.crmContactsService.getImportHistory(user.tenantId);
+  }
+
+  @Post('bulk-delete')
+  @Roles(Role.TENANT_ADMIN, Role.SUPER_ADMIN)
+  bulkDelete(@CurrentUser() user: AuthUser, @Body('ids') ids: string[]) {
+    return this.crmContactsService.bulkDelete(user.tenantId, ids);
   }
 
   @Get(':id')
@@ -45,4 +71,4 @@ export class CrmContactsController {
   remove(@CurrentUser() user: AuthUser, @Param('id') id: string) {
     return this.crmContactsService.remove(user.tenantId, id);
   }
-}
+}
