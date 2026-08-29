@@ -35,6 +35,12 @@ interface Transaction {
   status: "Success" | "Pending" | "Failed";
 }
 
+const statusConfig: Record<Transaction["status"], { icon: React.ElementType; className: string }> = {
+  Success: { icon: CheckCircle2, className: "text-emerald-600 dark:text-emerald-400" },
+  Pending: { icon: Clock, className: "text-amber-600 dark:text-amber-400" },
+  Failed: { icon: AlertCircle, className: "text-destructive" },
+};
+
 const initialTransactions: Transaction[] = [
   {
     id: "TXN-90481",
@@ -155,7 +161,7 @@ export default function WalletPage() {
         <div className="flex items-center gap-2">
           <Button
             onClick={() => setIsTopUpModalOpen(true)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5"
           >
             <Plus className="h-4 w-4" />
             Top Up Balance
@@ -281,7 +287,8 @@ export default function WalletPage() {
                           "text-[10px] font-semibold",
                           txn.type === "Recharge" && "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
                           txn.type === "Usage" && "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
-                          txn.type === "Subscription" && "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300"
+                          txn.type === "Subscription" && "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+                          txn.type === "Refund" && "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
                         )}
                       >
                         {txn.type}
@@ -300,10 +307,15 @@ export default function WalletPage() {
                       {isPositive ? `+₹${txn.amount.toFixed(2)}` : `-₹${Math.abs(txn.amount).toFixed(2)}`}
                     </td>
                     <td className="p-3.5 text-center">
-                      <span className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                        <CheckCircle2 className="h-3 w-3" />
-                        {txn.status}
-                      </span>
+                      {(() => {
+                        const StatusIcon = statusConfig[txn.status].icon;
+                        return (
+                          <span className={cn("inline-flex items-center gap-1 text-xs font-medium", statusConfig[txn.status].className)}>
+                            <StatusIcon className="h-3 w-3" />
+                            {txn.status}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td className="p-3.5 text-right">
                       <Button
@@ -388,7 +400,7 @@ export default function WalletPage() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   Proceed to Pay ₹{parseFloat(topUpAmount || "0").toLocaleString()}
                 </Button>
               </div>

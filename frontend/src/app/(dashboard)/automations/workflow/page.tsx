@@ -116,14 +116,20 @@ export default function WorkflowPage() {
 
   const toggleRow = (id: string) =>
     setRows((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, active: !r.active } : r))
+      prev.map((r) => (r.id === id ? { ...r, active: !r.active } : r)),
     );
 
   const handleWorkflowCreated = (newWf: any) => {
     const newRow: WorkflowRow = {
       id: newWf.id,
       active: true,
-      apps: [{ icon: Sparkles, bg: "bg-emerald-500/10 border", color: "text-emerald-600" }],
+      apps: [
+        {
+          icon: Sparkles,
+          bg: "bg-emerald-500/10 border",
+          color: "text-emerald-600",
+        },
+      ],
       title: newWf.title,
       tags: newWf.tags || "General",
       folder: newWf.folder || "All",
@@ -137,11 +143,18 @@ export default function WorkflowPage() {
       id: unlockedWf.id,
       active: true,
       apps: [
-        { icon: Sparkles, bg: "bg-amber-500/10 border", color: "text-amber-600" },
+        {
+          icon: Sparkles,
+          bg: "bg-amber-500/10 border",
+          color: "text-amber-600",
+        },
         { icon: Zap, bg: "bg-emerald-600", color: "text-white" },
       ],
       title: unlockedWf.title,
-      tags: typeof unlockedWf.tags === "string" ? unlockedWf.tags : (unlockedWf.tags?.join(", ") || "Premium, Unlocked"),
+      tags:
+        typeof unlockedWf.tags === "string"
+          ? unlockedWf.tags
+          : unlockedWf.tags?.join(", ") || "Premium, Unlocked",
       folder: unlockedWf.folder || "All",
       createdOn: "Just now",
     };
@@ -176,15 +189,12 @@ export default function WorkflowPage() {
         <div className="flex items-center gap-3">
           <Button
             onClick={() => setIsCreateModalOpen(true)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
           >
             <Plus className="h-4 w-4 mr-1" />
             Create Workflow
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => setIsUnlockModalOpen(true)}
-          >
+          <Button variant="outline" onClick={() => setIsUnlockModalOpen(true)}>
             <Lock className="h-4 w-4 mr-1" />
             Unlock Workflow
           </Button>
@@ -215,7 +225,7 @@ export default function WorkflowPage() {
                   "flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   activeFolder === folder.id
                     ? "bg-primary/10 text-primary"
-                    : "text-foreground hover:bg-accent"
+                    : "text-foreground hover:bg-accent",
                 )}
               >
                 <Folder className="h-4 w-4" />
@@ -271,10 +281,12 @@ export default function WorkflowPage() {
                             className={cn(
                               "flex h-7 w-7 items-center justify-center rounded-full",
                               app.bg,
-                              i !== 0 && "-ml-2 ring-2 ring-background"
+                              i !== 0 && "-ml-2 ring-2 ring-background",
                             )}
                           >
-                            <app.icon className={cn("h-3.5 w-3.5", app.color)} />
+                            <app.icon
+                              className={cn("h-3.5 w-3.5", app.color)}
+                            />
                           </div>
                         ))}
                       </div>
@@ -340,7 +352,7 @@ export default function WorkflowPage() {
                     "flex h-7 w-7 items-center justify-center rounded-md text-xs font-bold",
                     page === n
                       ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent"
+                      : "text-muted-foreground hover:bg-accent",
                   )}
                 >
                   {n}

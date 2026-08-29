@@ -57,7 +57,7 @@ export default function VoiceAgentsPage() {
   const [query, setQuery] = useState("");
 
   const filteredAgents = AGENTS.filter((agent) =>
-    agent.name.toLowerCase().includes(query.trim().toLowerCase())
+    agent.name.toLowerCase().includes(query.trim().toLowerCase()),
   );
 
   return (
@@ -204,7 +204,7 @@ export default function VoiceAgentsPage() {
               <ArrowLeft className="h-3.5 w-3.5" />
               Prev
             </Button>
-            <Badge className="rounded-md bg-green-600 px-3 py-1 text-xs font-bold text-white hover:bg-green-600">
+            <Badge className="rounded-md bg-primary px-3 py-1 text-xs font-bold text-primary-foreground hover:bg-primary">
               Page 1 of 1
             </Badge>
             <Button
@@ -226,7 +226,7 @@ export default function VoiceAgentsPage() {
           type="button"
           className={cn(
             "flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-dashed",
-            "border-muted-foreground/30 text-muted-foreground/40 transition-colors hover:border-muted-foreground/50 hover:text-muted-foreground/60"
+            "border-muted-foreground/30 text-muted-foreground/40 transition-colors hover:border-muted-foreground/50 hover:text-muted-foreground/60",
           )}
           aria-label="Play tutorial video"
         >

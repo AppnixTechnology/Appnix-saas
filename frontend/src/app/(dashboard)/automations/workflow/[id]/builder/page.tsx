@@ -31,7 +31,9 @@ export default function WorkflowCanvasBuilderPage() {
   const router = useRouter();
   const workflowId = params?.id as string;
 
-  const [workflowTitle, setWorkflowTitle] = useState("Automation Workflow Canvas");
+  const [workflowTitle, setWorkflowTitle] = useState(
+    "Automation Workflow Canvas",
+  );
   const [isActive, setIsActive] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -43,29 +45,35 @@ export default function WorkflowCanvasBuilderPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-5rem)] space-y-3">
+    <div className="flex flex-col h-[calc(100dvh-5rem)] space-y-3">
       {/* Top Builder Navigation Bar */}
-      <div className="flex items-center justify-between border-b pb-3 bg-card px-4 py-2.5 rounded-xl border shadow-xs">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b pb-3 bg-card px-4 py-2.5 rounded-xl border shadow-xs">
+        <div className="flex items-center gap-3 min-w-0">
           <Link
             href="/automations/workflow"
-            className="h-8 w-8 rounded-lg border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="h-8 w-8 shrink-0 rounded-lg border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-bold text-foreground">{workflowTitle}</h1>
-              <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-base font-bold text-foreground truncate">
+                {workflowTitle}
+              </h1>
+              <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px] shrink-0">
                 {isActive ? "Active" : "Draft"}
               </Badge>
-              <span className="font-mono text-xs text-muted-foreground">({workflowId})</span>
+              <span className="font-mono text-xs text-muted-foreground shrink-0">
+                ({workflowId})
+              </span>
             </div>
-            <p className="text-[11px] text-muted-foreground">Visual Canvas Builder • Autosave enabled</p>
+            <p className="text-[11px] text-muted-foreground truncate">
+              Visual Canvas Builder • Autosave enabled
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
           <Button
             variant="outline"
             size="sm"
@@ -78,17 +86,17 @@ export default function WorkflowCanvasBuilderPage() {
 
           <Button
             size="sm"
-            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8 gap-1 shadow-sm"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-8 gap-1 shadow-sm"
           >
             <Play className="h-3.5 w-3.5" />
-            <span>Publish & Activate</span>
+            <span className="hidden xs:inline">Publish & Activate</span>
+            <span className="xs:hidden">Publish</span>
           </Button>
         </div>
       </div>
 
       {/* Visual Canvas Area */}
-      <div className="flex-1 rounded-2xl border bg-slate-50/50 dark:bg-slate-950/40 relative overflow-hidden flex items-center justify-center p-8">
-        {/* Canvas Background Grid */}
+     <div className="flex-1 rounded-2xl border bg-slate-50/50 dark:bg-slate-950/40 relative overflow-hidden flex items-center justify-center p-3 sm:p-8">
         <div
           className="absolute inset-0 opacity-20 pointer-events-none"
           style={{
@@ -105,9 +113,15 @@ export default function WorkflowCanvasBuilderPage() {
               <Zap className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <span className="text-[10px] uppercase font-bold text-emerald-600 tracking-wider">Trigger Node</span>
-              <h3 className="text-xs font-bold text-foreground">Inbound Message / Webhook Event</h3>
-              <p className="text-[11px] text-muted-foreground">Listens for customer trigger event</p>
+              <span className="text-[10px] uppercase font-bold text-emerald-600 tracking-wider">
+                Trigger Node
+              </span>
+              <h3 className="text-xs font-bold text-foreground">
+                Inbound Message / Webhook Event
+              </h3>
+              <p className="text-[11px] text-muted-foreground">
+                Listens for customer trigger event
+              </p>
             </div>
           </div>
 
@@ -121,9 +135,15 @@ export default function WorkflowCanvasBuilderPage() {
               <Layers className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <span className="text-[10px] uppercase font-bold text-blue-600 tracking-wider">Condition Node</span>
-              <h3 className="text-xs font-bold text-foreground">Filter: Customer Match & KYC Valid</h3>
-              <p className="text-[11px] text-muted-foreground">Evaluates rules before message dispatch</p>
+              <span className="text-[10px] uppercase font-bold text-blue-600 tracking-wider">
+                Condition Node
+              </span>
+              <h3 className="text-xs font-bold text-foreground">
+                Filter: Customer Match & KYC Valid
+              </h3>
+              <p className="text-[11px] text-muted-foreground">
+                Evaluates rules before message dispatch
+              </p>
             </div>
           </div>
 
@@ -137,9 +157,15 @@ export default function WorkflowCanvasBuilderPage() {
               <MessageSquare className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <span className="text-[10px] uppercase font-bold text-purple-600 tracking-wider">Action Node</span>
-              <h3 className="text-xs font-bold text-foreground">WhatsApp: Dispatch Template</h3>
-              <p className="text-[11px] text-muted-foreground">Delivers automated messaging payload</p>
+              <span className="text-[10px] uppercase font-bold text-purple-600 tracking-wider">
+                Action Node
+              </span>
+              <h3 className="text-xs font-bold text-foreground">
+                WhatsApp: Dispatch Template
+              </h3>
+              <p className="text-[11px] text-muted-foreground">
+                Delivers automated messaging payload
+              </p>
             </div>
           </div>
         </div>

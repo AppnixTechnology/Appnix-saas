@@ -35,9 +35,21 @@ interface Chat {
 }
 
 const TAGS = [
-  { label: "test", icon: Tag, className: "bg-rose-50 text-rose-600 hover:bg-rose-50" },
-  { label: "demo", icon: Tag, className: "bg-sky-50 text-sky-600 hover:bg-sky-50" },
-  { label: "Important Lead", icon: Star, className: "bg-amber-50 text-amber-600 hover:bg-amber-50" },
+  {
+    label: "test",
+    icon: Tag,
+    className: "bg-rose-50 text-rose-600 hover:bg-rose-50",
+  },
+  {
+    label: "demo",
+    icon: Tag,
+    className: "bg-sky-50 text-sky-600 hover:bg-sky-50",
+  },
+  {
+    label: "Important Lead",
+    icon: Star,
+    className: "bg-amber-50 text-amber-600 hover:bg-amber-50",
+  },
 ];
 
 const CHATS: Chat[] = [
@@ -86,7 +98,8 @@ const CHATS: Chat[] = [
 
 // ---------- Avatar ----------
 function ChatAvatar({ chat }: { chat: Chat }) {
-  const base = "relative h-10 w-10 shrink-0 rounded-full overflow-hidden flex items-center justify-center";
+  const base =
+    "relative h-10 w-10 shrink-0 rounded-full overflow-hidden flex items-center justify-center";
 
   if (chat.avatarKind === "image" && chat.avatarUrl) {
     return (
@@ -135,7 +148,7 @@ function ChatListItem({
       onClick={onClick}
       className={cn(
         "w-full flex items-center gap-3 px-4 py-3 text-left border-b transition-colors hover:bg-accent/40",
-        active && "bg-accent/60"
+        active && "bg-accent/60",
       )}
     >
       <ChatAvatar chat={chat} />
@@ -164,8 +177,8 @@ function EmptyState() {
       </div>
       <h2 className="text-xl font-bold text-foreground">Open a Chat</h2>
       <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-        Select any chat to load conversation and start communicating with
-        your leads.
+        Select any chat to load conversation and start communicating with your
+        leads.
       </p>
       <div className="mt-5 flex items-center gap-3 text-[11px] font-semibold tracking-wider text-muted-foreground">
         <span className="h-px w-8 bg-border" />
@@ -179,11 +192,17 @@ function EmptyState() {
 // ---------- Page ----------
 export default function ChatsPage() {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [mobileView, setMobileView] = useState<"list" | "chat">("list");
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden rounded-lg border bg-background">
+    <div className="flex h-[calc(100dvh-4rem)] overflow-hidden rounded-lg border bg-background">
       {/* Sidebar */}
-      <div className="flex w-full max-w-[300px] flex-col border-r">
+      <div
+        className={cn(
+          "w-full sm:max-w-[300px] sm:w-[300px] flex-col border-r shrink-0",
+          mobileView === "list" ? "flex" : "hidden sm:flex",
+        )}
+      >
         {/* Breadcrumb Back Navigation */}
         <div className="flex items-center text-xs text-muted-foreground gap-1.5 px-4 pt-3">
           <Link
@@ -239,20 +258,41 @@ export default function ChatsPage() {
               key={chat.id}
               chat={chat}
               active={activeChatId === chat.id}
-              onClick={() => setActiveChatId(chat.id)}
+              onClick={() => {
+                setActiveChatId(chat.id);
+                setMobileView("chat");
+              }}
             />
           ))}
         </div>
       </div>
 
       {/* Conversation pane */}
-      <div className="relative flex-1">
+      {/* Conversation pane */}
+      <div
+        className={cn(
+          "relative flex-1 min-w-0",
+          mobileView === "chat"
+            ? "flex flex-col"
+            : "hidden sm:flex sm:flex-col",
+        )}
+      >
+        {/* Mobile-only back button to return to chat list */}
+        <button
+          type="button"
+          onClick={() => setMobileView("list")}
+          className="sm:hidden absolute top-3 left-3 z-10 h-8 w-8 flex items-center justify-center rounded-lg bg-background/80 backdrop-blur text-muted-foreground hover:bg-accent hover:text-foreground"
+          title="Back to chats"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </button>
+
         <EmptyState />
 
         {/* Floating new-chat button */}
         <Button
           size="icon"
-          className="absolute bottom-6 right-6 h-12 w-12 rounded-2xl bg-blue-950 hover:bg-blue-900 shadow-lg"
+          className="absolute bottom-6 right-6 h-12 w-12 rounded-2xl bg-primary hover:bg-primary/90 shadow-lg"
           aria-label="Start new chat"
         >
           <SquarePen className="h-5 w-5" />

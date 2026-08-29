@@ -41,21 +41,27 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-
-
-
 function WhatsAppIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
       <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.32 4.86L2 22l5.36-1.4a9.9 9.9 0 0 0 4.68 1.19h.01c5.46 0 9.9-4.45 9.9-9.91C21.95 6.45 17.5 2 12.04 2Zm0 18.02h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.18.83.85-3.1-.2-.32a8.14 8.14 0 0 1-1.26-4.36c0-4.51 3.68-8.19 8.2-8.19 2.19 0 4.24.85 5.79 2.4a8.13 8.13 0 0 1 2.4 5.8c0 4.51-3.68 8.27-8.1 8.27Zm4.49-6.13c-.25-.12-1.47-.72-1.69-.8-.23-.08-.39-.12-.56.12-.16.25-.64.8-.78.96-.14.16-.29.18-.53.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.23.25-.86.84-.86 2.04 0 1.2.88 2.36 1 2.52.12.16 1.73 2.64 4.19 3.7.59.25 1.04.4 1.4.51.59.19 1.12.16 1.54.1.47-.07 1.47-.6 1.68-1.18.2-.58.2-1.08.14-1.18-.06-.1-.22-.16-.47-.28Z" />
     </svg>
   );
 }
 
-
 function FacebookIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 320 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <svg
+      viewBox="0 0 320 512"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
       <path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z" />
     </svg>
   );
@@ -134,7 +140,11 @@ export const defaultChannels: Channel[] = [
     status: "connected",
     topRight: { label: "Enterprise Tier", sub: "Carrier Verified" },
     fields: [
-      { label: "Carrier Status", value: "Approved (Jio/Airtel/VI)", icon: CheckCircle2 },
+      {
+        label: "Carrier Status",
+        value: "Approved (Jio/Airtel/VI)",
+        icon: CheckCircle2,
+      },
       { label: "Verification", value: "Google Verified", icon: ScanLine },
       { label: "Rich Cards", value: "Supported", icon: Smartphone },
       { label: "Throughput", value: "250 msg/sec", icon: Zap },
@@ -144,7 +154,8 @@ export const defaultChannels: Channel[] = [
 ];
 
 export const channelIconStyles: Record<ChannelType, string> = {
-  whatsapp: "bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-300",
+  whatsapp:
+    "bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-300",
   instagram:
     "bg-gradient-to-br from-amber-400 via-pink-500 to-purple-600 text-white",
   facebook: "bg-blue-600 text-white",
@@ -158,18 +169,24 @@ export const channelIcons: Record<ChannelType, React.ElementType> = {
   rcs: Smartphone,
 };
 
-export const channelTitles: Record<ChannelType | "all", { title: string; subtitle: string }> = {
+export const channelTitles: Record<
+  ChannelType | "all",
+  { title: string; subtitle: string }
+> = {
   all: {
     title: "All Channels",
-    subtitle: "Manage your integrated communication channels, numbers, and bots.",
+    subtitle:
+      "Manage your integrated communication channels, numbers, and bots.",
   },
   whatsapp: {
     title: "WhatsApp Channels",
-    subtitle: "Connect and monitor your official WhatsApp Business numbers and API limits.",
+    subtitle:
+      "Connect and monitor your official WhatsApp Business numbers and API limits.",
   },
   instagram: {
     title: "Instagram Channels",
-    subtitle: "Manage connected Instagram professional accounts and direct message bots.",
+    subtitle:
+      "Manage connected Instagram professional accounts and direct message bots.",
   },
   facebook: {
     title: "Facebook Channels",
@@ -177,7 +194,8 @@ export const channelTitles: Record<ChannelType | "all", { title: string; subtitl
   },
   rcs: {
     title: "RCS Business Channels",
-    subtitle: "Configure carrier-verified Google RCS agents and rich card templates.",
+    subtitle:
+      "Configure carrier-verified Google RCS agents and rich card templates.",
   },
 };
 
@@ -191,7 +209,7 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newChannelType, setNewChannelType] = useState<ChannelType>(
-    filterType === "all" ? "whatsapp" : filterType
+    filterType === "all" ? "whatsapp" : filterType,
   );
   const [newChannelName, setNewChannelName] = useState("");
   const [newChannelSubtitle, setNewChannelSubtitle] = useState("");
@@ -214,8 +232,8 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
               ...c,
               status: c.status === "connected" ? "disconnected" : "connected",
             }
-          : c
-      )
+          : c,
+      ),
     );
   };
 
@@ -234,9 +252,17 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
       subtitle: newChannelSubtitle.trim() || `${newChannelType} connection`,
       status: "connected",
       fields: [
-        { label: "Connection Status", value: "Connected & Active", icon: CheckCircle2 },
+        {
+          label: "Connection Status",
+          value: "Connected & Active",
+          icon: CheckCircle2,
+        },
         { label: "Webhook Sync", value: "Live", icon: ScanLine },
-        { label: "Channel Type", value: newChannelType.toUpperCase(), icon: channelIcons[newChannelType] },
+        {
+          label: "Channel Type",
+          value: newChannelType.toUpperCase(),
+          icon: channelIcons[newChannelType],
+        },
       ],
       actions: [Link2, FileText, BarChart3, Bot],
     };
@@ -283,10 +309,12 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
             <Button
               onClick={() => {
-                setNewChannelType(filterType === "all" ? "whatsapp" : filterType);
+                setNewChannelType(
+                  filterType === "all" ? "whatsapp" : filterType,
+                );
                 setIsAddModalOpen(true);
               }}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white shrink-0 shadow-sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0 shadow-sm"
             >
               <Plus className="h-4 w-4 sm:mr-1" />
               <span>Add New Channel</span>
@@ -294,7 +322,9 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
             <Link href="/channels/statistics">
               <Button variant="outline" className="shrink-0">
                 <BarChart3 className="h-4 w-4 sm:mr-1" />
-                <span className="hidden sm:inline">Conversation Statistics</span>
+                <span className="hidden sm:inline">
+                  Conversation Statistics
+                </span>
               </Button>
             </Link>
             <Link href="/channels/balance">
@@ -303,7 +333,6 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
                 <span className="hidden sm:inline">Total Balance</span>
               </Button>
             </Link>
-           
           </div>
         </div>
       </div>
@@ -354,7 +383,11 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
             Showing {displayedChannels.length} channel
             {displayedChannels.length !== 1 ? "s" : ""}
           </span>
-          <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 text-xs text-muted-foreground"
+          >
             <ArrowUpDown className="h-3.5 w-3.5 mr-1" />
             <span>Sort</span>
           </Button>
@@ -365,7 +398,9 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
       {displayedChannels.length === 0 ? (
         <div className="rounded-xl border bg-card p-12 text-center text-muted-foreground space-y-3">
           <ScanLine className="h-10 w-10 mx-auto text-muted-foreground/40" />
-          <h3 className="font-semibold text-foreground text-base">No Channels Found</h3>
+          <h3 className="font-semibold text-foreground text-base">
+            No Channels Found
+          </h3>
           <p className="text-xs max-w-sm mx-auto">
             {searchQuery
               ? "No channels matched your search query. Try clearing your search."
@@ -374,7 +409,7 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
           <Button
             size="sm"
             onClick={() => setIsAddModalOpen(true)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white mt-2"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground mt-2"
           >
             <Plus className="h-4 w-4 mr-1" /> Connect Channel
           </Button>
@@ -385,7 +420,7 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
             "grid gap-4",
             view === "grid"
               ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-              : "grid-cols-1"
+              : "grid-cols-1",
           )}
         >
           {displayedChannels.map((channel) => {
@@ -401,7 +436,7 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
                     <div
                       className={cn(
                         "h-10 w-10 rounded-lg flex items-center justify-center shrink-0 shadow-xs",
-                        channelIconStyles[channel.type]
+                        channelIconStyles[channel.type],
                       )}
                     >
                       <Icon className="h-5 w-5" />
@@ -413,7 +448,7 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
                             "h-2 w-2 rounded-full shrink-0",
                             channel.status === "connected"
                               ? "bg-emerald-500 shadow-xs"
-                              : "bg-rose-500"
+                              : "bg-rose-500",
                           )}
                         />
                         <p className="font-semibold text-sm text-foreground truncate">
@@ -454,11 +489,17 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => alert(`Configuring ${channel.name}`)}>
+                        <DropdownMenuItem
+                          onClick={() => alert(`Configuring ${channel.name}`)}
+                        >
                           Edit Configuration
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDisconnect(channel.id)}>
-                          {channel.status === "connected" ? "Disconnect" : "Reconnect"}
+                        <DropdownMenuItem
+                          onClick={() => handleDisconnect(channel.id)}
+                        >
+                          {channel.status === "connected"
+                            ? "Disconnect"
+                            : "Reconnect"}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleRemove(channel.id)}
@@ -494,7 +535,10 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
 
                     if (ActionIcon === FileText) {
                       title = "Message Templates (Meta Approval)";
-                      href = channel.type === "whatsapp" ? "/channels/whatsapp/templates" : "/automations/templates";
+                      href =
+                        channel.type === "whatsapp"
+                          ? "/channels/whatsapp/templates"
+                          : "/automations/templates";
                     } else if (ActionIcon === Bot) {
                       title = "Chatbot Automation Builder";
                       href = "/chatbots";
@@ -522,7 +566,9 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
                             variant="ghost"
                             className={cn(
                               "h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors",
-                              ActionIcon === FileText && channel.type === "whatsapp" && "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/60"
+                              ActionIcon === FileText &&
+                                channel.type === "whatsapp" &&
+                                "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/60",
                             )}
                           >
                             <ActionIcon className="h-3.5 w-3.5" />
@@ -552,7 +598,7 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
                         "text-[10px] px-2 py-0.5 font-medium uppercase tracking-wider",
                         channel.status === "connected"
                           ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300"
-                          : "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950 dark:text-rose-300"
+                          : "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950 dark:text-rose-300",
                       )}
                     >
                       {channel.status}
@@ -587,37 +633,42 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
                   Select Channel Type
                 </label>
                 <div className="grid grid-cols-4 gap-2">
-                  {(["whatsapp", "instagram", "facebook", "rcs"] as ChannelType[]).map(
-                    (type) => {
-                      const Icon = channelIcons[type];
-                      const isSelected = newChannelType === type;
-                      return (
-                        <button
-                          key={type}
-                          type="button"
-                          onClick={() => setNewChannelType(type)}
+                  {(
+                    [
+                      "whatsapp",
+                      "instagram",
+                      "facebook",
+                      "rcs",
+                    ] as ChannelType[]
+                  ).map((type) => {
+                    const Icon = channelIcons[type];
+                    const isSelected = newChannelType === type;
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setNewChannelType(type)}
+                        className={cn(
+                          "flex flex-col items-center justify-center p-2.5 rounded-lg border text-center transition-all",
+                          isSelected
+                            ? "border-primary bg-primary/10 ring-1 ring-primary"
+                            : "border-border hover:bg-muted/50",
+                        )}
+                      >
+                        <div
                           className={cn(
-                            "flex flex-col items-center justify-center p-2.5 rounded-lg border text-center transition-all",
-                            isSelected
-                              ? "border-primary bg-primary/10 ring-1 ring-primary"
-                              : "border-border hover:bg-muted/50"
+                            "h-7 w-7 rounded-md flex items-center justify-center mb-1",
+                            channelIconStyles[type],
                           )}
                         >
-                          <div
-                            className={cn(
-                              "h-7 w-7 rounded-md flex items-center justify-center mb-1",
-                              channelIconStyles[type]
-                            )}
-                          >
-                            <Icon className="h-3.5 w-3.5" />
-                          </div>
-                          <span className="text-[11px] font-semibold capitalize text-foreground">
-                            {type}
-                          </span>
-                        </button>
-                      );
-                    }
-                  )}
+                          <Icon className="h-3.5 w-3.5" />
+                        </div>
+                        <span className="text-[11px] font-semibold capitalize text-foreground">
+                          {type}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -652,7 +703,8 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
                   Instant Webhook & Cloud API Sync
                 </p>
                 <p>
-                  Connecting this channel will enable live chats, bulk campaigns, and automated bot workflows.
+                  Connecting this channel will enable live chats, bulk
+                  campaigns, and automated bot workflows.
                 </p>
               </div>
 
@@ -668,7 +720,7 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
                 <Button
                   type="submit"
                   size="sm"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   Connect Channel
                 </Button>
