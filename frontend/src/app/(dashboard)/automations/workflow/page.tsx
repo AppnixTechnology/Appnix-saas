@@ -167,7 +167,7 @@ export default function WorkflowPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 pb-24 sm:space-y-6 sm:pb-6">
       {/* Breadcrumb Back Navigation */}
       <div className="flex items-center text-xs text-muted-foreground gap-1.5">
         <Link
@@ -182,19 +182,23 @@ export default function WorkflowPage() {
       </div>
 
       {/* Header */}
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-lg font-extrabold tracking-wide text-foreground">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <h1 className="text-base font-extrabold tracking-wide text-foreground sm:text-lg">
           WORKFLOW
         </h1>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-2 xs:flex-row sm:items-center sm:gap-3">
           <Button
             onClick={() => setIsCreateModalOpen(true)}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm sm:w-auto"
           >
             <Plus className="h-4 w-4 mr-1" />
             Create Workflow
           </Button>
-          <Button variant="outline" onClick={() => setIsUnlockModalOpen(true)}>
+          <Button
+            variant="outline"
+            onClick={() => setIsUnlockModalOpen(true)}
+            className="w-full sm:w-auto"
+          >
             <Lock className="h-4 w-4 mr-1" />
             Unlock Workflow
           </Button>
@@ -203,7 +207,7 @@ export default function WorkflowPage() {
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[280px_1fr]">
         {/* Folders sidebar */}
-        <div className="h-fit rounded-lg border bg-background p-4">
+        <div className="rounded-lg border bg-background p-3 sm:p-4 lg:h-fit">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-bold text-foreground">Folders</h2>
             <button
@@ -215,20 +219,21 @@ export default function WorkflowPage() {
             </button>
           </div>
 
-          <div className="space-y-1">
-            {FOLDERS.map((folder) => (
+          {/* Horizontal scroll chips on mobile/tablet, vertical stack on desktop */}
+          <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 lg:mx-0 lg:flex-col lg:gap-1 lg:overflow-visible lg:px-0 lg:pb-0">
+            {folders.map((folder) => (
               <button
                 key={folder.id}
                 type="button"
                 onClick={() => setActiveFolder(folder.id)}
                 className={cn(
-                  "flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  "flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-colors lg:w-full lg:justify-start lg:rounded-md lg:px-3 lg:py-2",
                   activeFolder === folder.id
                     ? "bg-primary/10 text-primary"
-                    : "text-foreground hover:bg-accent",
+                    : "text-foreground hover:bg-accent border lg:border-0",
                 )}
               >
-                <Folder className="h-4 w-4" />
+                <Folder className="h-4 w-4 shrink-0" />
                 {folder.name}
               </button>
             ))}
@@ -238,10 +243,10 @@ export default function WorkflowPage() {
         {/* Table card */}
         <div className="overflow-hidden rounded-lg border bg-background">
           <div className="overflow-x-auto">
-            <Table>
+            <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-24 text-xs font-bold tracking-wide">
+                  <TableHead className="w-20 text-xs font-bold tracking-wide sm:w-24">
                     STATUS
                   </TableHead>
                   <TableHead className="text-xs font-bold tracking-wide">
@@ -250,13 +255,13 @@ export default function WorkflowPage() {
                   <TableHead className="text-xs font-bold tracking-wide">
                     TITLE
                   </TableHead>
-                  <TableHead className="text-xs font-bold tracking-wide">
+                  <TableHead className="hidden text-xs font-bold tracking-wide md:table-cell">
                     TAGS
                   </TableHead>
-                  <TableHead className="text-xs font-bold tracking-wide">
+                  <TableHead className="hidden text-xs font-bold tracking-wide sm:table-cell">
                     FOLDER
                   </TableHead>
-                  <TableHead className="text-xs font-bold tracking-wide">
+                  <TableHead className="hidden text-xs font-bold tracking-wide lg:table-cell">
                     CREATED ON
                   </TableHead>
                   <TableHead className="text-right text-xs font-bold tracking-wide">
@@ -295,20 +300,27 @@ export default function WorkflowPage() {
                       <span className="font-semibold text-primary">
                         {row.title}
                       </span>
+                      {/* Show tags/folder inline on small screens where columns are hidden */}
+                      <span className="mt-0.5 block text-xs italic text-muted-foreground md:hidden">
+                        {row.tags}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-muted-foreground sm:hidden">
+                        {row.folder}
+                      </span>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <span className="text-sm italic text-muted-foreground">
                         {row.tags}
                       </span>
                     </TableCell>
-                    <TableCell className="text-sm text-foreground">
+                    <TableCell className="hidden text-sm text-foreground sm:table-cell">
                       {row.folder}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-sm text-foreground">
+                    <TableCell className="hidden whitespace-nowrap text-sm text-foreground lg:table-cell">
                       {row.createdOn}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center justify-end gap-1 text-muted-foreground">
+                      <div className="flex items-center justify-end gap-0.5 text-muted-foreground sm:gap-1">
                         <Button variant="ghost" size="icon" className="h-8 w-8">
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -327,7 +339,7 @@ export default function WorkflowPage() {
           </div>
 
           {/* Footer / pagination */}
-          <div className="flex flex-col gap-3 border-t bg-secondary/30 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 border-t bg-secondary/30 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
             <p className="text-xs font-medium text-muted-foreground">
               Showing {rows.length} of {TOTAL_RESULTS} results
             </p>
@@ -374,17 +386,17 @@ export default function WorkflowPage() {
       </div>
 
       {/* Floating actions */}
-      <div className="fixed bottom-7 right-7 flex flex-col gap-3">
+      <div className="fixed bottom-4 right-4 z-20 flex flex-col gap-2.5 sm:bottom-7 sm:right-7 sm:gap-3">
         <Button
           size="icon"
-          className="h-11 w-11 rounded-full bg-green-600 shadow-lg hover:bg-green-700"
+          className="h-10 w-10 rounded-full bg-green-600 shadow-lg hover:bg-green-700 sm:h-11 sm:w-11"
           aria-label="Quick actions"
         >
           <Zap className="h-5 w-5" />
         </Button>
         <Button
           size="icon"
-          className="h-11 w-11 rounded-full shadow-lg"
+          className="h-10 w-10 rounded-full shadow-lg sm:h-11 sm:w-11"
           aria-label="Chat"
         >
           <MessageSquare className="h-5 w-5" />
