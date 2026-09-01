@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Appnix Technologies Privacy Policy",
   description: "Privacy Policy for Appnix Technologies and its WhatsApp Business communication SaaS platform.",
   alternates: {
-    canonical: "https://appnix.co.in/privacy-policy",
+    canonical: "https://www.appnix.co.in/privacy-policy",
   },
   robots: {
     index: true,
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Appnix Technologies Privacy Policy",
     description: "Privacy Policy for Appnix Technologies and its WhatsApp Business communication SaaS platform.",
-    url: "https://appnix.co.in/privacy-policy",
+    url: "https://www.appnix.co.in/privacy-policy",
     siteName: "Appnix Technologies",
     type: "website",
     locale: "en_US",

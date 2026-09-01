@@ -123,8 +123,8 @@ export function LegalPageLayout({
                 <span>•</span>
                 <span>Last Updated: <strong>{lastUpdated}</strong></span>
                 <span>•</span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                  Official SaaS Platform Notice
+                <span className="text-foreground/80 font-medium">
+                  Platform Legal Notice
                 </span>
               </div>
             </div>
@@ -350,7 +350,7 @@ export function LegalPageLayout({
                     Have questions regarding our compliance practices?
                   </h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    We maintain strict data isolation, verified Meta Cloud API connectivity, and client-controlled data handling. Reach out anytime with compliance, review, or data requests.
+                    We maintain tenant-aware data partitioning, standard API connectivity, and client-controlled data handling. Reach out anytime with compliance, review, or data requests.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 shrink-0">

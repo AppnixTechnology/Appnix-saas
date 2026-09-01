@@ -46,7 +46,7 @@ export function TrustMetrics() {
   );
 
   return (
-    <section id="trust-metrics" className="border-y border-border/60 bg-muted/30 py-12 sm:py-16">
+    <section id="trust-metrics" className="border-y border-border/60 bg-muted/30 py-10 sm:py-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <span className="text-xs font-bold uppercase tracking-wider text-primary">

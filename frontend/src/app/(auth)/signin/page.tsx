@@ -323,7 +323,7 @@ function SignInContent() {
 
           <div className="flex items-center justify-center gap-2 text-xs text-slate-400">
             <ShieldCheck className="h-3.5 w-3.5 text-slate-400" />
-            <span>Enterprise-grade 256-bit SSL encryption</span>
+            <span>Secure SSL encrypted connection</span>
           </div>
         </div>
       </div>

@@ -13,7 +13,6 @@ import { CampaignShowcase } from "@/components/landing/campaign-showcase";
 import { WhiteLabel } from "@/components/landing/white-label";
 import { WhyAppnix } from "@/components/landing/why-appnix";
 import { Testimonials } from "@/components/landing/testimonials";
-import { PricingPreview } from "@/components/landing/pricing-preview";
 import { FAQ } from "@/components/landing/faq";
 import { FinalCTA } from "@/components/landing/final-cta";
 import { Footer } from "@/components/landing/footer";
@@ -63,8 +62,8 @@ export default function LandingPage() {
       {/* 9. Campaign & Broadcast Manager Showcase */}
       <CampaignShowcase onOpenDemoModal={() => handleOpenDemo("Multi-Channel Broadcast Campaigns", "Campaigns Section CTA")} />
 
-      {/* 10. White-Label & Agency Reseller Solution */}
-      <WhiteLabel onOpenDemoModal={() => handleOpenDemo("White-Label SaaS Reseller Solution", "White Label Section CTA")} />
+      {/* 10. Multi-Tenant & White-Label Capabilities */}
+      <WhiteLabel onOpenDemoModal={() => handleOpenDemo("Multi-Tenant & White-Label Architecture", "White Label Section CTA")} />
 
       {/* 11. Why Appnix Comparative Advantage */}
       <WhyAppnix />
@@ -72,10 +71,7 @@ export default function LandingPage() {
       {/* 12. Testimonials & Social Proof */}
       <Testimonials />
 
-      {/* 13. Pricing Preview with Real Tiers */}
-      <PricingPreview onOpenDemoModal={(interest) => handleOpenDemo(interest || "Enterprise Tier", "Pricing Section CTA")} />
-
-      {/* 14. Frequently Asked Questions Accordion */}
+      {/* 13. Frequently Asked Questions Accordion */}
       <FAQ onOpenDemoModal={() => handleOpenDemo("General Inquiries", "FAQ Section CTA")} />
 
       {/* 15. Final High-Conversion CTA Banner */}

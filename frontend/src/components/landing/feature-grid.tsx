@@ -24,7 +24,7 @@ export function FeatureGrid() {
         icon: MessageSquare,
         title: t.featureGrid.feature1Title,
         description: t.featureGrid.feature1Desc,
-        highlights: ["Auto-routing", "SLA tracking", "Team notes"],
+        highlights: ["Multi-agent routing", "Conversation assignment", "Team notes"],
         badge: "Omnichannel",
         accent: "text-emerald-600 bg-emerald-500/10 border-emerald-500/20",
       },
@@ -33,7 +33,7 @@ export function FeatureGrid() {
         icon: Send,
         title: t.featureGrid.feature2Title,
         description: t.featureGrid.feature2Desc,
-        highlights: ["Verified templates", "Dynamic variables", "Click analytics"],
+        highlights: ["Message templates", "Dynamic variables", "Delivery tracking"],
         badge: "Broadcasting",
         accent: "text-blue-600 bg-blue-500/10 border-blue-500/20",
       },
@@ -42,8 +42,8 @@ export function FeatureGrid() {
         icon: Bot,
         title: t.featureGrid.feature5Title,
         description: t.featureGrid.feature5Desc,
-        highlights: ["Visual drag & drop", "Human handover", "24/7 instant replies"],
-        badge: "AI Automation",
+        highlights: ["Automated replies", "Agent handover", "Inquiry triage"],
+        badge: "Automated Bots",
         accent: "text-purple-600 bg-purple-500/10 border-purple-500/20",
       },
       {
@@ -51,7 +51,7 @@ export function FeatureGrid() {
         icon: Zap,
         title: t.featureGrid.feature3Title,
         description: t.featureGrid.feature3Desc,
-        highlights: ["Event triggers", "Smart delays", "Branching"],
+        highlights: ["Visual workflow canvas", "Event triggers", "HTTP webhooks"],
         badge: "Workflows",
         accent: "text-amber-600 bg-amber-500/10 border-amber-500/20",
       },
@@ -60,16 +60,16 @@ export function FeatureGrid() {
         icon: Users,
         title: t.featureGrid.feature4Title,
         description: t.featureGrid.feature4Desc,
-        highlights: ["Deal values", "Contact 360 view", "Auto-tagging"],
+        highlights: ["Contact profiles", "Custom fields & tags", "Lead pipelines"],
         badge: "Lead CRM",
         accent: "text-rose-600 bg-rose-500/10 border-rose-500/20",
       },
       {
-        id: "analytics",
+        id: "white-label",
         icon: BarChart3,
         title: t.featureGrid.feature6Title,
         description: t.featureGrid.feature6Desc,
-        highlights: ["Agent metrics", "Delivery funnels", "CSAT reports"],
+        highlights: ["Tenant isolation (Live)", "Custom domains (Coming Soon)", "Branded themes (Coming Soon)"],
         badge: "White-Label",
         accent: "text-indigo-600 bg-indigo-500/10 border-indigo-500/20",
       },
@@ -78,12 +78,11 @@ export function FeatureGrid() {
   );
 
   return (
-    <section id="features" className="py-16 sm:py-24 bg-background">
+    <section id="features" className="py-12 sm:py-16 lg:py-20 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="mx-auto max-w-3xl text-center mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary mb-3">
-            <Sparkles className="h-3.5 w-3.5" />
+        <div className="mx-auto max-w-3xl text-center mb-8 sm:mb-12">
+          <div className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary mb-3">
             {t.featureGrid.badge}
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">

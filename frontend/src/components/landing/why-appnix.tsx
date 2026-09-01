@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Layers,
   CheckCircle2,
   XCircle,
 } from "lucide-react";
@@ -10,23 +9,23 @@ import { useTranslation } from "@/lib/i18n";
 const comparisons = [
   {
     category: "Disconnected Point Solutions",
-    problem: "Separate tools for WhatsApp, live chat, CRM, bot builder, and broadcasts.",
-    appnixSolution: "One unified multi-channel workspace with synchronized data management.",
+    problem: "Separate tools for messaging, CRM, automation, and customer management.",
+    appnixSolution: "A unified workspace for supported messaging channels, CRM, and customer interaction management.",
   },
   {
-    category: "Lead Response Time",
-    problem: "Delays in following up with new customer inquiries across scattered apps.",
-    appnixSolution: "Automated trigger-based instant replies and lead assignment.",
+    category: "Customer Response Workflows",
+    problem: "Customer inquiries may require follow-up across multiple tools.",
+    appnixSolution: "Create automated workflows for customer responses and conversation routing.",
   },
   {
     category: "Channel Integrations",
-    problem: "Complex standalone setups and disconnected message delivery logs.",
-    appnixSolution: "Direct Cloud API integrations for supported messaging platforms.",
+    problem: "Managing multiple communication channels can require separate configurations and tools.",
+    appnixSolution: "Connect supported messaging platforms through available integrations.",
   },
   {
     category: "Team Visibility & Routing",
-    problem: "No centralized visibility into team response activity or conversation status.",
-    appnixSolution: "Multi-agent assignment, conversation tags, and team collaboration notes.",
+    problem: "Customer conversations and team activity may be managed across separate tools.",
+    appnixSolution: "Use team assignment, conversation organization, and collaboration features available in the platform.",
   },
 ];
 
@@ -34,12 +33,11 @@ export function WhyAppnix() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-20 sm:py-28 bg-muted/20 border-y border-border/60">
+    <section className="py-12 sm:py-16 lg:py-20 bg-muted/20 border-y border-border/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="mx-auto max-w-3xl text-center mb-16">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary mb-3">
-            <Layers className="h-3.5 w-3.5" />
+        <div className="mx-auto max-w-3xl text-center mb-8 sm:mb-12">
+          <div className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary mb-3">
             {t.whyAppnix.badge}
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl text-balance">

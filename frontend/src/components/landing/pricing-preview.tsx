@@ -48,10 +48,10 @@ export function PricingPreview({ onOpenDemoModal }: PricingPreviewProps) {
         popular: true,
         features: [
           "Up to 25,000 monthly messages",
-          "Unlimited Channels (WhatsApp, IG, FB, RCS)",
-          "5 Advanced AI Botflows",
+          "Multiple Channels (WhatsApp, IG, FB, RCS)",
+          "5 Automation Botflows",
           "10 Team Member Seats",
-          "Priority Live Support & SLA",
+          "Email & Priority Support",
           "Custom Webhooks & REST API",
           "Full Campaign & Broadcast Suite",
         ],
@@ -68,12 +68,12 @@ export function PricingPreview({ onOpenDemoModal }: PricingPreviewProps) {
         description: t.pricing.enterpriseDesc,
         popular: false,
         features: [
-          "Unlimited Monthly Messages",
-          "Custom AI Voice Agent streaming",
+          "Custom Message Volume Allocation",
+          "Custom Voice Agent Integration",
           "Unlimited Automation Botflows",
           "Unlimited Team Seats & SSO",
           "Dedicated Account Manager",
-          "Custom SLA & Dedicated IP Deployment",
+          "Custom Onboarding & Dedicated Workspace",
           "Full White-Label Platform Access",
         ],
         ctaText: t.pricing.bookEnterprise,
@@ -231,16 +231,16 @@ export function PricingPreview({ onOpenDemoModal }: PricingPreviewProps) {
           })}
         </div>
 
-        {/* Bottom Trust Guarantee */}
+        {/* Bottom Trust Claims */}
         <div className="mt-12 text-center text-xs text-muted-foreground flex flex-wrap items-center justify-center gap-6">
           <span className="flex items-center gap-1.5">
             <ShieldCheck className="h-4 w-4 text-emerald-600" />
-            14-Day Free Sandbox Access
+            Independent SaaS Platform
           </span>
           <span>•</span>
-          <span>No Credit Card Required</span>
+          <span>Tenant-Isolated Workspaces</span>
           <span>•</span>
-          <span>Instant Phone Number Migration</span>
+          <span>Standard API Integration</span>
         </div>
       </div>
     </section>

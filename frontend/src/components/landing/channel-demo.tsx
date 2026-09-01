@@ -1,503 +1,202 @@
 "use client";
 
-import { useState } from "react";
-import {
-  MessageSquare,
-  Smartphone,
-  Send,
-  CheckCircle2,
-  Sparkles,
-  ArrowRight,
-  ExternalLink,
-  Bot,
-  Zap,
-  CheckCheck,
-  Image as ImageIcon,
-  ShoppingBag,
-  Bell,
-  Star,
-  ShieldCheck,
-  Paperclip,
-  Smile,
-  Phone,
-  Video,
-  MoreVertical,
-  ChevronRight,
-} from "lucide-react";
+import { CheckCircle2, ArrowRight, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   WhatsAppIcon,
   InstagramIcon,
   RCSIcon,
   FacebookIcon,
 } from "@/components/landing/channel-icons";
+import { useTranslation } from "@/lib/i18n";
 
-type ChannelId = "whatsapp" | "instagram" | "rcs" | "facebook";
-
-interface ChannelConfig {
-  id: ChannelId;
-  name: string;
-  badge: string;
-  tagline: string;
-  description: string;
-  features: string[];
-  themeColor: string;
-  verifiedHeader: string;
-  senderName: string;
-  senderHandle: string;
-  customerName: string;
-  customerAvatar: string;
-  customerAvatarBg: string;
-  messages: {
-    sender: "customer" | "agent" | "bot";
-    text: string;
-    time: string;
-    quickButtons?: string[];
-    richCard?: {
-      title: string;
-      description: string;
-      ctaText: string;
-      badge?: string;
-    };
-  }[];
+interface ChannelDemoProps {
+  onOpenDemoModal?: () => void;
 }
 
-const channelsData: ChannelConfig[] = [
+interface ChannelItem {
+  id: string;
+  name: string;
+  subtitle: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  accentColor: string;
+  badgeBorder: string;
+  badgeBg: string;
+  capabilities: string[];
+}
+
+const channels: ChannelItem[] = [
   {
     id: "whatsapp",
-    name: "WhatsApp Business API",
-    badge: "Cloud API Integration",
-    tagline: "WhatsApp Cloud API Integration",
+    name: "WhatsApp",
+    subtitle: "WhatsApp Business API integration",
     description:
-      "Send WhatsApp template notifications, manage customer conversations, and organize support inquiries with supported WhatsApp Business Platform integration.",
-    features: [
-      "WhatsApp Business Cloud API Connection",
-      "Interactive Template Messages with Quick-Reply Buttons",
-      "Product Catalog Showcase & Automated Flows",
-      "Automated Bot Workflows with Agent Assignment",
-    ],
-    themeColor: "emerald",
-    verifiedHeader: "WhatsApp Business Platform Integration",
-    senderName: "Appnix Solutions",
-    senderHandle: "+1 (800) 555-0199",
-    customerName: "Vikram Malhotra",
-    customerAvatar: "VM",
-    customerAvatarBg: "from-emerald-600 to-teal-600",
-    messages: [
-      {
-        sender: "customer",
-        text: "Hi Appnix team! Can you share the WhatsApp Cloud API integration details and sandbox for our CRM setup?",
-        time: "11:15 AM",
-      },
-      {
-        sender: "bot",
-        text: "Hello Vikram! Welcome to Appnix. Here is the developer sandbox access for testing message templates and webhook events:",
-        time: "11:15 AM",
-        richCard: {
-          title: "Appnix WhatsApp Cloud API Sandbox",
-          description: "Webhook event listener, template manager, and CRM contact auto-sync.",
-          ctaText: "Open Sandbox Console →",
-          badge: "Sandbox Ready",
-        },
-        quickButtons: ["📦 View API Specs", "📅 Book Live Demo", "💬 Chat with Team"],
-      },
-      {
-        sender: "agent",
-        text: "I've assigned Maya from our solutions team to assist your team with custom webhooks setup.",
-        time: "11:16 AM",
-      },
+      "Manage incoming customer chats, send approved notification templates, and automate responses using the WhatsApp Business Cloud API.",
+    icon: WhatsAppIcon,
+    accentColor: "text-emerald-600 dark:text-emerald-400",
+    badgeBorder: "border-emerald-500/20",
+    badgeBg: "bg-emerald-500/10",
+    capabilities: [
+      "Two-way customer messaging",
+      "Interactive template messages",
+      "Webhook event synchronization",
+      "Multi-agent chat routing",
     ],
   },
   {
     id: "instagram",
-    name: "Instagram Direct",
-    badge: "Direct API Integration",
-    tagline: "Manage Story Replies & Direct Messages",
+    name: "Instagram",
+    subtitle: "Instagram Direct integration",
     description:
-      "Manage incoming comments, story replies, and direct messages in a unified inbox. Set up automated response workflows to engage leads.",
-    features: [
-      "Automated Story Mention & DM Replies",
-      "Keyword-Triggered Response Flows",
-      "Unified DM Inbox for Instagram Professional Accounts",
-      "Product Link Sharing & Inquiry Routing",
-    ],
-    themeColor: "pink",
-    verifiedHeader: "Instagram Direct Messaging Integration",
-    senderName: "Appnix Growth Studio",
-    senderHandle: "@appnix_official",
-    customerName: "Chloe Davenport",
-    customerAvatar: "CD",
-    customerAvatarBg: "from-pink-600 to-rose-600",
-    messages: [
-      {
-        sender: "customer",
-        text: "Hi! Can we connect our e-commerce store catalog to send automated order updates via chat?",
-        time: "02:30 PM",
-      },
-      {
-        sender: "bot",
-        text: "Hey Chloe! Yes, Appnix connects with your store webhooks to automatically send dispatch alerts and order cards 🎉",
-        time: "02:30 PM",
-        richCard: {
-          title: "E-Commerce Webhook Connector",
-          description: "Sync orders, track delivery updates, and send real-time notifications.",
-          ctaText: "Explore Integration Guide",
-          badge: "Webhook Sync",
-        },
-        quickButtons: ["🛍️ View Documentation", "⚡ Start Free Trial"],
-      },
-      {
-        sender: "customer",
-        text: "Created our trial account! The response setup looks clean 🙌",
-        time: "02:32 PM",
-      },
+      "Handle Instagram Direct messages, customer inquiries, and story replies directly from your centralized team inbox.",
+    icon: InstagramIcon,
+    accentColor: "text-pink-600 dark:text-pink-400",
+    badgeBorder: "border-pink-500/20",
+    badgeBg: "bg-pink-500/10",
+    capabilities: [
+      "Direct message (DM) inbox",
+      "Story mention notifications",
+      "Automated greeting replies",
+      "Conversation assignment",
     ],
   },
   {
     id: "rcs",
-    name: "RCS Business Messaging",
-    badge: "RCS Messaging",
-    tagline: "Interactive Rich Messaging",
+    name: "RCS",
+    subtitle: "RCS Business Messaging integration",
     description:
-      "Deliver rich media experiences featuring carousels, action chips, verified branding assets, and delivery status tracking.",
-    features: [
-      "Branded Sender Profiles & Media Cards",
-      "Carousel Cards & Media Previews",
-      "Native Suggested Action Chips & Quick Options",
-      "Delivery & Read Status Receipts",
-    ],
-    themeColor: "blue",
-    verifiedHeader: "RCS Business Messaging Integration",
-    senderName: "Apex Airline Alerts",
-    senderHandle: "RCS Channel",
-    customerName: "David Miller",
-    customerAvatar: "DM",
-    customerAvatarBg: "from-blue-600 to-indigo-600",
-    messages: [
-      {
-        sender: "bot",
-        text: "Your flight AP-402 to San Francisco is on schedule. Terminal 3 Gate B12 boarding starts at 04:15 PM.",
-        time: "03:45 PM",
-        richCard: {
-          title: "Flight AP-402 • Mobile Boarding Pass Ready",
-          description: "Seat 14A • Priority Boarding Group 2 • Gate B12",
-          ctaText: "View Mobile Boarding Pass",
-          badge: "On Time",
-        },
-        quickButtons: ["💺 Upgrade Seat", "🍔 Pre-order Meal", "🔔 Alert Flight Changes"],
-      },
-      {
-        sender: "customer",
-        text: "Can I upgrade to Extra Legroom seat 12C?",
-        time: "03:48 PM",
-      },
-      {
-        sender: "agent",
-        text: "Seat 12C is confirmed for you David! Your updated mobile pass has been generated.",
-        time: "03:49 PM",
-      },
+      "Engage mobile customers with branded profiles, rich multimedia cards, and interactive suggested action buttons.",
+    icon: RCSIcon,
+    accentColor: "text-blue-600 dark:text-blue-400",
+    badgeBorder: "border-blue-500/20",
+    badgeBg: "bg-blue-500/10",
+    capabilities: [
+      "Rich media carousels",
+      "Suggested action chips",
+      "Delivery & read receipts",
+      "Direct SMS fallback support",
     ],
   },
   {
     id: "facebook",
     name: "Facebook Messenger",
-    badge: "Messenger Integration",
-    tagline: "Manage Page Inquiries & Leads",
+    subtitle: "Facebook Messenger integration",
     description:
-      "Connect your Facebook business pages and Click-to-Messenger ads directly into Appnix for centralized conversation management.",
-    features: [
-      "Connect Multiple Facebook Pages to 1 Team Inbox",
-      "Click-to-Messenger Lead Capture",
-      "Automated Menu & FAQ Response Flows",
-      "Automatic CRM Contact Record Creation",
-    ],
-    themeColor: "indigo",
-    verifiedHeader: "Facebook Messenger Integration",
-    senderName: "Appnix Support Desk",
-    senderHandle: "fb.me/appnixtech",
-    customerName: "Jessica Lee",
-    customerAvatar: "JL",
-    customerAvatarBg: "from-indigo-600 to-purple-600",
-    messages: [
-      {
-        sender: "customer",
-        text: "Hi support team, checking status of our incoming Facebook campaign inquiries.",
-        time: "09:10 AM",
-      },
-      {
-        sender: "agent",
-        text: "Hi Jessica! All inbound inquiries from your connected page have been routed and logged in CRM.",
-        time: "09:12 AM",
-        richCard: {
-          title: "Campaign Inquiries Summary",
-          description: "Inquiries Logged • Assigned to Team • Real-time Sync",
-          ctaText: "View Full CRM Pipeline",
-          badge: "Real-time Sync",
-        },
-        quickButtons: ["📊 Download CSV", "👥 Reassign Team Leads"],
-      },
-      {
-        sender: "customer",
-        text: "Thank you for the quick update!",
-        time: "09:14 AM",
-      },
+      "Consolidate Facebook Page communications, customer inquiries, and automated triage in one shared workspace.",
+    icon: FacebookIcon,
+    accentColor: "text-indigo-600 dark:text-indigo-400",
+    badgeBorder: "border-indigo-500/20",
+    badgeBg: "bg-indigo-500/10",
+    capabilities: [
+      "Facebook Page inbox",
+      "Automated welcome flows",
+      "Rich media & attachment support",
+      "Internal team collaboration",
     ],
   },
 ];
 
-import { useTranslation } from "@/lib/i18n";
-
-export function ChannelDemo({ onOpenDemoModal }: { onOpenDemoModal: () => void }) {
+export function ChannelDemo({ onOpenDemoModal }: ChannelDemoProps) {
   const { t } = useTranslation();
-  const [selectedChannelId, setSelectedChannelId] = useState<ChannelId>("whatsapp");
-  const [activeInputText, setActiveInputText] = useState("");
-
-  const currentChannel =
-    channelsData.find((c) => c.id === selectedChannelId) || channelsData[0];
 
   return (
-    <section id="channels" className="py-20 sm:py-28 bg-muted/20 border-b border-border/60">
+    <section id="channels" className="py-12 sm:py-16 lg:py-20 bg-muted/20 border-b border-border/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="mx-auto max-w-3xl text-center mb-14 sm:mb-18">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary mb-3">
-            <Sparkles className="h-3.5 w-3.5" />
-            {t.channelDemo.badge}
-          </div>
+        <div className="mx-auto max-w-3xl text-center mb-10 sm:mb-14">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-            {t.channelDemo.title}
+            One Central Hub. Every Major Conversation Channel.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-muted-foreground text-balance">
-            {t.channelDemo.subtitle}
+          <p className="mt-4 text-base sm:text-lg text-muted-foreground text-balance leading-relaxed">
+            Connect supported business messaging channels in one platform and manage customer conversations from a unified workspace.
           </p>
         </div>
 
-        {/* Interactive Channel Tabs Grid (Hover & Click Switch) */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
-          {channelsData.map((channel) => {
-            const isSelected = channel.id === selectedChannelId;
+        {/* 4-Card Responsive Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+          {channels.map((channel) => {
+            const Icon = channel.icon;
             return (
-              <button
+              <div
                 key={channel.id}
-                onClick={() => setSelectedChannelId(channel.id)}
-                onMouseEnter={() => setSelectedChannelId(channel.id)}
-                className={`p-4 rounded-xl text-left border transition-all duration-200 cursor-pointer ${
-                  isSelected
-                    ? "bg-card border-primary ring-2 ring-primary/20 shadow-md scale-[1.02]"
-                    : "bg-card/60 hover:bg-card border-border/70 text-muted-foreground hover:text-foreground"
-                }`}
+                className="group rounded-2xl border border-border/80 bg-card p-6 shadow-xs hover:shadow-lg hover:border-primary/40 transition-all duration-200 flex flex-col justify-between"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    {channel.id === "whatsapp" && (
-                      <WhatsAppIcon className="h-5 w-5 text-emerald-600" />
-                    )}
-                    {channel.id === "instagram" && (
-                      <InstagramIcon className="h-5 w-5 text-pink-600" />
-                    )}
-                    {channel.id === "rcs" && (
-                      <RCSIcon className="h-5 w-5 text-blue-600" />
-                    )}
-                    {channel.id === "facebook" && (
-                      <FacebookIcon className="h-5 w-5 text-indigo-600" />
-                    )}
-                    <span className="font-bold text-xs sm:text-sm text-foreground">
-                      {channel.id.toUpperCase()}
-                    </span>
+                <div>
+                  {/* Channel Header with Icon & Subtitle */}
+                  <div className="flex items-center gap-3.5 mb-4">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${channel.badgeBorder} ${channel.badgeBg} ${channel.accentColor} shrink-0 shadow-2xs group-hover:scale-105 transition-transform`}>
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-foreground">
+                        {channel.name}
+                      </h3>
+                      <p className="text-xs font-semibold text-muted-foreground mt-0.5">
+                        {channel.subtitle}
+                      </p>
+                    </div>
                   </div>
-                  {isSelected && (
-                    <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                  )}
+
+                  {/* Concise Description */}
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-5">
+                    {channel.description}
+                  </p>
+
+                  {/* Key Capabilities */}
+                  <div className="pt-4 border-t border-border/60 space-y-2">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-foreground/80 block">
+                      Capabilities
+                    </span>
+                    <ul className="space-y-1.5 text-xs text-muted-foreground">
+                      {channel.capabilities.map((cap, idx) => (
+                        <li key={idx} className="flex items-center gap-2">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <span className="text-foreground/90">{cap}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-                <p className="text-[11px] line-clamp-1 font-medium">
-                  {channel.name}
-                </p>
-              </button>
+
+                {/* Bottom CTA / Action */}
+                <div className="pt-6 mt-6 border-t border-border/60">
+                  <button
+                    type="button"
+                    onClick={() => onOpenDemoModal?.()}
+                    className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold text-foreground bg-secondary/60 hover:bg-secondary border border-border/70 hover:border-primary/40 transition-all cursor-pointer"
+                  >
+                    <span>Connect {channel.name.split(" ")[0]}</span>
+                    <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                  </button>
+                </div>
+              </div>
             );
           })}
         </div>
 
-        {/* Main Interactive Demo Box */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center rounded-2xl border border-border/80 bg-card p-6 sm:p-8 shadow-xl">
-          {/* Left Column: Channel Details & Capabilities */}
-          <div className="lg:col-span-5 space-y-5">
+        {/* Unified Integration Architecture Strip */}
+        <div className="mt-10 sm:mt-12 rounded-2xl border border-border/70 bg-card/60 p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
+              <Layers className="h-5 w-5" />
+            </div>
             <div>
-              <Badge className="mb-2 bg-primary/10 text-primary font-semibold text-xs border-primary/20">
-                {currentChannel.badge}
-              </Badge>
-              <h3 className="text-2xl font-bold tracking-tight text-foreground">
-                {currentChannel.name}
-              </h3>
-              <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400 mt-1">
-                {currentChannel.tagline}
+              <h4 className="text-sm font-bold text-foreground">
+                Unified Inbound Webhooks &amp; Multi-Channel Routing
+              </h4>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                All conversations flow into one centralized agent inbox with real-time assignment and status tracking.
               </p>
             </div>
-
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {currentChannel.description}
-            </p>
-
-            <div className="space-y-2.5 pt-2">
-              <span className="text-xs font-bold text-foreground uppercase tracking-wider block">
-                Key Channel Capabilities
-              </span>
-              {currentChannel.features.map((feature, i) => (
-                <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-foreground">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>{feature}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="pt-3 flex flex-wrap gap-3">
-              <Button
-                onClick={onOpenDemoModal}
-                className="h-10 px-5 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5 shadow-sm"
-              >
-                Connect {currentChannel.name.split(" ")[0]} Now
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
-            </div>
           </div>
-
-          {/* Right Column: REAL AUTHENTIC CHANNEL CHAT UI */}
-          <div className="lg:col-span-7">
-            <div className="rounded-2xl border border-border bg-background shadow-2xl overflow-hidden flex flex-col min-h-[460px]">
-              {/* Channel Security / Partner Banner */}
-              <div className="bg-muted/70 border-b border-border px-4 py-2 flex items-center justify-between text-[11px] text-muted-foreground">
-                <span className="flex items-center gap-1.5 font-medium text-foreground">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                  {currentChannel.verifiedHeader}
-                </span>
-                <span className="font-mono text-[10px]">appnix-cloud-gateway</span>
-              </div>
-
-              {/* Channel Header */}
-              <div className="border-b border-border bg-card p-3.5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`h-10 w-10 rounded-full bg-gradient-to-tr ${currentChannel.customerAvatarBg} text-white flex items-center justify-center font-bold text-xs shadow-xs`}>
-                    {currentChannel.customerAvatar}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <h4 className="text-sm font-bold text-foreground">
-                        {currentChannel.customerName}
-                      </h4>
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {currentChannel.senderHandle} • Active Client Thread
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-[10px] bg-background">
-                    Auto-Routing: Active
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Chat Thread Container */}
-              <div className="flex-1 p-4 sm:p-5 space-y-3.5 bg-muted/10 overflow-y-auto max-h-[310px]">
-                {currentChannel.messages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`flex flex-col ${
-                      msg.sender === "customer" ? "items-start" : "items-end"
-                    }`}
-                  >
-                    <div
-                      className={`max-w-[88%] rounded-2xl p-3.5 text-xs shadow-xs space-y-2.5 ${
-                        msg.sender === "customer"
-                          ? "bg-card border border-border text-foreground rounded-tl-xs"
-                          : "bg-primary text-primary-foreground rounded-tr-xs"
-                      }`}
-                    >
-                      <p className="leading-relaxed">{msg.text}</p>
-
-                      {/* Rich Media Card */}
-                      {msg.richCard && (
-                        <div className="rounded-xl border border-white/20 bg-black/20 p-3 text-left space-y-2">
-                          <div className="flex items-center justify-between">
-                            <h5 className="font-bold text-xs text-white">
-                              {msg.richCard.title}
-                            </h5>
-                            {msg.richCard.badge && (
-                              <span className="bg-emerald-500 text-slate-950 text-[9px] font-bold px-1.5 py-0.2 rounded">
-                                {msg.richCard.badge}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[11px] text-white/90 leading-tight">
-                            {msg.richCard.description}
-                          </p>
-                          <div className="pt-0.5">
-                            <span className="inline-block text-[10px] font-bold text-emerald-300 underline cursor-pointer">
-                              {msg.richCard.ctaText}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Interactive Quick Reply Buttons */}
-                      {msg.quickButtons && (
-                        <div className="pt-1 flex flex-wrap gap-1.5">
-                          {msg.quickButtons.map((btn, bIdx) => (
-                            <button
-                              key={bIdx}
-                              className="bg-white/15 hover:bg-white/25 text-white text-[10px] font-semibold px-2.5 py-1 rounded-lg border border-white/20 transition-colors cursor-pointer text-left"
-                            >
-                              {btn}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      <div
-                        className={`flex items-center justify-end gap-1 text-[9px] ${
-                          msg.sender === "customer"
-                            ? "text-muted-foreground"
-                            : "text-primary-foreground/75"
-                        }`}
-                      >
-                        <span>{msg.time}</span>
-                        {msg.sender !== "customer" && (
-                          <CheckCheck className="h-3 w-3 text-emerald-300" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Real Input Composer */}
-              <div className="p-3 border-t border-border bg-card space-y-2">
-                <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                  <span className="bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded cursor-pointer hover:bg-primary/20">
-                    ⚡ /template: Quick Reply
-                  </span>
-                  <span className="bg-muted text-foreground font-medium px-2 py-0.5 rounded cursor-pointer hover:bg-accent">
-                    📎 Attach Media
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    value={activeInputText}
-                    onChange={(e) => setActiveInputText(e.target.value)}
-                    placeholder={`Reply via ${currentChannel.name}...`}
-                    className="flex-1 text-xs bg-muted/40 rounded-lg px-3 py-2 text-foreground border-none outline-none placeholder:text-muted-foreground"
-                  />
-                  <Button size="sm" className="h-8 px-3 text-xs bg-primary text-primary-foreground gap-1">
-                    <Send className="h-3 w-3" />
-                    Send
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Button
+            onClick={onOpenDemoModal}
+            size="sm"
+            className="h-9 px-4 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shrink-0 cursor-pointer"
+          >
+            Explore Channel Setup
+          </Button>
         </div>
       </div>
     </section>

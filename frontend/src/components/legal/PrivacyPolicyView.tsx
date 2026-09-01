@@ -7,17 +7,13 @@ import {
   Database, 
   FileText, 
   UserCheck, 
-  AlertCircle, 
   CheckCircle2, 
   Mail, 
   Phone, 
   MapPin, 
-  ExternalLink,
   ArrowRight,
   Server,
-  Layers,
-  EyeOff,
-  RefreshCw
+  Layers
 } from "lucide-react";
 import { LegalPageLayout, TOCItem } from "@/components/legal/LegalPageLayout";
 
@@ -34,7 +30,7 @@ const PRIVACY_TOC: TOCItem[] = [
   { id: "cookies-sessions", title: "Cookies, Sessions & Storage" },
   { id: "user-rights", title: "Your Rights & Data Choices" },
   { id: "data-deletion-requests", title: "How to Request Data Deletion" },
-  { id: "multi-tenant-isolation", title: "Multi-Tenant Data Isolation" },
+  { id: "multi-tenant-isolation", title: "Multi-Tenant Architecture & Data Separation" },
   { id: "children-privacy", title: "Children's Privacy" },
   { id: "policy-updates", title: "Updates to this Privacy Policy" },
   { id: "contact-us", title: "Contact Information & Inquiries" },
@@ -44,7 +40,7 @@ export function PrivacyPolicyView() {
   return (
     <LegalPageLayout
       title="Appnix Technologies Privacy Policy"
-      subtitle="Comprehensive notice explaining our data collection, processing, customer ownership, and WhatsApp Business Platform integration practices."
+      subtitle="Notice explaining our data collection, processing, customer ownership, and WhatsApp Business Platform integration practices."
       badge="Data Privacy & Compliance"
       effectiveDate="January 1, 2026"
       lastUpdated="September 1, 2026"
@@ -58,18 +54,18 @@ export function PrivacyPolicyView() {
             01
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Overview & Identity of Appnix Technologies
+            Overview &amp; Identity of Appnix Technologies
           </h2>
         </div>
         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-          Welcome to the Privacy Policy of <strong>Appnix Technologies</strong> (&ldquo;Appnix&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;). This policy transparently explains how we collect, use, process, safeguard, and disclose information when you interact with our website (<a href="https://appnix.co.in" className="text-primary hover:underline font-medium">https://appnix.co.in</a>) and our multi-tenant Software-as-a-Service (&ldquo;SaaS&rdquo;) platform.
+          Welcome to the Privacy Policy of <strong>Appnix Technologies</strong> (&ldquo;Appnix&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;). This policy explains how we collect, use, process, safeguard, and disclose information when you interact with our website (<a href="https://www.appnix.co.in" className="text-primary hover:underline font-medium">https://www.appnix.co.in</a>) and our multi-tenant Software-as-a-Service (&ldquo;SaaS&rdquo;) platform.
         </p>
         <div className="rounded-xl border border-border/80 bg-muted/40 p-4 text-xs sm:text-sm space-y-2">
-          <p className="font-semibold text-foreground">Official Corporate & Contact Information:</p>
+          <p className="font-semibold text-foreground">Corporate &amp; Contact Information:</p>
           <ul className="space-y-1 text-muted-foreground">
             <li><strong>Legal Entity:</strong> Appnix Technologies</li>
             <li><strong>Registered Address:</strong> 603–604, 6th Floor, Tower B, Bhutani Alphathum, Sector 90, Noida, Uttar Pradesh 201305, India</li>
-            <li><strong>Official Platform Domain:</strong> <a href="https://appnix.co.in" className="text-primary hover:underline">https://appnix.co.in</a></li>
+            <li><strong>Platform Website:</strong> <a href="https://www.appnix.co.in" className="text-primary hover:underline">https://www.appnix.co.in</a></li>
             <li><strong>Privacy Desk Email:</strong> <a href="mailto:privacy@appnix.co.in" className="text-primary hover:underline">privacy@appnix.co.in</a></li>
             <li><strong>Support Email:</strong> <a href="mailto:support@appnix.co.in" className="text-primary hover:underline">support@appnix.co.in</a></li>
             <li><strong>Telephone:</strong> <a href="tel:+917753983175" className="text-primary hover:underline">+91 77539 83175</a></li>
@@ -84,34 +80,20 @@ export function PrivacyPolicyView() {
             02
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            SaaS Platform Scope & WhatsApp Business Model
+            SaaS Platform Scope &amp; WhatsApp Business Model
           </h2>
         </div>
         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
           <strong>Appnix Technologies provides a software platform that helps businesses manage customer communication through WhatsApp. Clients connect their own WhatsApp Business accounts to the platform and use it to communicate with their customers, manage conversations, and organize customer interactions. Platform Data is used only to provide these communication and management features to the respective client.</strong>
         </p>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          In operating the platform:
-        </p>
-        <div className="grid gap-3 sm:grid-cols-2 pt-1">
-          <div className="rounded-xl border border-border bg-card p-3.5 space-y-1.5 shadow-2xs">
-            <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
-              <UserCheck className="h-3.5 w-3.5 text-primary" />
-              Client as Data Controller
-            </h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Our business client acts as the data controller regarding the end-customer phone numbers, names, and communication content they upload or route through the platform.
-            </p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-3.5 space-y-1.5 shadow-2xs">
-            <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
-              <Database className="h-3.5 w-3.5 text-emerald-600" />
-              Appnix as Data Processor
-            </h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Appnix Technologies acts strictly as a data processor / technology intermediary, executing message routing, campaign broadcasts, and workflow automations solely on instructions from the client.
-            </p>
-          </div>
+        <div className="rounded-xl border border-border bg-card p-4 space-y-2 shadow-2xs">
+          <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+            <UserCheck className="h-3.5 w-3.5 text-primary" />
+            Roles and Responsibilities
+          </h4>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Depending on the service and applicable law, Appnix may process customer information on behalf of its business clients to provide the platform. Business clients act as the controller for customer communication and contact information they manage through their account.
+          </p>
         </div>
       </section>
 
@@ -126,57 +108,57 @@ export function PrivacyPolicyView() {
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          We collect and process only the categories of information necessary to deliver, secure, and administer our B2B SaaS platform:
+          We collect and process the following categories of information to provide, secure, and administer our SaaS platform:
         </p>
         
         <div className="space-y-3 pt-1">
-          <div className="rounded-xl border border-border/80 bg-card p-4 space-y-2">
+          <div className="rounded-xl border border-border/80 bg-card p-4 space-y-1.5">
             <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-primary" />
-              1. Account & Registration Information
+              1. Account &amp; Registration Information
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              When a client business registers for an Appnix workspace, we collect the account owner&apos;s name, business email address, company name, workspace slug, contact phone number, and cryptographically hashed passwords. If Google OAuth is chosen for sign-in, we collect the authenticated email, name, avatar, and Google account identifier.
+              When a client business registers for an Appnix workspace, we collect the account owner&apos;s name, business email address, company name, workspace identifier, phone number, and cryptographically hashed passwords. If Google sign-in is used, we collect the authenticated email, name, avatar, and Google account identifier.
             </p>
           </div>
 
-          <div className="rounded-xl border border-border/80 bg-card p-4 space-y-2">
+          <div className="rounded-xl border border-border/80 bg-card p-4 space-y-1.5">
             <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-blue-500" />
-              2. Channel Credentials & Authentication Tokens
+              2. Channel Credentials &amp; Authentication Information
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              When clients link their WhatsApp Business Account (WABA), Meta Business Suite, Instagram Professional, RCS, or third-party webhooks (e.g., Shopify, CRM endpoints), we store configuration parameters, Phone Number IDs, WhatsApp Business Account IDs (WABA ID), and encrypted OAuth/API access tokens required to communicate with upstream APIs.
+              When clients link their WhatsApp Business Account, Instagram, RCS, or webhook endpoints, we store configuration parameters, Phone Number IDs, WhatsApp Business Account IDs (WABA ID), and API access tokens required to communicate with upstream messaging APIs.
             </p>
           </div>
 
-          <div className="rounded-xl border border-border/80 bg-card p-4 space-y-2">
+          <div className="rounded-xl border border-border/80 bg-card p-4 space-y-1.5">
             <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              3. Client CRM Contacts & Customer Data
+              3. CRM Contacts &amp; Customer Information
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Data uploaded, imported via CSV, or received from messaging channels by the client, including customer contact names, phone numbers, email addresses, custom CRM tags, custom field attributes (Super Fields), and audience segment lists.
+              Data uploaded, imported, or received from messaging channels by the client, including customer contact phone numbers, names, email addresses, custom CRM tags, custom field attributes, and audience segments.
             </p>
           </div>
 
-          <div className="rounded-xl border border-border/80 bg-card p-4 space-y-2">
+          <div className="rounded-xl border border-border/80 bg-card p-4 space-y-1.5">
             <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-purple-500" />
-              4. Communication Metadata & Message Logs
+              4. Messaging &amp; Channel Information
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Message transmission timestamps, template names, delivery statuses (e.g., sent, delivered, read, failed), error codes returned by upstream telecom/Meta providers, and interactive chatbot workflow responses processed on behalf of the client.
+              Message transmission timestamps, template names, delivery statuses (such as sent, delivered, read, failed), error codes returned by upstream providers, and workflow responses processed on behalf of the client.
             </p>
           </div>
 
-          <div className="rounded-xl border border-border/80 bg-card p-4 space-y-2">
+          <div className="rounded-xl border border-border/80 bg-card p-4 space-y-1.5">
             <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-amber-500" />
-              5. Technical, Log & Security Information
+              5. Technical, Log &amp; Authentication Information
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              IP addresses, browser type, operating system, sign-in timestamps, API request logs, and error diagnostic traces collected automatically to ensure system stability, prevent unauthorized access, and troubleshoot operational incidents.
+              IP addresses, browser type, operating system, sign-in timestamps, API request logs, and error diagnostic traces collected to ensure system stability, prevent unauthorized access, and troubleshoot technical issues.
             </p>
           </div>
         </div>
@@ -189,33 +171,33 @@ export function PrivacyPolicyView() {
             04
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            WhatsApp Business Platform & Meta-Related Data Processing
+            WhatsApp Business Platform &amp; Meta-Related Data Processing
           </h2>
         </div>
         <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 sm:p-5 space-y-3">
           <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-semibold text-sm">
             <ShieldCheck className="h-4 w-4 shrink-0" />
-            <span>Dedicated WhatsApp Business Platform Data Clause</span>
+            <span>WhatsApp Business Platform Data Clause</span>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Appnix Technologies integrates with the official <strong>Meta Cloud API / WhatsApp Business Platform</strong>. When you connect your WhatsApp Business Account to the Appnix SaaS platform, our software facilitates the transmission of messages and webhook events between your Meta WABA and our platform dashboard.
+            Appnix Technologies integrates with the WhatsApp Business Platform / Meta APIs. When you connect your WhatsApp Business Account to the Appnix platform, our software facilitates the transmission of messages and webhook events between your Meta account and our platform workspace.
           </p>
           <ul className="space-y-2 text-xs text-muted-foreground">
             <li className="flex items-start gap-2">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
-              <span><strong>Purpose-Limited Processing:</strong> Meta and WhatsApp data (including message text, recipient phone numbers, media attachments, template IDs, and webhook notifications) are processed exclusively to provide the communication, inbox, chatbot, and campaign features requested by the respective client.</span>
+              <span><strong>Purpose-Limited Processing:</strong> Meta and WhatsApp data (including message text, recipient phone numbers, media attachments, template IDs, and webhook notifications) are processed to provide the communication, inbox, workflow, and campaign features requested by the respective client.</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
-              <span><strong>No Data Ownership:</strong> Appnix Technologies does not claim ownership of any client WhatsApp message content, recipient contact records, or Meta account assets.</span>
+              <span><strong>No Data Ownership:</strong> Appnix does not claim ownership of customer content or Meta account assets.</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
-              <span><strong>No Sale of WhatsApp Data:</strong> Appnix Technologies strictly does not sell, license, rent, monetize, or disclose WhatsApp or Meta-related user data to any third-party advertisers, data brokers, or commercial marketers.</span>
+              <span><strong>No Sale of WhatsApp Data:</strong> Appnix does not sell customer contact lists or WhatsApp/Meta-related customer content for advertising or data-broker purposes.</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
-              <span><strong>No Advertising Profiling:</strong> We do not build advertising profiles or conduct cross-platform surveillance based on your WhatsApp communication metadata or client contacts.</span>
+              <span><strong>No Advertising Profiling:</strong> We do not build advertising profiles or conduct cross-platform tracking based on client messaging metadata or contact lists.</span>
             </li>
           </ul>
         </div>
@@ -232,24 +214,24 @@ export function PrivacyPolicyView() {
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          We process data strictly on lawful grounds (performance of a contract, legitimate business interest in platform security, and compliance with statutory obligations) for the following purposes:
+          We process data for the following operational purposes:
         </p>
         <div className="grid gap-3 sm:grid-cols-2 text-xs text-muted-foreground">
           <div className="rounded-xl border border-border bg-card p-3.5 space-y-1">
-            <p className="font-semibold text-foreground">Service Delivery & Automation</p>
-            <p>Provisioning workspace accounts, routing outbound and inbound messages, executing automated chatbot flows, and synchronizing approved message templates.</p>
+            <p className="font-semibold text-foreground">Service Delivery &amp; Messaging</p>
+            <p>Provisioning workspace accounts, routing outbound and inbound messages, executing automated workflows, and synchronizing message templates.</p>
           </div>
           <div className="rounded-xl border border-border bg-card p-3.5 space-y-1">
-            <p className="font-semibold text-foreground">CRM & Contact Organization</p>
+            <p className="font-semibold text-foreground">CRM &amp; Contact Organization</p>
             <p>Enabling clients to organize contact records, manage tag attributes, segment subscriber audiences, and view customer conversation histories.</p>
           </div>
           <div className="rounded-xl border border-border bg-card p-3.5 space-y-1">
-            <p className="font-semibold text-foreground">Security, Fraud & Abuse Prevention</p>
+            <p className="font-semibold text-foreground">Security &amp; Abuse Prevention</p>
             <p>Monitoring for unauthorized login attempts, safeguarding API credentials, preventing message spamming or rate-limit abuse, and maintaining audit logs.</p>
           </div>
           <div className="rounded-xl border border-border bg-card p-3.5 space-y-1">
-            <p className="font-semibold text-foreground">Billing & Transaction Management</p>
-            <p>Processing subscription renewals, workspace balance top-ups, invoicing, and generating transaction statements for tax accounting.</p>
+            <p className="font-semibold text-foreground">Account Administration</p>
+            <p>Managing account settings, user permissions, invoices, and transaction records where applicable.</p>
           </div>
         </div>
       </section>
@@ -261,18 +243,17 @@ export function PrivacyPolicyView() {
             06
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Data Ownership, Customer Control & Strict Prohibition on Selling Data
+            Data Ownership &amp; No Sale of Data
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          At Appnix Technologies, our business model is straightforward: we offer subscription software to businesses. <strong>We are not an advertising company and we do not monetize personal data.</strong>
+          At Appnix Technologies, our business model is focused on providing business software. <strong>We do not sell personal data.</strong>
         </p>
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-2 text-xs sm:text-sm">
-          <p className="font-bold text-foreground">Explicit Guarantees:</p>
           <ul className="space-y-1.5 text-muted-foreground list-disc pl-4">
-            <li><strong>You Own Your Data:</strong> All CRM contacts, message copy, and subscriber information imported into your tenant workspace remain your exclusive property.</li>
-            <li><strong>No Sale to Third Parties:</strong> We do not sell, rent, trade, or distribute your customer lists, phone numbers, or conversation content to any third parties under any circumstances.</li>
-            <li><strong>No Ad Targeting:</strong> Your customer data is never used to train generalized advertising models or served to ad networks.</li>
+            <li><strong>Customer Content Ownership:</strong> Customers retain ownership of Customer Content to the extent they own it.</li>
+            <li><strong>No Sale of Data:</strong> Appnix does not sell customer contact lists or WhatsApp/Meta-related customer content for advertising or data-broker purposes.</li>
+            <li><strong>No Advertising Targeting:</strong> Customer data is not used to train generalized advertising models or served to ad networks.</li>
           </ul>
         </div>
       </section>
@@ -284,11 +265,11 @@ export function PrivacyPolicyView() {
             07
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Disclosures & Essential Service Providers
+            Disclosures &amp; Essential Service Providers
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          We disclose information only to vetted, essential sub-processors and third-party infrastructure providers strictly required to operate the SaaS platform:
+          We disclose information to essential service providers required to operate the platform:
         </p>
         <div className="space-y-2.5 text-xs">
           <div className="rounded-xl border border-border bg-card p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -297,37 +278,37 @@ export function PrivacyPolicyView() {
               <p className="text-muted-foreground">Upstream communications infrastructure for WhatsApp template submission, message delivery, and webhook events.</p>
             </div>
             <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full shrink-0">
-              Direct Channel API
+              Messaging Platform
             </span>
           </div>
 
           <div className="rounded-xl border border-border bg-card p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <p className="font-semibold text-foreground">Cloud Database & Server Hosting</p>
-              <p className="text-muted-foreground">PostgreSQL managed database storage and compute infrastructure for hosting application logic and isolated tenant databases.</p>
+              <p className="font-semibold text-foreground">Cloud Database &amp; Application Hosting</p>
+              <p className="text-muted-foreground">PostgreSQL managed database storage and application infrastructure for hosting platform services.</p>
             </div>
             <span className="text-[11px] font-medium text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full shrink-0">
-              Secure Infrastructure
+              Infrastructure
             </span>
           </div>
 
           <div className="rounded-xl border border-border bg-card p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
               <p className="font-semibold text-foreground">Brevo (Sendinblue) Transactional Email Service</p>
-              <p className="text-muted-foreground">Delivery of transactional authentication codes (OTPs), password reset verification, and critical system notifications.</p>
+              <p className="text-muted-foreground">Delivery of transactional authentication codes (OTPs), password reset verification, and system notifications.</p>
             </div>
             <span className="text-[11px] font-medium text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full shrink-0">
-              Email Dispatch
+              Email Delivery
             </span>
           </div>
 
           <div className="rounded-xl border border-border bg-card p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <p className="font-semibold text-foreground">Legal & Regulatory Compliance</p>
-              <p className="text-muted-foreground">We may disclose information if required by applicable Indian law, valid court order, or enforceable government request.</p>
+              <p className="font-semibold text-foreground">Legal &amp; Regulatory Compliance</p>
+              <p className="text-muted-foreground">We may disclose information if required by applicable law, valid court order, or enforceable governmental request.</p>
             </div>
             <span className="text-[11px] font-medium text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full shrink-0">
-              Statutory Requirement
+              Legal Requirement
             </span>
           </div>
         </div>
@@ -340,18 +321,15 @@ export function PrivacyPolicyView() {
             08
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Data Retention & Storage Lifecycle
+            Data Retention &amp; Storage Lifecycle
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          We retain client data only for as long as necessary to fulfill the operational purposes described in this Privacy Policy:
+          Data is retained only for as long as reasonably necessary to provide the service, meet contractual requirements, address security needs, and comply with applicable legal obligations.
         </p>
-        <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground list-disc pl-5">
-          <li><strong>Active Subscription Period:</strong> Account data, CRM contacts, and workflow automations remain active and available throughout your subscription.</li>
-          <li><strong>Workflow Data Stores & Transient Records:</strong> Temporary key-value cache records are governed by configurable Time-To-Live (TTL) parameters and are automatically purged upon expiry.</li>
-          <li><strong>Workspace Deletion:</strong> Upon account cancellation and completed data deletion request, workspace records, CRM contacts, and channel credentials are permanently removed within 30 calendar days.</li>
-          <li><strong>Financial & Invoicing Records:</strong> Tax invoices, billing logs, and transaction receipts are retained for the statutory period mandated by Indian tax legislation.</li>
-        </ul>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Deletion requests are processed within a reasonable period based on the request, applicable obligations, and the systems involved. Financial and invoicing records are retained as required by applicable tax laws.
+        </p>
       </section>
 
       {/* 9. Security Safeguards */}
@@ -361,40 +339,40 @@ export function PrivacyPolicyView() {
             09
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Security Safeguards & Technical Measures
+            Security Measures &amp; Technical Safeguards
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Appnix Technologies implements standard, industry-accepted security practices to protect data against unauthorized access, loss, or alteration:
+          Appnix Technologies implements standard security practices to protect data against unauthorized access, loss, or alteration:
         </p>
         <div className="grid gap-3 sm:grid-cols-2 text-xs text-muted-foreground">
           <div className="rounded-xl border border-border bg-card p-3.5 space-y-1">
             <p className="font-semibold text-foreground flex items-center gap-1.5">
               <Lock className="h-3.5 w-3.5 text-primary" />
-              Encryption in Transit & at Rest
+              HTTPS Data Transmission
             </p>
-            <p>All communication between your browser, our API endpoints, and Meta Cloud API is encrypted using Transport Layer Security (TLS 1.2 / TLS 1.3 HTTPS). Sensitive credentials and API tokens are encrypted in our database.</p>
+            <p>Data transmission between browsers, our API endpoints, and external messaging APIs is conducted over HTTPS.</p>
           </div>
           <div className="rounded-xl border border-border bg-card p-3.5 space-y-1">
             <p className="font-semibold text-foreground flex items-center gap-1.5">
               <Server className="h-3.5 w-3.5 text-primary" />
-              Cryptographic Password Hashing
+              Password Hashing
             </p>
-            <p>User passwords are never stored in plaintext; they are hashed using salted cryptographic algorithms (bcrypt/Argon2).</p>
+            <p>User account passwords are stored using salted cryptographic hashing (bcrypt) and are never stored in plaintext.</p>
           </div>
           <div className="rounded-xl border border-border bg-card p-3.5 space-y-1">
             <p className="font-semibold text-foreground flex items-center gap-1.5">
               <Layers className="h-3.5 w-3.5 text-primary" />
               Role-Based Access Control (RBAC)
             </p>
-            <p>Strict access controls prevent unauthorized access across team members and maintain separation between Super Admin, Tenant Admin, and standard Members.</p>
+            <p>Access controls manage permissions across team members within an organization workspace.</p>
           </div>
           <div className="rounded-xl border border-border bg-card p-3.5 space-y-1">
             <p className="font-semibold text-foreground flex items-center gap-1.5">
               <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-              Parameterized Database Queries
+              Parameterized Database Access
             </p>
-            <p>Database interactions are conducted via Prisma ORM with parameterized queries to prevent SQL injection vulnerabilities.</p>
+            <p>Database queries are executed via Prisma ORM using parameterized statements to safeguard against SQL injection.</p>
           </div>
         </div>
       </section>
@@ -406,16 +384,16 @@ export function PrivacyPolicyView() {
             10
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Cookies, Sessions & Authentication Storage
+            Cookies, Sessions &amp; Authentication Storage
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          We use strictly functional and essential browser storage mechanisms necessary to authenticate users and remember workspace settings:
+          We use browser storage mechanisms necessary to authenticate users and remember workspace settings:
         </p>
         <ul className="space-y-1.5 text-xs sm:text-sm text-muted-foreground list-disc pl-5">
-          <li><strong>Authentication Tokens (JWT):</strong> Stored securely to maintain authenticated user sessions across dashboard navigations.</li>
-          <li><strong>UI State & Preferences:</strong> Browser local storage stores UI theme preferences (light/dark mode) and selected language locales.</li>
-          <li><strong>No Third-Party Advertising Cookies:</strong> We do not deploy third-party advertising cookies or cross-site tracking pixels on our SaaS application dashboard.</li>
+          <li><strong>Authentication Tokens (JWT):</strong> Stored in browser localStorage to maintain authenticated user sessions across dashboard navigations.</li>
+          <li><strong>UI State &amp; Preferences:</strong> Browser localStorage stores UI theme preferences (light/dark mode) and language selections.</li>
+          <li><strong>No Advertising Cookies:</strong> We do not deploy third-party advertising cookies or cross-site tracking pixels on our SaaS application dashboard.</li>
         </ul>
       </section>
 
@@ -426,24 +404,24 @@ export function PrivacyPolicyView() {
             11
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Your Rights & Data Choices
+            Your Rights &amp; Data Choices
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Depending on your jurisdiction and applicable data protection regulations, you have the following rights regarding your data processed by Appnix Technologies:
+          Depending on your jurisdiction and applicable data protection regulations, you have rights regarding your personal information:
         </p>
         <div className="grid gap-2.5 sm:grid-cols-2 text-xs text-muted-foreground">
           <div className="rounded-lg border border-border bg-card p-3">
-            <strong className="text-foreground">Right of Access:</strong> You can request a summary of the personal information stored in your account.
+            <strong className="text-foreground">Right of Access:</strong> You can request information about the personal data processed in your account.
           </div>
           <div className="rounded-lg border border-border bg-card p-3">
-            <strong className="text-foreground">Right of Rectification:</strong> You can update or correct your personal profile and business details anytime via the Dashboard.
+            <strong className="text-foreground">Right of Rectification:</strong> You can update or correct your profile details via the Dashboard.
           </div>
           <div className="rounded-lg border border-border bg-card p-3">
-            <strong className="text-foreground">Right to Data Portability:</strong> You can export your CRM contact lists, templates, and campaign reports in CSV/JSON format.
+            <strong className="text-foreground">Right to Data Portability:</strong> You can export CRM contact lists and campaign reports in CSV or JSON format.
           </div>
           <div className="rounded-lg border border-border bg-card p-3">
-            <strong className="text-foreground">Right to Erasure / Deletion:</strong> You can request the permanent deletion of your workspace, contacts, and connected channels.
+            <strong className="text-foreground">Right to Erasure:</strong> You can request the deletion of your account and associated data.
           </div>
         </div>
       </section>
@@ -459,11 +437,11 @@ export function PrivacyPolicyView() {
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          We provide clear, accessible mechanisms for clients and authorized individuals to request the complete deletion of their information from our systems:
+          We provide clear mechanisms for clients and authorized individuals to request the deletion of their information:
         </p>
         <div className="rounded-xl border border-border bg-card p-4 space-y-3">
           <p className="text-xs sm:text-sm text-muted-foreground">
-            For detailed, step-by-step instructions, self-service channel removal steps, and Meta callback details, please review our dedicated Data Deletion page:
+            For step-by-step instructions on requesting data deletion or disconnecting connected accounts, please review our dedicated Data Deletion page:
           </p>
           <Link
             href="/data-deletion"
@@ -482,11 +460,11 @@ export function PrivacyPolicyView() {
             13
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Multi-Tenant Architecture & Data Isolation
+            Multi-Tenant Architecture &amp; Data Separation
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Appnix Technologies is architected as an isolated multi-tenant SaaS. Every database query enforces strict <code>tenantId</code> constraints. Data belonging to Client A is logically partitioned and completely inaccessible to Client B. No cross-tenant data leakage is permitted at any application tier.
+          The platform uses tenant-aware access controls and data partitioning to help keep each organization&apos;s data separated.
         </p>
       </section>
 
@@ -501,7 +479,7 @@ export function PrivacyPolicyView() {
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Our SaaS platform is exclusively designed for businesses and professional commercial communication. We do not knowingly collect, market to, or solicit personal data from children under the age of 18. If you believe a minor has provided us with personal information, please notify us at <a href="mailto:privacy@appnix.co.in" className="text-primary hover:underline">privacy@appnix.co.in</a> to effect immediate deletion.
+          Our SaaS platform is designed for businesses and commercial communication. We do not knowingly collect personal data from children under the age of 18. If you believe a minor has provided us with personal information, please notify us at <a href="mailto:privacy@appnix.co.in" className="text-primary hover:underline">privacy@appnix.co.in</a>.
         </p>
       </section>
 
@@ -516,7 +494,7 @@ export function PrivacyPolicyView() {
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          We may update this Privacy Policy from time to time to reflect modifications in our software, Meta API updates, or applicable regulatory requirements. When significant revisions occur, we will update the &ldquo;Last Updated&rdquo; date at the top of this page and, where appropriate, notify active tenant administrators via email or in-app dashboard alert.
+          We may update this Privacy Policy from time to time to reflect modifications in our services, API updates, or regulatory requirements. When revisions occur, we will update the &ldquo;Last Updated&rdquo; date at the top of this page.
         </p>
       </section>
 
@@ -527,11 +505,11 @@ export function PrivacyPolicyView() {
             16
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Contact Information & Privacy Inquiries
+            Contact Information &amp; Privacy Inquiries
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          If you have questions, feedback, or concerns regarding this Privacy Policy or our WhatsApp Business Platform data handling practices, please contact our team:
+          If you have questions regarding this Privacy Policy or our data handling practices, please contact our team:
         </p>
         <div className="rounded-xl border border-border/80 bg-card p-5 space-y-3 text-xs sm:text-sm">
           <div className="flex items-start gap-3">

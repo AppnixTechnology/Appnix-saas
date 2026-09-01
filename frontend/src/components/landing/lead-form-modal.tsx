@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
@@ -21,17 +21,15 @@ import {
 } from "@/components/ui/select";
 import {
   CheckCircle2,
-  Sparkles,
   ArrowRight,
-  ShieldCheck,
   Clock,
   MessageSquare,
   Building2,
   Mail,
   User,
   Phone,
-  Send,
   Loader2,
+  HelpCircle,
 } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 
@@ -47,11 +45,11 @@ const interestOptions = [
   "WhatsApp Business API",
   "RCS Business Messaging",
   "Instagram Direct & Facebook",
-  "CRM & Lead Management",
-  "No-Code Bot & Automation Builder",
+  "CRM & Contact Management",
+  "Workflow Automation",
   "Multi-Channel Broadcast Campaigns",
-  "White-Label SaaS Reseller Solution",
-  "Custom Enterprise Integration",
+  "Multi-Tenant & White-Label Architecture",
+  "Custom Platform Integration",
 ];
 
 export function LeadFormModal({
@@ -78,7 +76,7 @@ export function LeadFormModal({
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim() || !formData.company.trim()) {
+    if (!formData.name.trim() || !formData.email.trim() || !formData.company.trim()) {
       setErrorMessage("Please fill in all required fields.");
       return;
     }
@@ -104,7 +102,7 @@ export function LeadFormModal({
       setIsSuccess(true);
     } catch (err) {
       console.error("Submission error:", err);
-      // Fallback optimistic success for resilient UX if API proxy is offline
+      // Resilient UX fallback
       setIsSuccess(true);
     } finally {
       setIsSubmitting(false);
@@ -137,17 +135,16 @@ export function LeadFormModal({
       <DialogContent className="sm:max-w-[540px] p-0 overflow-hidden border-border/80 shadow-2xl rounded-2xl bg-card">
         {/* Top brand header band */}
         <div className="bg-gradient-to-r from-slate-900 via-[#0B1E5B] to-slate-900 px-6 py-6 text-white relative">
-          <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-emerald-400 uppercase tracking-wider">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            Priority Demo & Solution Consultation
+          <div className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-2">
+            Product Demo
           </div>
           <DialogTitle className="text-2xl font-bold tracking-tight text-white">
-            {isSuccess ? "Demo Request Confirmed!" : "See Appnix in Action"}
+            {isSuccess ? t.leadModal.successTitle : t.leadModal.title}
           </DialogTitle>
           <DialogDescription className="text-slate-300 text-sm mt-1">
             {isSuccess
-              ? "Our product solutions team is preparing your personalized walkthrough."
-              : "Experience how our omnichannel platform streamlines conversations, automates workflows, and accelerates sales."}
+              ? "Our product solutions team has received your request and will reach out to coordinate a demo."
+              : t.leadModal.subtitle}
           </DialogDescription>
         </div>
 
@@ -162,8 +159,8 @@ export function LeadFormModal({
                 <h3 className="text-xl font-bold text-foreground">
                   Thank you, {formData.name || "there"}!
                 </h3>
-                <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  We've received your request for <strong className="text-foreground">{formData.company || "your company"}</strong>. A senior solutions engineer will contact you via WhatsApp / Email at <strong className="text-foreground">{formData.email || "your email"}</strong> within 1 business hour.
+                <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+                  We have received your demonstration request for <strong className="text-foreground">{formData.company || "your organization"}</strong>. A product specialist will contact you at <strong className="text-foreground">{formData.email || "your email"}</strong> to arrange your walkthrough.
                 </p>
               </div>
 
@@ -173,17 +170,17 @@ export function LeadFormModal({
                   What happens next?
                 </div>
                 <ul className="list-disc list-inside space-y-1 pl-1">
-                  <li>We'll review your channel requirements ({formData.interest})</li>
-                  <li>Provide a tailored live demo of our Unified Inbox & Bot Builder</li>
-                  <li>Provide exclusive 14-day full platform sandbox credentials</li>
+                  <li>Review your communication and workflow requirements ({formData.interest})</li>
+                  <li>Walk through relevant platform features and channel setups</li>
+                  <li>Answer questions regarding workspace configuration and integrations</li>
                 </ul>
               </div>
 
               <Button
                 onClick={handleReset}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium cursor-pointer"
               >
-                Back to Exploring Appnix
+                Back to Appnix
               </Button>
             </div>
           ) : (
@@ -246,12 +243,11 @@ export function LeadFormModal({
                 <div className="space-y-1.5">
                   <Label htmlFor="lead-phone" className="text-xs font-semibold flex items-center gap-1.5">
                     <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-                    {t.leadModal.phoneLabel} <span className="text-destructive">*</span>
+                    {t.leadModal.phoneLabel}
                   </Label>
                   <Input
                     id="lead-phone"
                     type="tel"
-                    required
                     placeholder={t.leadModal.phonePlaceholder}
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -262,7 +258,7 @@ export function LeadFormModal({
 
               <div className="space-y-1.5">
                 <Label htmlFor="lead-interest" className="text-xs font-semibold flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                  <HelpCircle className="h-3.5 w-3.5 text-primary" />
                   Primary Area of Interest
                 </Label>
                 <Select
@@ -290,7 +286,7 @@ export function LeadFormModal({
                 <Textarea
                   id="lead-message"
                   rows={2}
-                  placeholder="e.g. Need WhatsApp API integration for 50k monthly leads, plus CRM webhook sync."
+                  placeholder="e.g. Tell us about your messaging, CRM, or workflow requirements."
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   className="text-xs sm:text-sm bg-background resize-none"
@@ -301,7 +297,7 @@ export function LeadFormModal({
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold gap-2 shadow-md hover:shadow-lg transition-all"
+                  className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
@@ -317,15 +313,22 @@ export function LeadFormModal({
                 </Button>
               </div>
 
-              <div className="flex items-center justify-center gap-4 text-[11px] text-muted-foreground pt-1">
-                <span className="flex items-center gap-1">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                  100% Privacy Guaranteed
-                </span>
+              {/* Privacy Notice */}
+              <p className="text-[11px] text-muted-foreground text-center pt-1 leading-normal">
+                By submitting this form, you agree that Appnix Technologies may use the information provided to contact you regarding your request. See our{" "}
+                <Link
+                  href="/privacy-policy"
+                  target="_blank"
+                  className="text-primary underline hover:text-primary/80"
+                >
+                  Privacy Policy
+                </Link>.
+              </p>
+
+              <div className="flex items-center justify-center gap-3 text-[11px] text-muted-foreground pt-1 border-t border-border/60">
+                <span>Business-focused SaaS Platform</span>
                 <span>•</span>
-                <span>No Credit Card Required</span>
-                <span>•</span>
-                <span>1-Hour Response</span>
+                <span>Independent Software Provider</span>
               </div>
             </form>
           )}

@@ -2,35 +2,28 @@
 
 import Link from "next/link";
 import { 
-  FileText, 
   ShieldCheck, 
-  AlertCircle, 
   CheckCircle2, 
   Scale, 
-  Lock, 
-  Server, 
   Mail, 
   Phone, 
   MapPin, 
-  ExternalLink,
-  ArrowRight,
-  CreditCard,
-  Ban
+  ExternalLink
 } from "lucide-react";
 import { LegalPageLayout, TOCItem } from "@/components/legal/LegalPageLayout";
 
 const TERMS_TOC: TOCItem[] = [
   { id: "acceptance", title: "Acceptance of Terms" },
-  { id: "saas-description", title: "Description of SaaS Platform & Services" },
+  { id: "saas-description", title: "Description of Platform & Services" },
   { id: "account-registration", title: "Account Registration & Responsibilities" },
   { id: "whatsapp-compliance", title: "WhatsApp & Meta Platform Compliance" },
   { id: "acceptable-use", title: "Acceptable Use & Anti-Spam Policy" },
   { id: "prohibited-activities", title: "Prohibited Activities" },
-  { id: "customer-content", title: "Customer Content & Data Ownership" },
+  { id: "customer-content", title: "Customer Content & Ownership" },
   { id: "intellectual-property", title: "Intellectual Property Rights" },
   { id: "third-party-services", title: "Third-Party Services & Upstream APIs" },
   { id: "service-availability", title: "Service Availability & Maintenance" },
-  { id: "billing-subscriptions", title: "Fees, Subscriptions & Balance Top-ups" },
+  { id: "billing-subscriptions", title: "Fees & Payment Terms" },
   { id: "refund-policy", title: "Cancellation & Refund Policy" },
   { id: "suspension-termination", title: "Suspension & Termination" },
   { id: "disclaimers", title: "Disclaimer of Warranties" },
@@ -45,7 +38,7 @@ export function TermsAndConditionsView() {
   return (
     <LegalPageLayout
       title="Appnix Technologies Terms & Conditions"
-      subtitle="The binding legal agreement governing use of the Appnix Technologies SaaS messaging and customer engagement platform."
+      subtitle="Agreement governing use of the Appnix Technologies software platform."
       badge="Legal Terms of Service"
       effectiveDate="January 1, 2026"
       lastUpdated="September 1, 2026"
@@ -63,12 +56,12 @@ export function TermsAndConditionsView() {
           </h2>
         </div>
         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-          These Terms &amp; Conditions (&ldquo;Terms&rdquo;) constitute a legally binding agreement between <strong>Appnix Technologies</strong> (&ldquo;Appnix&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;) and the business, entity, or individual (&ldquo;Client&rdquo;, &ldquo;Customer&rdquo;, or &ldquo;you&rdquo;) registering for or utilizing our software-as-a-service platform accessible via <a href="https://appnix.co.in" className="text-primary hover:underline font-medium">https://appnix.co.in</a> (the &ldquo;Platform&rdquo; or &ldquo;Services&rdquo;).
+          These Terms &amp; Conditions (&ldquo;Terms&rdquo;) constitute a legally binding agreement between <strong>Appnix Technologies</strong> (&ldquo;Appnix&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;) and the business, entity, or individual (&ldquo;Client&rdquo;, &ldquo;Customer&rdquo;, or &ldquo;you&rdquo;) accessing or using our software platform accessible via <a href="https://www.appnix.co.in" className="text-primary hover:underline font-medium">https://www.appnix.co.in</a> (the &ldquo;Platform&rdquo; or &ldquo;Services&rdquo;).
         </p>
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-xs sm:text-sm text-muted-foreground">
-          <p className="font-semibold text-foreground">Important Acceptance Notice:</p>
+          <p className="font-semibold text-foreground">Acceptance Notice:</p>
           <p className="mt-1 leading-relaxed">
-            By creating an account, connecting a WhatsApp Business Account, or accessing the platform, you acknowledge that you have read, understood, and agree to be bound by these Terms, as well as our <Link href="/privacy-policy" className="text-primary hover:underline font-semibold">Privacy Policy</Link> and <Link href="/data-deletion" className="text-primary hover:underline font-semibold">Data Deletion Instructions</Link>.
+            By creating an account, connecting a messaging channel, or using the platform, you agree to be bound by these Terms, as well as our <Link href="/privacy-policy" className="text-primary hover:underline font-semibold">Privacy Policy</Link> and <Link href="/data-deletion" className="text-primary hover:underline font-semibold">Data Deletion Instructions</Link>.
           </p>
         </div>
       </section>
@@ -80,14 +73,14 @@ export function TermsAndConditionsView() {
             02
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Description of SaaS Platform & Services
+            Description of Platform &amp; Services
           </h2>
         </div>
         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
           <strong>Appnix Technologies provides a software platform that helps businesses manage customer communication through WhatsApp. Clients connect their own WhatsApp Business accounts to the platform and use it to communicate with their customers, manage conversations, and organize customer interactions. Platform Data is used only to provide these communication and management features to the respective client.</strong>
         </p>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Platform features include unified multi-agent inbox, campaign broadcasts, interactive visual chatbot and workflow builders, custom CRM contacts management (Super Fields and tags), template synchronization with Meta, and transactional notifications.
+          Platform capabilities may include a unified team inbox, messaging campaigns, visual workflow builders, CRM contact organization, and template synchronization with supported messaging channels.
         </p>
       </section>
 
@@ -98,14 +91,14 @@ export function TermsAndConditionsView() {
             03
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Account Registration & Responsibilities
+            Account Registration &amp; Responsibilities
           </h2>
         </div>
         <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground list-disc pl-5">
-          <li><strong>Business Representation:</strong> You represent and warrant that you are registering on behalf of a valid commercial entity or legitimate business, and have full authority to bind that entity to these Terms.</li>
-          <li><strong>Accurate Information:</strong> You agree to provide accurate, current, and complete registration details and promptly maintain and update this information.</li>
-          <li><strong>Credential Security:</strong> You are responsible for safeguarding your login credentials, API secrets, and workspace tokens. You must notify us immediately of any unauthorized account activity.</li>
-          <li><strong>Account Activity:</strong> The Client assumes full liability for all actions, communications, and message broadcasts executed under its workspace credentials.</li>
+          <li><strong>Business Representation:</strong> You represent that you register on behalf of a valid commercial entity or business, and possess authority to agree to these Terms.</li>
+          <li><strong>Accurate Information:</strong> You agree to provide accurate and current registration details and update them as necessary.</li>
+          <li><strong>Credential Security:</strong> You are responsible for safeguarding your login credentials and API tokens. You must notify us promptly of any unauthorized access.</li>
+          <li><strong>Account Activity:</strong> The Client is responsible for communications and actions performed through its workspace account.</li>
         </ul>
       </section>
 
@@ -122,10 +115,10 @@ export function TermsAndConditionsView() {
         <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 sm:p-5 space-y-3">
           <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-semibold text-sm">
             <ShieldCheck className="h-4 w-4 shrink-0" />
-            <span>Mandatory Meta &amp; WhatsApp Policy Compliance</span>
+            <span>Meta &amp; WhatsApp Policy Compliance</span>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Because our platform interfaces with Meta Cloud API and WhatsApp Business Platform, all Clients must strictly comply with the following upstream policies:
+            When connecting WhatsApp Business Accounts or Meta messaging channels, Clients must comply with applicable upstream platform policies:
           </p>
           <ul className="space-y-1.5 text-xs text-muted-foreground list-disc pl-4">
             <li><a href="https://www.whatsapp.com/legal/business-policy/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">WhatsApp Business Messaging Policy <ExternalLink className="h-2.5 w-2.5 inline" /></a></li>
@@ -133,10 +126,10 @@ export function TermsAndConditionsView() {
             <li><a href="https://developers.facebook.com/terms/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Meta Developer Platform Terms <ExternalLink className="h-2.5 w-2.5 inline" /></a></li>
           </ul>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            <strong>Explicit Opt-in Requirement:</strong> Clients must obtain verifiable, explicit prior consent from end-users before transmitting proactive business or marketing template messages over WhatsApp.
+            <strong>Opt-in Requirement:</strong> Clients must obtain prior consent from end-users before transmitting proactive business or marketing template messages over WhatsApp.
           </p>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            <strong>Upstream Decisions:</strong> You acknowledge that Meta Platforms, Inc. independently determines template approvals, phone number verification tiering, and account quality limits. Appnix does not guarantee template approvals or immunity from Meta account restrictions if your business violates WhatsApp messaging guidelines.
+            <strong>Upstream Platform Decisions:</strong> Meta Platforms, Inc. independently determines template approvals, phone number tiering, and account quality limits. Appnix does not control or guarantee template approvals or upstream platform enforcement decisions.
           </p>
         </div>
       </section>
@@ -148,20 +141,20 @@ export function TermsAndConditionsView() {
             05
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Acceptable Use & Anti-Spam Policy
+            Acceptable Use &amp; Anti-Spam Policy
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          You agree to use our Services only for lawful business communication and customer support. Appnix maintains a <strong>Zero Tolerance Anti-Spam Policy</strong>.
+          You agree to use our Services only for lawful business communication and customer support.
         </p>
         <div className="grid gap-3 sm:grid-cols-2 text-xs text-muted-foreground">
           <div className="rounded-xl border border-border bg-card p-3.5 space-y-1">
-            <p className="font-semibold text-foreground">Opt-Out Mechanisms</p>
-            <p>You must honor all end-user unsubscribe or opt-out requests (e.g. &ldquo;STOP&rdquo;) promptly and refrain from messaging opted-out contacts.</p>
+            <p className="font-semibold text-foreground">Opt-Out Requests</p>
+            <p>You must honor end-user unsubscribe or opt-out requests (such as &ldquo;STOP&rdquo;) promptly and refrain from messaging opted-out contacts.</p>
           </div>
           <div className="rounded-xl border border-border bg-card p-3.5 space-y-1">
-            <p className="font-semibold text-foreground">Truthful Sender Identity</p>
-            <p>You must accurately identify your business in all communication and never impersonate third parties or mislead recipients.</p>
+            <p className="font-semibold text-foreground">Sender Identity</p>
+            <p>You must accurately identify your business in all communications and never mislead recipients.</p>
           </div>
         </div>
       </section>
@@ -177,14 +170,14 @@ export function TermsAndConditionsView() {
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Clients and users shall NOT under any circumstances:
+          Clients and users shall not:
         </p>
         <ul className="space-y-1.5 text-xs sm:text-sm text-muted-foreground list-disc pl-5">
-          <li>Send unsolicited marketing broadcasts (spam) to scraped or bought contact lists.</li>
-          <li>Distribute fraudulent schemes, deceptive financial offers, malicious URLs, phishing attempts, or illicit substances prohibited by WhatsApp Commerce Policy.</li>
-          <li>Reverse engineer, decompile, disassemble, or derive the source code of the Appnix SaaS platform.</li>
-          <li>Bypass security controls, execute denial-of-service (DoS) attacks, or overload API rate limits.</li>
-          <li>Resell, sublicense, or rent the platform to unauthorized third parties without an active Agency White-Label Reseller agreement.</li>
+          <li>Send unsolicited marketing messages to purchased or scraped contact lists.</li>
+          <li>Distribute fraudulent offers, deceptive content, malware, or products prohibited by WhatsApp Commerce Policy.</li>
+          <li>Reverse engineer, decompile, or attempt to derive the source code of the platform.</li>
+          <li>Circumvent security controls or intentionally overload system resources.</li>
+          <li>Resell or redistribute access to the platform unless authorized under applicable agreements.</li>
         </ul>
       </section>
 
@@ -195,14 +188,14 @@ export function TermsAndConditionsView() {
             07
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Customer Content & Data Ownership
+            Customer Content &amp; Ownership
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          <strong>You retain all ownership, intellectual property rights, and legal responsibility for all messages, media, customer contact lists, and assets uploaded to your workspace (&ldquo;Customer Content&rdquo;).</strong>
+          Customers retain ownership of Customer Content to the extent they own it.
         </p>
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-          You grant Appnix a limited, non-exclusive, royalty-free license solely to host, transmit, format, and display your Customer Content to the extent strictly necessary to operate the Services on your behalf.
+          You grant Appnix a limited license solely to host, transmit, and display your Customer Content to the extent necessary to operate the platform on your behalf.
         </p>
       </section>
 
@@ -217,7 +210,7 @@ export function TermsAndConditionsView() {
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          The Appnix platform, including its software code, UI designs, workflow engines, documentation, trademarks, logos, and features, is and remains the exclusive intellectual property of Appnix Technologies. Nothing in these Terms grants the Client any ownership in Appnix IP.
+          The Appnix platform, including software code, interfaces, workflows, trademarks, and documentation, is the property of Appnix Technologies. Nothing in these Terms grants the Client ownership in Appnix intellectual property.
         </p>
       </section>
 
@@ -228,11 +221,11 @@ export function TermsAndConditionsView() {
             09
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Third-Party Services & Upstream APIs
+            Third-Party Services &amp; Upstream APIs
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          The Platform integrates with third-party service providers (such as Meta Platforms, Google Cloud, Brevo, and telecom carriers). Appnix Technologies is not responsible for upstream outages, rate-limiting, policy modifications, or disruptions originating from these independent third-party platforms.
+          The Platform integrates with third-party service providers (such as Meta Platforms, Brevo, and cloud hosting infrastructure). Appnix Technologies is not responsible for disruptions, rate-limiting, or policy changes originating from independent third-party platforms.
         </p>
       </section>
 
@@ -243,11 +236,11 @@ export function TermsAndConditionsView() {
             10
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Service Availability & Maintenance
+            Service Availability &amp; Maintenance
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          We strive to maintain a 99.9% service uptime. However, the Platform is provided on an &ldquo;AS IS&rdquo; and &ldquo;AS AVAILABLE&rdquo; basis. Routine maintenance, scheduled infrastructure updates, or unforeseen network disruptions may occasionally cause brief downtime. Where feasible, advance notice of scheduled maintenance will be communicated.
+          We work to maintain platform availability. However, the Platform is provided on an &ldquo;AS IS&rdquo; and &ldquo;AS AVAILABLE&rdquo; basis. Routine maintenance, infrastructure updates, or network events may occasionally cause brief downtime.
         </p>
       </section>
 
@@ -258,13 +251,13 @@ export function TermsAndConditionsView() {
             11
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Fees, Subscriptions & Balance Top-ups
+            Fees &amp; Payment Terms
           </h2>
         </div>
         <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground list-disc pl-5">
-          <li><strong>Subscription Plans:</strong> Access to specific features, seat quotas, and workflow tiers is billed on a recurring monthly or annual subscription basis according to selected plan pricing.</li>
-          <li><strong>Messaging Consumption:</strong> WhatsApp conversation fees and RCS message units may be billed directly by upstream providers (Meta) or charged against workspace prepaid wallet balances.</li>
-          <li><strong>Taxes:</strong> All listed prices are exclusive of applicable taxes (such as GST), which will be added at checkout where legally required.</li>
+          <li><strong>Plan Pricing:</strong> Subscription plans and pricing tiers may be offered based on feature sets, quotas, and service terms when made available.</li>
+          <li><strong>Messaging Consumption:</strong> WhatsApp conversation charges and messaging fees may be billed directly by upstream providers (Meta) or charged under applicable service arrangements.</li>
+          <li><strong>Taxes:</strong> Prices exclude applicable statutory taxes (such as GST), which are applied where legally required.</li>
         </ul>
       </section>
 
@@ -275,11 +268,11 @@ export function TermsAndConditionsView() {
             12
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Cancellation & Refund Policy
+            Cancellation &amp; Refund Policy
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          You may cancel your SaaS subscription at any time via <strong>Settings &gt; Billing</strong>. Upon cancellation, your workspace remains active through the end of the paid billing period. Because of the instant allocation of cloud infrastructure and API credentials, subscription payments are non-refundable except where required by applicable statutory consumer protection law.
+          Clients may cancel active subscriptions at any time through account settings or by contacting support. Subscription payments are non-refundable except where required by applicable law.
         </p>
       </section>
 
@@ -290,16 +283,16 @@ export function TermsAndConditionsView() {
             13
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Suspension & Termination
+            Suspension &amp; Termination
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Appnix Technologies reserves the right to immediately suspend or terminate your account or revoke channel connectivity if:
+          Appnix Technologies may suspend or terminate account access if:
         </p>
         <ul className="space-y-1.5 text-xs text-muted-foreground list-disc pl-5">
-          <li>You violate WhatsApp Business Messaging Policies or receive severe spam flags from Meta.</li>
-          <li>You fail to settle outstanding subscription invoices.</li>
-          <li>You engage in abusive, unlawful, or harmful activities that compromise the integrity of our multi-tenant infrastructure.</li>
+          <li>You violate WhatsApp Business Messaging Policies or platform terms.</li>
+          <li>You fail to settle applicable fees when due.</li>
+          <li>You engage in abusive or unlawful activity that harms system operations.</li>
         </ul>
       </section>
 
@@ -314,7 +307,7 @@ export function TermsAndConditionsView() {
           </h2>
         </div>
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed uppercase">
-          To the maximum extent permitted by applicable law, the Platform and Services are provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo;, without warranties of any kind, whether express, implied, statutory, or otherwise, including implied warranties of merchantability, fitness for a particular purpose, and non-infringement.
+          To the extent permitted by applicable law, the Platform and Services are provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo;, without warranties of any kind, whether express, implied, statutory, or otherwise, including implied warranties of merchantability, fitness for a particular purpose, and non-infringement.
         </p>
       </section>
 
@@ -329,7 +322,7 @@ export function TermsAndConditionsView() {
           </h2>
         </div>
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-          In no event shall Appnix Technologies, its founders, officers, or employees be liable for any indirect, incidental, special, consequential, or punitive damages (including loss of profits, data, business reputation, or goodwill) arising out of or related to your use of the Services. Our total aggregate liability under these Terms shall not exceed the total fees paid by you to Appnix Technologies in the twelve (12) months preceding the claim.
+          In no event shall Appnix Technologies, its directors, or employees be liable for indirect, incidental, special, consequential, or punitive damages arising from use of the Services. Our aggregate liability under these Terms shall not exceed the fees paid by you to Appnix Technologies in the twelve (12) months preceding the claim.
         </p>
       </section>
 
@@ -344,7 +337,7 @@ export function TermsAndConditionsView() {
           </h2>
         </div>
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-          You agree to defend, indemnify, and hold harmless Appnix Technologies from and against any third-party claims, damages, obligations, losses, liabilities, costs, or debt (including legal fees) arising from: (i) your Customer Content or messaging campaigns, (ii) your violation of these Terms or Meta Platform Policies, or (iii) any end-user complaint regarding lack of messaging opt-in consent.
+          You agree to indemnify and hold harmless Appnix Technologies from and against third-party claims, damages, liabilities, and expenses arising from: (i) your Customer Content or messaging campaigns, (ii) your violation of these Terms or applicable messaging platform policies, or (iii) customer complaints regarding lack of message consent.
         </p>
       </section>
 
@@ -355,16 +348,16 @@ export function TermsAndConditionsView() {
             17
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Governing Law & Jurisdiction
+            Governing Law &amp; Jurisdiction
           </h2>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 space-y-2 text-xs sm:text-sm text-muted-foreground">
           <p className="font-semibold text-foreground flex items-center gap-1.5">
             <Scale className="h-4 w-4 text-primary" />
-            Jurisdiction Clause:
+            Jurisdiction:
           </p>
           <p className="leading-relaxed">
-            These Terms shall be governed by and construed in accordance with the laws of <strong>India</strong>, without regard to conflict of law principles. Any dispute, claim, or controversy arising out of or relating to these Terms shall be subject to the exclusive jurisdiction of the competent courts in <strong>Gautam Buddha Nagar (Noida), Uttar Pradesh, India</strong>.
+            These Terms shall be governed by and construed in accordance with the laws of <strong>India</strong>. Any dispute arising out of these Terms shall be subject to the jurisdiction of the competent courts in <strong>Gautam Buddha Nagar (Noida), Uttar Pradesh, India</strong>.
           </p>
         </div>
       </section>
@@ -380,7 +373,7 @@ export function TermsAndConditionsView() {
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          We reserve the right to revise these Terms periodically. We will post the revised Terms on this page with an updated &ldquo;Last Updated&rdquo; date. Continued use of the platform after changes become effective constitutes your acceptance of the revised Terms.
+          We may update these Terms periodically. We will post revised Terms on this page with an updated &ldquo;Last Updated&rdquo; date. Continued use of the platform after changes become effective constitutes acceptance of the revised Terms.
         </p>
       </section>
 
@@ -391,11 +384,11 @@ export function TermsAndConditionsView() {
             19
           </span>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground m-0">
-            Contact Information & Legal Notices
+            Contact Information &amp; Legal Notices
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          For formal legal notices or inquiries concerning these Terms &amp; Conditions, please reach out to our legal and compliance desk:
+          For legal notices or questions regarding these Terms &amp; Conditions, please contact us:
         </p>
         <div className="rounded-xl border border-border/80 bg-card p-5 space-y-3 text-xs sm:text-sm">
           <div className="flex items-start gap-3">
@@ -408,7 +401,7 @@ export function TermsAndConditionsView() {
           <div className="flex items-center gap-3">
             <Mail className="h-4 w-4 text-primary shrink-0" />
             <div>
-              <span className="text-muted-foreground">Legal &amp; Compliance: </span>
+              <span className="text-muted-foreground">Legal Desk: </span>
               <a href="mailto:privacy@appnix.co.in" className="text-primary hover:underline font-medium">privacy@appnix.co.in</a>
               <span className="text-muted-foreground"> | Support: </span>
               <a href="mailto:support@appnix.co.in" className="text-primary hover:underline font-medium">support@appnix.co.in</a>

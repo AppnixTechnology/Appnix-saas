@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Appnix Technologies Data Deletion",
   description: "Instructions for requesting deletion of data associated with the Appnix Technologies SaaS platform.",
   alternates: {
-    canonical: "https://appnix.co.in/data-deletion",
+    canonical: "https://www.appnix.co.in/data-deletion",
   },
   robots: {
     index: true,
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Appnix Technologies Data Deletion",
     description: "Instructions for requesting deletion of data associated with the Appnix Technologies SaaS platform.",
-    url: "https://appnix.co.in/data-deletion",
+    url: "https://www.appnix.co.in/data-deletion",
     siteName: "Appnix Technologies",
     type: "website",
     locale: "en_US",

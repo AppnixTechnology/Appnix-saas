@@ -6,7 +6,7 @@ interface IconProps extends React.SVGProps<SVGSVGElement> {
 }
 
 /**
- * Official WhatsApp Brand Icon
+ * WhatsApp Brand Icon
  */
 export function WhatsAppIcon({ className = "h-5 w-5", size, ...props }: IconProps) {
   return (
@@ -27,7 +27,7 @@ export function WhatsAppIcon({ className = "h-5 w-5", size, ...props }: IconProp
 }
 
 /**
- * Official Instagram Brand Icon
+ * Instagram Brand Icon
  */
 export function InstagramIcon({ className = "h-5 w-5", size, ...props }: IconProps) {
   return (
@@ -46,7 +46,7 @@ export function InstagramIcon({ className = "h-5 w-5", size, ...props }: IconPro
 }
 
 /**
- * Official Google RCS Business Messaging Icon
+ * RCS Business Messaging Icon
  */
 export function RCSIcon({ className = "h-5 w-5", size, ...props }: IconProps) {
   return (
@@ -67,7 +67,7 @@ export function RCSIcon({ className = "h-5 w-5", size, ...props }: IconProps) {
 }
 
 /**
- * Official Facebook / Messenger Brand Icon
+ * Facebook / Messenger Brand Icon
  */
 export function FacebookIcon({ className = "h-5 w-5", size, ...props }: IconProps) {
   return (

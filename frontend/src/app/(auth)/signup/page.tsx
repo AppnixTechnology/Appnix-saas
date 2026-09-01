@@ -156,23 +156,23 @@ function SignUpContent() {
             </h1>
 
             <p className="mt-4 text-sm leading-relaxed text-blue-100/90 sm:text-base">
-              Join thousands of fast-growing teams using Appnix to orchestrate WhatsApp, Instagram, Google RCS, and Meta Cloud API workflows.
+              Appnix provides an integrated SaaS platform to orchestrate WhatsApp Cloud API, Instagram Direct, RCS, and CRM workflows.
             </p>
           </div>
 
           <div className="relative mt-10 hidden overflow-hidden rounded-xl border border-white/15 bg-white/10 p-4 backdrop-blur-md lg:block">
             <div className="flex items-center gap-2 text-blue-200">
               <BarChart3 className="h-4 w-4" />
-              <span className="text-xs font-medium text-white">Live Platform Metrics</span>
+              <span className="text-xs font-medium text-white">Platform Capabilities</span>
             </div>
             <div className="mt-4 grid grid-cols-3 gap-3">
               <div className="rounded-lg bg-white/10 p-3 border border-white/5">
-                <div className="text-lg font-bold text-white">99.9%</div>
-                <div className="text-[10px] text-blue-200">Uptime SLA</div>
+                <div className="text-base font-bold text-white">Multi-Channel</div>
+                <div className="text-[10px] text-blue-200">Supported Integrations</div>
               </div>
               <div className="rounded-lg bg-white/10 p-3 border border-white/5">
-                <div className="text-lg font-bold text-white">50M+</div>
-                <div className="text-[10px] text-blue-200">Messages/Mo</div>
+                <div className="text-base font-bold text-white">Isolated</div>
+                <div className="text-[10px] text-blue-200">Tenant Architecture</div>
               </div>
               <div className="rounded-lg bg-white/10 p-3 border border-white/5 flex items-end gap-1">
                 <div className="h-4 w-1.5 rounded-full bg-blue-300/60" />

@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Appnix Technologies Terms & Conditions",
   description: "Terms and Conditions governing use of the Appnix Technologies SaaS platform.",
   alternates: {
-    canonical: "https://appnix.co.in/terms-and-conditions",
+    canonical: "https://www.appnix.co.in/terms-and-conditions",
   },
   robots: {
     index: true,
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Appnix Technologies Terms & Conditions",
     description: "Terms and Conditions governing use of the Appnix Technologies SaaS platform.",
-    url: "https://appnix.co.in/terms-and-conditions",
+    url: "https://www.appnix.co.in/terms-and-conditions",
     siteName: "Appnix Technologies",
     type: "website",
     locale: "en_US",

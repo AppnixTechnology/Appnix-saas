@@ -405,15 +405,6 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
               </div>
             )}
           </div>
-
-          {/* 4. Pricing (Direct Link) */}
-          <Link
-            href="#pricing"
-            onClick={handleLinkClick}
-            className="px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/60 rounded-lg"
-          >
-            {t.nav.pricing}
-          </Link>
         </nav>
 
         {/* Right: Language Selector + Action CTAs */}
@@ -578,15 +569,6 @@ export function Navbar({ onOpenDemoModal }: NavbarProps) {
                 </div>
               )}
             </div>
-
-            {/* Pricing (Direct Link) */}
-            <Link
-              href="#pricing"
-              onClick={handleLinkClick}
-              className="px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted rounded-lg transition-colors"
-            >
-              {t.nav.pricing}
-            </Link>
           </div>
 
           {/* Mobile Bottom Action Section */}

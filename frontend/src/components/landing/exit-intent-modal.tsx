@@ -51,7 +51,7 @@ export function ExitIntentModal({ onOpenDemoModal }: ExitIntentModalProps) {
         <div className="bg-gradient-to-br from-[#0B1E5B] to-slate-900 p-6 sm:p-7 text-white relative">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300 border border-emerald-500/30 mb-3">
             <Zap className="h-3.5 w-3.5" />
-            Exclusive Product Sandbox
+            Explore Platform Features
           </div>
 
           <DialogTitle className="text-2xl font-bold tracking-tight text-white">
@@ -66,7 +66,7 @@ export function ExitIntentModal({ onOpenDemoModal }: ExitIntentModalProps) {
           <div className="space-y-2.5">
             <div className="flex items-center gap-2.5 text-xs text-foreground font-medium">
               <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-              <span>Full WhatsApp Cloud API & RCS sandbox access</span>
+              <span>WhatsApp Cloud API & RCS messaging workflows</span>
             </div>
             <div className="flex items-center gap-2.5 text-xs text-foreground font-medium">
               <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
@@ -74,7 +74,7 @@ export function ExitIntentModal({ onOpenDemoModal }: ExitIntentModalProps) {
             </div>
             <div className="flex items-center gap-2.5 text-xs text-foreground font-medium">
               <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-              <span>Zero commitment • 14 days 100% free trial</span>
+              <span>Multi-channel inbox & workflow automation</span>
             </div>
           </div>
 

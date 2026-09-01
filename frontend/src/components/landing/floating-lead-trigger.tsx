@@ -19,7 +19,7 @@ export function FloatingLeadTrigger({ onClick }: FloatingLeadTriggerProps) {
         {/* Hover Tooltip (Appears ONLY on hover) */}
         <div className="absolute -top-9 right-0 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap rounded-lg bg-slate-900 text-white dark:bg-card dark:text-foreground px-3 py-1 text-xs font-semibold shadow-xl border border-white/10 flex items-center gap-1.5 translate-y-1 group-hover:translate-y-0">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
-          <span>Chat on WhatsApp • Instant Reply</span>
+          <span>Chat on WhatsApp • Inquire Today</span>
           <div className="absolute top-full right-4 border-4 border-transparent border-t-slate-900 dark:border-t-card" />
         </div>
 
