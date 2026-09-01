@@ -104,25 +104,25 @@ export function Footer({ onOpenDemoModal }: FooterProps) {
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
-                <Link href="#channels" className="hover:text-foreground transition-colors inline-flex items-center gap-1.5">
+                <Link href="/#channels" className="hover:text-foreground transition-colors inline-flex items-center gap-1.5">
                   <WhatsAppIcon className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                   WhatsApp API
                 </Link>
               </li>
               <li>
-                <Link href="#channels" className="hover:text-foreground transition-colors inline-flex items-center gap-1.5">
+                <Link href="/#channels" className="hover:text-foreground transition-colors inline-flex items-center gap-1.5">
                   <RCSIcon className="h-3.5 w-3.5 text-blue-600 shrink-0" />
                   Google RCS
                 </Link>
               </li>
               <li>
-                <Link href="#channels" className="hover:text-foreground transition-colors inline-flex items-center gap-1.5">
+                <Link href="/#channels" className="hover:text-foreground transition-colors inline-flex items-center gap-1.5">
                   <InstagramIcon className="h-3.5 w-3.5 text-pink-600 shrink-0" />
                   Instagram Direct
                 </Link>
               </li>
               <li>
-                <Link href="#channels" className="hover:text-foreground transition-colors inline-flex items-center gap-1.5">
+                <Link href="/#channels" className="hover:text-foreground transition-colors inline-flex items-center gap-1.5">
                   <FacebookIcon className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
                   Messenger
                 </Link>
@@ -130,34 +130,34 @@ export function Footer({ onOpenDemoModal }: FooterProps) {
             </ul>
           </div>
 
-          {/* Column 3: Platform Features (2 cols) */}
+          {/* Column 3: Platform Features / Product (2 cols) */}
           <div className="lg:col-span-2 space-y-3">
             <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
               {t.footer.productCol}
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
-                <Link href="#features" className="hover:text-foreground transition-colors">
+                <Link href="/#features" className="hover:text-foreground transition-colors">
                   {t.nav.unifiedInbox}
                 </Link>
               </li>
               <li>
-                <Link href="#features" className="hover:text-foreground transition-colors">
+                <Link href="/#campaigns" className="hover:text-foreground transition-colors">
                   {t.nav.campaignManager}
                 </Link>
               </li>
               <li>
-                <Link href="#features" className="hover:text-foreground transition-colors">
+                <Link href="/#automations" className="hover:text-foreground transition-colors">
                   {t.nav.botBuilder}
                 </Link>
               </li>
               <li>
-                <Link href="#crm" className="hover:text-foreground transition-colors">
+                <Link href="/#crm" className="hover:text-foreground transition-colors">
                   {t.nav.crmContact}
                 </Link>
               </li>
               <li>
-                <Link href="#white-label" className="hover:text-foreground transition-colors">
+                <Link href="/#white-label" className="hover:text-foreground transition-colors">
                   {t.nav.whiteLabel}
                 </Link>
               </li>
@@ -171,12 +171,8 @@ export function Footer({ onOpenDemoModal }: FooterProps) {
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
-                <Link href="#white-label" className="hover:text-foreground transition-colors">
-                  {t.nav.whiteLabel}
-                </Link>
-              </li>
-              <li>
                 <button
+                  type="button"
                   onClick={onOpenDemoModal}
                   className="hover:text-foreground transition-colors text-left cursor-pointer"
                 >
@@ -186,6 +182,11 @@ export function Footer({ onOpenDemoModal }: FooterProps) {
               <li>
                 <Link href="/signin" className="hover:text-foreground transition-colors">
                   {t.nav.signIn}
+                </Link>
+              </li>
+              <li>
+                <Link href="/#faq" className="hover:text-foreground transition-colors">
+                  {t.nav.faq}
                 </Link>
               </li>
             </ul>
@@ -210,11 +211,6 @@ export function Footer({ onOpenDemoModal }: FooterProps) {
               <li>
                 <Link href="/data-deletion" className="hover:text-foreground transition-colors">
                   {t.footer.dataDeletion || "Data Deletion"}
-                </Link>
-              </li>
-              <li>
-                <Link href="#faq" className="hover:text-foreground transition-colors">
-                  {t.nav.faq}
                 </Link>
               </li>
             </ul>

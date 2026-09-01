@@ -44,15 +44,13 @@ export function FinalCTA({ onOpenDemoModal }: FinalCTAProps) {
               </Button>
 
               <Button
-                asChild
+                onClick={onOpenDemoModal}
                 size="lg"
                 variant="outline"
                 className="w-full sm:w-auto h-12 px-8 text-sm font-semibold border-white/20 bg-white/10 hover:bg-white/20 text-white gap-2 backdrop-blur-xs cursor-pointer"
               >
-                <Link href="/signup">
-                  <PhoneCall className="h-4 w-4 text-emerald-400" />
-                  {t.finalCta.secondaryBtn}
-                </Link>
+                <PhoneCall className="h-4 w-4 text-emerald-400" />
+                <span>{t.finalCta.secondaryBtn}</span>
               </Button>
             </div>
 

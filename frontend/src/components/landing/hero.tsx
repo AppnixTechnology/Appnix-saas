@@ -33,7 +33,7 @@ export function Hero({ onOpenDemoModal }: HeroProps) {
   };
 
   return (
-    <section className="relative overflow-hidden bg-background min-h-[calc(100vh-4rem)] lg:min-h-[calc(100vh-4.5rem)] flex flex-col justify-between items-center pt-8 pb-4 sm:pt-12 sm:pb-6 lg:pt-14 lg:pb-8 select-none">
+    <section id="hero" className="relative overflow-hidden bg-background min-h-[calc(100vh-4rem)] lg:min-h-[calc(100vh-4.5rem)] flex flex-col justify-between items-center pt-8 pb-4 sm:pt-12 sm:pb-6 lg:pt-14 lg:pb-8 select-none">
       {/* ─── 1. TECHNICAL BACKGROUND: CLEAN GRID & SOFT AMBIENT GLOW ─── */}
       <div
         className="absolute inset-0 pointer-events-none overflow-hidden select-none"

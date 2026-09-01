@@ -350,7 +350,14 @@ function SignUpContent() {
                   htmlFor="termsAccepted"
                   className="text-sm font-normal leading-snug text-slate-600"
                 >
-                  {t.auth.agreeTerms}
+                  I agree to the{" "}
+                  <Link href="/terms-and-conditions" target="_blank" className="text-primary hover:underline font-medium">
+                    Terms &amp; Conditions
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy-policy" target="_blank" className="text-primary hover:underline font-medium">
+                    Privacy Policy
+                  </Link>
                 </Label>
               </div>
               {errors.termsAccepted && (

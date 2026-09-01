@@ -57,7 +57,7 @@ export function CampaignShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => v
   const { t } = useTranslation();
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20 bg-background">
+    <section id="campaigns" className="py-12 sm:py-16 lg:py-20 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* Left Column: Clean Campaign Pipeline Visual */}

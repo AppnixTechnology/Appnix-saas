@@ -33,7 +33,7 @@ export function WhyAppnix() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20 bg-muted/20 border-y border-border/60">
+    <section id="why-appnix" className="py-12 sm:py-16 lg:py-20 bg-muted/20 border-y border-border/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mx-auto max-w-3xl text-center mb-8 sm:mb-12">
