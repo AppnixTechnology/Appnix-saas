@@ -20,6 +20,7 @@ import {
 import { Navbar } from "@/components/landing/navbar";
 import { Footer } from "@/components/landing/footer";
 import { LeadFormModal } from "@/components/landing/lead-form-modal";
+import { SecurityPracticesModal } from "@/components/legal/SecurityPracticesModal";
 import { ScrollToTop } from "@/components/landing/scroll-to-top";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +54,7 @@ export function LegalPageLayout({
   const [mobileTocOpen, setMobileTocOpen] = useState(false);
   const [demoModalOpen, setDemoModalOpen] = useState(false);
   const [demoInterest, setDemoInterest] = useState("Enterprise Security & Compliance");
+  const [securityModalOpen, setSecurityModalOpen] = useState(false);
 
   // Track active section on scroll
   useEffect(() => {
@@ -363,7 +365,7 @@ export function LegalPageLayout({
                   </a>
                   <button
                     type="button"
-                    onClick={() => handleOpenDemo("Legal & Security Compliance")}
+                    onClick={() => setSecurityModalOpen(true)}
                     className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-background px-4 py-2.5 text-xs font-semibold text-foreground hover:bg-muted transition-colors cursor-pointer"
                   >
                     Request Security Brief
@@ -386,7 +388,13 @@ export function LegalPageLayout({
         source="Legal Page Contact"
       />
 
-      {/* 6. Footer */}
+      {/* 6. Dedicated Security & Data Practices Modal */}
+      <SecurityPracticesModal
+        isOpen={securityModalOpen}
+        onOpenChange={setSecurityModalOpen}
+      />
+
+      {/* 7. Footer */}
       <Footer onOpenDemoModal={() => handleOpenDemo("General Inquiries")} />
     </div>
   );
