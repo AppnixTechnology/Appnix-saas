@@ -54,9 +54,9 @@ export function Footer({ onOpenDemoModal }: FooterProps) {
             {/* Live Operational Status Badge */}
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground shadow-2xs">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <span className="font-semibold text-foreground">All Systems Operational</span>
+              <span className="font-semibold text-foreground">Multi-Channel SaaS Platform</span>
               <span>•</span>
-              <span className="text-emerald-600 font-medium">99.9% Uptime</span>
+              <span className="text-emerald-600 font-medium">Cloud Infrastructure</span>
             </div>
 
             {/* Social Icons */}
@@ -203,60 +203,61 @@ export function Footer({ onOpenDemoModal }: FooterProps) {
             </ul>
           </div>
 
-          {/* Column 5: Trust & Compliance (2 cols) */}
+          {/* Column 5: Legal (2 cols) */}
           <div className="lg:col-span-2 space-y-3">
             <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
-              {t.footer.companyCol}
+              {t.footer.legalCol || "Legal"}
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
+              <li>
+                <Link href="/privacy-policy" className="hover:text-foreground transition-colors">
+                  {t.footer.privacyPolicy || "Privacy Policy"}
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms-and-conditions" className="hover:text-foreground transition-colors">
+                  {t.footer.termsAndConditions || t.footer.termsOfService || "Terms & Conditions"}
+                </Link>
+              </li>
+              <li>
+                <Link href="/data-deletion" className="hover:text-foreground transition-colors">
+                  {t.footer.dataDeletion || "Data Deletion"}
+                </Link>
+              </li>
               <li>
                 <Link href="#faq" className="hover:text-foreground transition-colors">
                   {t.nav.faq}
                 </Link>
               </li>
-              <li>
-                <span className="hover:text-foreground transition-colors cursor-pointer">
-                  {t.footer.privacyPolicy}
-                </span>
-              </li>
-              <li>
-                <span className="hover:text-foreground transition-colors cursor-pointer">
-                  {t.footer.termsOfService}
-                </span>
-              </li>
-              <li>
-                <span className="hover:text-foreground transition-colors cursor-pointer">
-                  Meta Compliance
-                </span>
-              </li>
             </ul>
           </div>
         </div>
 
-        {/* Partner Trust Strip */}
-        <div className="rounded-xl border border-border/70 bg-background/60 p-3.5 mb-8 flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground">
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-            <span className="flex items-center gap-1.5 text-foreground font-medium">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" />
-              Meta Cloud API Partner
+        {/* Neutral Capability Section */}
+        <div className="rounded-xl border border-border/70 bg-background/60 p-4 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs text-muted-foreground">
+          <div className="space-y-1">
+            <span className="font-bold text-foreground text-xs block">
+              Built for modern business communication
             </span>
-            <span className="flex items-center gap-1.5 text-foreground font-medium">
-              <ShieldCheck className="h-4 w-4 text-blue-600" />
-              Google RCS Verified
-            </span>
-            <span className="flex items-center gap-1.5 text-foreground font-medium">
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              ISO 27001 Ready
+            <span className="text-muted-foreground text-[11px] block">
+              Securely designed • Business-focused • Multi-channel communication
             </span>
           </div>
 
           <button
             onClick={onOpenDemoModal}
-            className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1 cursor-pointer"
+            className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1 cursor-pointer self-start md:self-auto"
           >
-            Request Enterprise Security Whitepaper
+            Explore Platform Solutions
             <ArrowRight className="h-3 w-3" />
           </button>
+        </div>
+
+        {/* Mandatory Platform & Trademark Disclaimer */}
+        <div className="mb-6 p-3 rounded-lg border border-border/50 bg-muted/20 text-[11px] text-muted-foreground leading-relaxed">
+          <p>
+            WhatsApp, Facebook, Instagram and Meta are trademarks of Meta Platforms, Inc. Google and RCS are trademarks of Google LLC. Appnix Technologies is an independent software platform and is not affiliated with or endorsed by these companies unless explicitly stated.
+          </p>
         </div>
 
         <Separator className="mb-6" />

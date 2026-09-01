@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   // Used to resolve relative URLs (like /og-image.png below) into absolute
   // URLs for Open Graph / Twitter cards. Falls back to appnix.com if
   // NEXT_PUBLIC_SITE_URL isn't set in the environment.
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://appnix.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://appnix.co.in"),
   title: {
     default: "Appnix - Unified Business Messaging & Marketing Platform",
     template: "%s | Appnix",
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://appnix.com",
+    url: "https://appnix.co.in",
     siteName: "Appnix",
     title: "Appnix - Unified Business Messaging & Marketing Platform",
     description: "WhatsApp Business API, RCS, Instagram, Facebook Marketing - White-Label SaaS Platform",

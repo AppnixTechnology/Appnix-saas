@@ -409,7 +409,7 @@ export function Hero({ onOpenDemoModal }: HeroProps) {
             <div className="absolute -bottom-4 left-6 z-20 pointer-events-none hidden md:block">
               <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-card/90 border border-border shadow-xs text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold backdrop-blur-xs">
                 <WhatsAppIcon className="h-2.5 w-2.5" />
-                <span>WhatsApp Official API Connected ✓</span>
+                <span>WhatsApp Cloud API Connected ✓</span>
               </div>
             </div>
 

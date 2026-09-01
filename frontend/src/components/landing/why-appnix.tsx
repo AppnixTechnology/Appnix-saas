@@ -11,22 +11,22 @@ const comparisons = [
   {
     category: "Disconnected Point Solutions",
     problem: "Separate tools for WhatsApp, live chat, CRM, bot builder, and broadcasts.",
-    appnixSolution: "One unified omnichannel workspace with seamless native data sync.",
+    appnixSolution: "One unified multi-channel workspace with synchronized data management.",
   },
   {
     category: "Lead Response Time",
-    problem: "Hours or days to follow up with new inbound leads across scattered channels.",
-    appnixSolution: "Instant 5-second automated response and lead routing to designated reps.",
+    problem: "Delays in following up with new customer inquiries across scattered apps.",
+    appnixSolution: "Automated trigger-based instant replies and lead assignment.",
   },
   {
-    category: "Channel Compliance",
-    problem: "Unofficial scraping tools and high ban risks with zero Meta guarantees.",
-    appnixSolution: "100% Official Meta Cloud API & Google RCS Verified Partner infrastructure.",
+    category: "Channel Integrations",
+    problem: "Complex standalone setups and disconnected message delivery logs.",
+    appnixSolution: "Direct Cloud API integrations for supported messaging platforms.",
   },
   {
-    category: "Team Visibility & SLA",
-    problem: "No centralized visibility into agent response speeds or missed chats.",
-    appnixSolution: "Real-time CSAT tracking, SLA alerts, and multi-agent workload balancing.",
+    category: "Team Visibility & Routing",
+    problem: "No centralized visibility into team response activity or conversation status.",
+    appnixSolution: "Multi-agent assignment, conversation tags, and team collaboration notes.",
   },
 ];
 

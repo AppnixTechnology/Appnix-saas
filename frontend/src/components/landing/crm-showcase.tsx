@@ -41,7 +41,7 @@ const mockContacts = [
     stage: "Proposal Sent",
     dealValue: "$8,500",
     assignedTo: "Maya Lin",
-    tags: ["Enterprise", "RCS Verified"],
+    tags: ["Enterprise", "RCS Customer"],
     lastContact: "1 hour ago",
   },
   {

@@ -8,43 +8,43 @@ import { useTranslation } from "@/lib/i18n";
 const testimonials = [
   {
     content:
-      "Appnix completely transformed how we communicate with customers. The unified inbox and automated lead assignment alone saved our sales team 20+ hours every week.",
+      "Appnix helped us centralize our WhatsApp and Instagram customer conversations. The unified inbox and lead assignment have streamlined our support operations.",
     author: "Sarah Chen",
-    role: "CEO & Co-Founder",
-    company: "TechStart Global",
+    role: "Operations Lead",
+    company: "Retail Brands Hub",
     avatar: "SC",
-    metric: "20+ Hours Saved / Week",
+    metric: "Unified Inbox",
     rating: 5,
   },
   {
     content:
-      "The white-label solution allowed us to launch our own branded messaging platform for 40+ agency clients in weeks, not months. The multi-tenant architecture is bulletproof.",
+      "The white-label capability allowed us to provide a branded messaging platform to our client accounts. The multi-tenant architecture keeps client data isolated and clean.",
     author: "Marcus Johnson",
-    role: "Founder & Managing Director",
-    company: "AgencyPro Media",
+    role: "Agency Director",
+    company: "Growth Media Studio",
     avatar: "MJ",
-    metric: "40+ Client Tenants Managed",
+    metric: "Tenant Isolation",
     rating: 5,
   },
   {
     content:
-      "Best WhatsApp Business API integration we've ever deployed. Deliverability is consistently 99.4% and the visual bot builder reduced our support response time to under 2 minutes.",
+      "Setting up message templates and conversational flow triggers was straightforward. The visual builder helps our team manage customer inquiries efficiently.",
     author: "Priya Sharma",
-    role: "CTO",
-    company: "E-Commerce Plus",
+    role: "Technical Lead",
+    company: "Commerce Solutions",
     avatar: "PS",
-    metric: "99.4% Delivery Rate",
+    metric: "Template Management",
     rating: 5,
   },
 ];
 
-const partners = [
-  "Meta Tech Partner",
-  "Google RCS Verified",
-  "HubSpot Ecosystem",
-  "Shopify Plus Ready",
-  "AWS Cloud Certified",
-  "ISO 27001 Standard",
+const supportedPlatforms = [
+  "WhatsApp Business Platform",
+  "Google RCS Messaging",
+  "Instagram Direct",
+  "Facebook Messenger",
+  "Custom Webhooks",
+  "PostgreSQL Multi-Tenant",
 ];
 
 export function Testimonials() {
@@ -88,7 +88,7 @@ export function Testimonials() {
                 </div>
 
                 <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed italic">
-                  "{item.content}"
+                  &ldquo;{item.content}&rdquo;
                 </p>
 
                 {/* Author Details */}
@@ -110,19 +110,19 @@ export function Testimonials() {
           ))}
         </div>
 
-        {/* Verified Technology Standards / Ecosystem Banner */}
+        {/* Supported Messaging Channels & Ecosystem Strip */}
         <div className="mt-16 rounded-2xl border border-border/60 bg-muted/30 p-6 sm:p-8 text-center">
           <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-4">
-            Enterprise Cloud & Messaging Ecosystem Standards
+            Supported Messaging Channels &amp; Technical Integrations
           </span>
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8">
-            {partners.map((partner, idx) => (
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
+            {supportedPlatforms.map((platform, idx) => (
               <div
                 key={idx}
-                className="flex items-center gap-2 rounded-xl bg-background border border-border/70 px-4 py-2 text-xs font-semibold text-foreground shadow-2xs"
+                className="flex items-center gap-2 rounded-xl bg-background border border-border/70 px-3.5 py-2 text-xs font-semibold text-foreground shadow-2xs"
               >
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                <span>{partner}</span>
+                <span>{platform}</span>
               </div>
             ))}
           </div>

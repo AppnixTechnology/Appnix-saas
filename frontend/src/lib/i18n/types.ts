@@ -216,10 +216,13 @@ export interface TranslationDictionary {
     solutionsCol: string;
     resourcesCol: string;
     companyCol: string;
+    legalCol?: string;
     copyright: string;
     allRightsReserved: string;
     privacyPolicy: string;
     termsOfService: string;
+    termsAndConditions?: string;
+    dataDeletion?: string;
   };
   leadModal: {
     title: string;

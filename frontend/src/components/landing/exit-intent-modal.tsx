@@ -58,7 +58,7 @@ export function ExitIntentModal({ onOpenDemoModal }: ExitIntentModalProps) {
             Before you go...
           </DialogTitle>
           <DialogDescription className="text-slate-300 text-sm mt-1.5">
-            Discover how Appnix unifies WhatsApp, Instagram, RCS, and CRM to increase your customer conversion rate by up to 3x.
+            Discover how Appnix unifies WhatsApp, Instagram, RCS, and CRM to streamline customer conversations and lead engagement.
           </DialogDescription>
         </div>
 

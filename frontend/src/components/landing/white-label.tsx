@@ -49,7 +49,7 @@ export function WhiteLabel({ onOpenDemoModal }: { onOpenDemoModal: () => void })
               </div>
               <div className="flex items-center gap-2 font-mono text-xs text-slate-300">
                 <Globe className="h-3.5 w-3.5 text-emerald-400" />
-                <span>app.appnix.com</span>
+                <span>app.appnix.co.in</span>
               </div>
               <div className="h-8 rounded-lg bg-white/10 flex items-center px-3 text-xs font-bold text-white">
                 Appnix SaaS Engine
@@ -71,7 +71,7 @@ export function WhiteLabel({ onOpenDemoModal }: { onOpenDemoModal: () => void })
               </div>
               <div className="h-8 rounded-lg bg-emerald-500 text-slate-950 flex items-center justify-between px-3 text-xs font-bold shadow-md">
                 <span>Your Agency Logo & Theme</span>
-                <span className="text-[10px] font-normal">Custom SLA</span>
+                <span className="text-[10px] font-normal">Custom Plans</span>
               </div>
             </div>
           </div>
@@ -98,7 +98,7 @@ export function WhiteLabel({ onOpenDemoModal }: { onOpenDemoModal: () => void })
             {
               icon: Server,
               title: "Dedicated Infrastructure",
-              description: "Enterprise high-throughput message pipelines with 99.9% uptime SLA guarantee.",
+              description: "Scalable message pipelines with multi-tenant database isolation and performance routing.",
             },
             {
               icon: ShieldCheck,

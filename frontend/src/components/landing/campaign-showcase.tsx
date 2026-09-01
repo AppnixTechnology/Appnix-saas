@@ -44,7 +44,7 @@ export function CampaignShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => v
                     </span>
                     <span>+</span>
                     <span className="inline-flex items-center gap-1 text-blue-700 dark:text-blue-400 font-medium bg-blue-500/10 px-1.5 py-0.2 rounded text-[11px]">
-                      <RCSIcon className="h-3 w-3 shrink-0" /> RCS Verified
+                      <RCSIcon className="h-3 w-3 shrink-0" /> RCS Messaging
                     </span>
                   </p>
                 </div>
@@ -87,7 +87,7 @@ export function CampaignShowcase({ onOpenDemoModal }: { onOpenDemoModal: () => v
                     <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
                     Delivery Performance Funnel
                   </span>
-                  <span className="text-emerald-600 font-bold">Fast-Dispatch Rate: 1,200 msg/sec</span>
+                  <span className="text-emerald-600 font-bold">Dispatch Status: Multi-Channel Queue</span>
                 </div>
 
                 <div className="space-y-1.5">

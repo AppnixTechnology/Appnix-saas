@@ -1,50 +1,43 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
-import { ShieldCheck, MessageSquare, Zap, Headphones } from "lucide-react";
+import { useMemo } from "react";
+import { MessageSquare, Zap, Layers, Users, CheckCircle2 } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 
 export function TrustMetrics() {
   const { t } = useTranslation();
-  const [isVisible, setIsVisible] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  const metrics = useMemo(
+  const capabilities = useMemo(
     () => [
       {
-        numericValue: 10,
-        suffix: "K+",
-        label: t.trustMetrics.stat1Label,
+        title: t.trustMetrics.stat1Label,
         description: t.trustMetrics.stat1Sub,
-        icon: ShieldCheck,
+        feature: "WhatsApp, RCS, IG & FB",
+        icon: MessageSquare,
         iconColor: "text-emerald-600",
         bgColor: "bg-emerald-500/10",
       },
       {
-        numericValue: 1,
-        suffix: "B+",
-        label: t.trustMetrics.stat2Label,
+        title: t.trustMetrics.stat2Label,
         description: t.trustMetrics.stat2Sub,
-        icon: MessageSquare,
-        iconColor: "text-blue-600",
-        bgColor: "bg-blue-500/10",
-      },
-      {
-        numericValue: 99.9,
-        suffix: "%",
-        decimals: 1,
-        label: t.trustMetrics.stat3Label,
-        description: t.trustMetrics.stat3Sub,
+        feature: "Visual Triggers & Delays",
         icon: Zap,
         iconColor: "text-amber-600",
         bgColor: "bg-amber-500/10",
       },
       {
-        numericValue: 24,
-        suffix: "/7",
-        label: t.trustMetrics.stat4Label,
+        title: t.trustMetrics.stat3Label,
+        description: t.trustMetrics.stat3Sub,
+        feature: "Secure Workspace Isolation",
+        icon: Layers,
+        iconColor: "text-blue-600",
+        bgColor: "bg-blue-500/10",
+      },
+      {
+        title: t.trustMetrics.stat4Label,
         description: t.trustMetrics.stat4Sub,
-        icon: Headphones,
+        feature: "Custom Tags & Fields",
+        icon: Users,
         iconColor: "text-purple-600",
         bgColor: "bg-purple-500/10",
       },
@@ -52,99 +45,44 @@ export function TrustMetrics() {
     [t]
   );
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.2 }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <section id="trust-metrics" ref={containerRef} className="border-y border-border/60 bg-muted/30 py-12 sm:py-16">
+    <section id="trust-metrics" className="border-y border-border/60 bg-muted/30 py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-6 md:grid-cols-4 lg:gap-8">
-          {metrics.map((item) => (
+        <div className="text-center mb-8">
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">
+            {t.trustMetrics.badge}
+          </span>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground mt-1">
+            {t.trustMetrics.title}
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {capabilities.map((item, index) => (
             <div
-              key={item.label}
-              className="flex flex-col items-center text-center p-4 rounded-xl transition-all duration-300 hover:bg-background/80 hover:shadow-xs"
+              key={index}
+              className="flex flex-col items-center text-center p-5 rounded-2xl border border-border/70 bg-card shadow-2xs hover:shadow-md transition-all duration-200"
             >
-              <div className={`mb-3 flex h-12 w-12 items-center justify-center rounded-2xl ${item.bgColor} ${item.iconColor}`}>
+              <div className={`mb-3.5 flex h-12 w-12 items-center justify-center rounded-2xl ${item.bgColor} ${item.iconColor}`}>
                 <item.icon className="h-6 w-6" />
               </div>
 
-              <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-                {isVisible ? (
-                  <AnimatedNumber
-                    target={item.numericValue}
-                    decimals={item.decimals || 0}
-                    suffix={item.suffix}
-                  />
-                ) : (
-                  <span>0{item.suffix}</span>
-                )}
-              </div>
-
-              <h3 className="mt-1 text-sm font-bold text-foreground">
-                {item.label}
+              <h3 className="text-base font-bold text-foreground">
+                {item.title}
               </h3>
 
-              <p className="mt-1 text-xs text-muted-foreground max-w-[180px]">
+              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
                 {item.description}
               </p>
+
+              <div className="mt-3 pt-3 border-t border-border/60 w-full flex items-center justify-center gap-1.5 text-[11px] font-medium text-foreground/80">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                <span>{item.feature}</span>
+              </div>
             </div>
           ))}
         </div>
       </div>
     </section>
-  );
-}
-
-function AnimatedNumber({
-  target,
-  decimals = 0,
-  suffix = "",
-}: {
-  target: number;
-  decimals?: number;
-  suffix?: string;
-}) {
-  const [current, setCurrent] = useState(0);
-
-  useEffect(() => {
-    let start = 0;
-    const duration = 1200; // ms
-    const stepTime = 20;
-    const steps = duration / stepTime;
-    const increment = target / steps;
-
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= target) {
-        setCurrent(target);
-        clearInterval(timer);
-      } else {
-        setCurrent(start);
-      }
-    }, stepTime);
-
-    return () => clearInterval(timer);
-  }, [target]);
-
-  return (
-    <span>
-      {decimals > 0 ? current.toFixed(decimals) : Math.floor(current)}
-      {suffix}
-    </span>
   );
 }

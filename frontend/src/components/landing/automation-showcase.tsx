@@ -49,7 +49,7 @@ export function AutomationShowcase({ onOpenDemoModal }: { onOpenDemoModal: () =>
                 "Conditional branching based on user intent & tags",
                 "Smart delays, business hours routing & holiday schedules",
                 "Native webhooks for HubSpot, Salesforce, and custom APIs",
-                "65%+ reduction in manual first-response time",
+                "Automated instant replies for inbound customer inquiries",
               ].map((item, idx) => (
                 <div key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-foreground">
                   <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -124,7 +124,7 @@ export function AutomationShowcase({ onOpenDemoModal }: { onOpenDemoModal: () =>
                     <h5 className="text-xs font-bold text-foreground truncate">
                       Send Instant Catalog & Demo Access Link
                     </h5>
-                    <p className="text-[10px] text-muted-foreground">Template: welcome_lead_v2 (98.6% delivered)</p>
+                    <p className="text-[10px] text-muted-foreground">Template: welcome_lead_v2 (Approved)</p>
                   </div>
                 </div>
 
