@@ -415,7 +415,7 @@ export default function WorkflowTemplatesPage() {
               className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-9 font-semibold gap-1.5 shadow-sm"
             >
               <Plus className="h-3.5 w-3.5" />
-              <span>+ Create Custom Template</span>
+              <span>Create Custom Template</span>
             </Button>
           </div>
         </div>

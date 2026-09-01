@@ -10,10 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
-  MessageSquare,
-  Camera,
-  MessageCircle,
-  Share2,
+  MessageCircle, // used as RCS icon (no official RCS brand mark)
   CheckCircle2,
   AlertCircle,
   Loader2,
@@ -23,6 +20,9 @@ import {
   ShieldCheck,
   Zap,
 } from "lucide-react";
+// Real brand icons — lucide-react has no accurate WhatsApp/Instagram/Facebook glyphs,
+// so pull the actual logo marks from react-icons instead.
+import { FaWhatsapp, FaInstagram, FaFacebookF } from "react-icons/fa6";
 import { BotChannel, BotSettings, CreateBotData } from "@/components/bots/types";
 
 interface ChannelConfigProps {
@@ -164,7 +164,7 @@ export function BotStepChannels({
 
   const channelConfigs: Record<BotChannel, any> = {
     whatsapp: {
-      icon: <MessageSquare className="h-5 w-5 text-emerald-600" />,
+      icon: <FaWhatsapp className="h-5 w-5 text-[#25D366]" />,
       title: "WhatsApp Cloud API",
       subtitle: "Official Meta WhatsApp Business Platform",
       fields: [
@@ -201,7 +201,7 @@ export function BotStepChannels({
       ],
     },
     instagram: {
-      icon: <Camera className="h-5 w-5 text-pink-600" />,
+      icon: <FaInstagram className="h-5 w-5 text-[#E1306C]" />,
       title: "Instagram Direct Messaging",
       subtitle: "Meta Graph API for Instagram Professional Accounts",
       fields: [
@@ -252,7 +252,7 @@ export function BotStepChannels({
       ],
     },
     facebook: {
-      icon: <Share2 className="h-5 w-5 text-blue-600" />,
+      icon: <FaFacebookF className="h-5 w-5 text-[#1877F2]" />,
       title: "Facebook Messenger",
       subtitle: "Messenger Platform Webhook & Page Inbox",
       fields: [
