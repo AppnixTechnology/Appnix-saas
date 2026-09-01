@@ -510,14 +510,14 @@ export default function DataStorePage() {
                   <span>Import Data</span>
                 </Button>
 
-                <Button
-                  size="sm"
-                  onClick={() => setIsCreateStoreModalOpen(true)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-9 font-semibold gap-1.5 shadow-sm"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>+ Create Data Store</span>
-                </Button>
+               <Button
+  size="sm"
+  onClick={() => setIsCreateStoreModalOpen(true)}
+  className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-9 font-semibold gap-1.5 shadow-sm"
+>
+  <Plus className="h-3.5 w-3.5" />
+  <span>Create Data Store</span>
+</Button>
               </>
             ) : (
               <>
@@ -541,14 +541,14 @@ export default function DataStorePage() {
                   <span>Export CSV</span>
                 </Button>
 
-                <Button
-                  size="sm"
-                  onClick={() => handleOpenAddRecord()}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-9 font-semibold gap-1.5 shadow-sm"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>+ Add Record</span>
-                </Button>
+               <Button
+  size="sm"
+  onClick={() => handleOpenAddRecord()}
+  className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-9 font-semibold gap-1.5 shadow-sm"
+>
+  <Plus className="h-3.5 w-3.5" />
+  <span>Add Record</span>
+</Button>
               </>
             )}
           </div>
@@ -772,13 +772,13 @@ export default function DataStorePage() {
                       <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">
                           <Button
-                            size="sm"
-                            onClick={() => setSelectedStore(store)}
-                            className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white gap-1 px-2.5 shadow-2xs"
-                          >
-                            <FolderOpen className="h-3 w-3" />
-                            <span>Open Records</span>
-                          </Button>
+  size="sm"
+  onClick={() => setSelectedStore(store)}
+  className="h-7 text-xs bg-primary hover:bg-primary/90 text-primary-foreground gap-1 px-2.5 shadow-2xs"
+>
+  <FolderOpen className="h-3 w-3" />
+  <span>Open Records</span>
+</Button>
 
                           <Button
                             size="sm"

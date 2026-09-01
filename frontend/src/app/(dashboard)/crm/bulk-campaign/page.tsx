@@ -30,10 +30,6 @@ import {
   RefreshCw,
   MoreVertical,
   ChevronRight,
-  MessageSquare,
-  Camera,
-  Smartphone,
-  ScanLine,
   X,
   Play,
   Pause,
@@ -41,7 +37,19 @@ import {
   BarChart3,
   Users,
   Zap,
+  LayoutGrid,
 } from "lucide-react";
+
+// Proper brand marks for the messaging channels, matching the icons already
+// used across the Templates and Live Chat pages, instead of generic lucide
+// glyphs (MessageSquare/Camera/Smartphone/ScanLine) which don't represent
+// the actual channel brands.
+import {
+  WhatsAppIcon,
+  InstagramIcon,
+  FacebookIcon,
+  RCSIcon,
+} from "@/components/landing/channel-icons";
 
 // ---------- Types ----------
 type ChannelType = "whatsapp" | "instagram" | "rcs" | "facebook";
@@ -149,25 +157,25 @@ const channelConfig: Record<
 > = {
   whatsapp: {
     label: "WhatsApp",
-    icon: MessageSquare,
+    icon: WhatsAppIcon,
     style: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
     badgeStyle: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300",
   },
   instagram: {
     label: "Instagram",
-    icon: Camera,
+    icon: InstagramIcon,
     style: "bg-gradient-to-br from-amber-400 via-pink-500 to-purple-600 text-white",
     badgeStyle: "bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950 dark:text-pink-300",
   },
   rcs: {
     label: "RCS",
-    icon: Smartphone,
+    icon: RCSIcon,
     style: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300",
     badgeStyle: "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-300",
   },
   facebook: {
     label: "Facebook",
-    icon: ScanLine,
+    icon: FacebookIcon,
     style: "bg-blue-600 text-white",
     badgeStyle: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300",
   },
@@ -458,11 +466,11 @@ export default function BulkCampaignPage() {
               Channel:
             </span>
             {[
-              { key: "all", label: "All Channels" },
-              { key: "whatsapp", label: "WhatsApp", icon: MessageSquare },
-              { key: "instagram", label: "Instagram", icon: Camera },
-              { key: "rcs", label: "RCS", icon: Smartphone },
-              { key: "facebook", label: "Facebook", icon: ScanLine },
+              { key: "all", label: "All Channels", icon: LayoutGrid },
+              { key: "whatsapp", label: "WhatsApp", icon: WhatsAppIcon },
+              { key: "instagram", label: "Instagram", icon: InstagramIcon },
+              { key: "rcs", label: "RCS", icon: RCSIcon },
+              { key: "facebook", label: "Facebook", icon: FacebookIcon },
             ].map((ch) => (
               <button
                 key={ch.key}

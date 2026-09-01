@@ -297,10 +297,10 @@ export function TemplateListing() {
           <div className="flex items-center gap-2 shrink-0">
             <Button
               onClick={() => router.push("/channels/whatsapp/templates/create")}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white shrink-0 shadow-sm"
+              className="primary primary text-white shrink-0 shadow-sm"
             >
               <Plus className="h-4 w-4 mr-1.5" />
-              <span>+ Create Template</span>
+              <span>Create Template</span>
             </Button>
           </div>
         </div>

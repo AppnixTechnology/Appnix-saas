@@ -41,7 +41,11 @@ interface Department {
   id: string;
   name: string;
   status: { label: string; tone: "green" | "blue" };
-  tag: { label: string; icon: React.ElementType; tone: "green" | "pink" | "red" };
+  tag: {
+    label: string;
+    icon: React.ElementType;
+    tone: "green" | "pink" | "red";
+  };
   description: string;
   icon: React.ElementType;
   avatars: string[];
@@ -139,16 +143,18 @@ const statusTone: Record<Department["status"]["tone"], string> = {
 };
 
 export default function DepartmentsPage() {
-  const [departments, setDepartments] = useState<Department[]>(initialDepartments);
+  const [departments, setDepartments] =
+    useState<Department[]>(initialDepartments);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newDeptName, setNewDeptName] = useState("");
   const [newDeptDesc, setNewDeptDesc] = useState("");
   const [newDeptStatus, setNewDeptStatus] = useState("Active");
 
-  const filteredDepts = departments.filter((d) =>
-    d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    d.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredDepts = departments.filter(
+    (d) =>
+      d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.description.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleDelete = (id: string) => {
@@ -167,7 +173,9 @@ export default function DepartmentsPage() {
         tone: newDeptStatus === "Active" ? "green" : "blue",
       },
       tag: { label: "General", icon: HelpCircle, tone: "green" },
-      description: newDeptDesc.trim() || "Department unit created to handle operational tasks.",
+      description:
+        newDeptDesc.trim() ||
+        "Department unit created to handle operational tasks.",
       icon: Building2,
       avatars: [],
       extraCount: 1,
@@ -238,7 +246,8 @@ export default function DepartmentsPage() {
           />
         </div>
         <span className="text-xs text-muted-foreground">
-          Showing {filteredDepts.length} department{filteredDepts.length !== 1 ? "s" : ""}
+          Showing {filteredDepts.length} department
+          {filteredDepts.length !== 1 ? "s" : ""}
         </span>
       </div>
 
@@ -257,7 +266,7 @@ export default function DepartmentsPage() {
                 variant="secondary"
                 className={cn(
                   "rounded-full text-xs font-semibold",
-                  statusTone[dept.status.tone]
+                  statusTone[dept.status.tone],
                 )}
               >
                 {dept.status.label}
@@ -271,7 +280,7 @@ export default function DepartmentsPage() {
             <div
               className={cn(
                 "mb-3 mt-1 flex items-center gap-1.5 text-xs font-medium",
-                tagTone[dept.tag.tone]
+                tagTone[dept.tag.tone],
               )}
             >
               <dept.tag.icon className="h-3.5 w-3.5" />
@@ -292,14 +301,14 @@ export default function DepartmentsPage() {
                     alt=""
                     className={cn(
                       "h-7 w-7 rounded-full border-2 border-card object-cover",
-                      i !== 0 && "-ml-2"
+                      i !== 0 && "-ml-2",
                     )}
                   />
                 ))}
                 <span
                   className={cn(
-                    "flex h-7 items-center rounded-full border-2 border-card bg-emerald-500 px-2 text-[11px] font-bold text-white",
-                    dept.avatars.length !== 0 && "-ml-2"
+                    "flex h-7 items-center rounded-full border-2 border-card bg-primary px-2 text-[11px] font-bold text-primary-foreground",
+                    dept.avatars.length !== 0 && "-ml-2",
                   )}
                 >
                   +{dept.extraCount}
@@ -337,7 +346,7 @@ export default function DepartmentsPage() {
           onClick={() => setIsAddModalOpen(true)}
           className={cn(
             "flex flex-col items-center justify-center rounded-xl border-2 border-dashed bg-muted/20 p-5 text-center transition-colors cursor-pointer",
-            "hover:border-primary/50 hover:bg-muted/40"
+            "hover:border-primary/50 hover:bg-muted/40",
           )}
         >
           <div className="mb-3.5 flex h-10 w-10 items-center justify-center rounded-lg border-2 border-dashed bg-background text-muted-foreground">
@@ -355,7 +364,9 @@ export default function DepartmentsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-xl border bg-card p-6 shadow-xl animate-in">
             <div className="flex items-center justify-between border-b pb-3">
-              <h2 className="text-lg font-bold text-foreground">Create New Department</h2>
+              <h2 className="text-lg font-bold text-foreground">
+                Create New Department
+              </h2>
               <button
                 onClick={() => setIsAddModalOpen(false)}
                 className="text-muted-foreground hover:text-foreground"
@@ -415,7 +426,10 @@ export default function DepartmentsPage() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-primary text-primary-foreground">
+                <Button
+                  type="submit"
+                  className="bg-primary text-primary-foreground"
+                >
                   Create Department
                 </Button>
               </div>

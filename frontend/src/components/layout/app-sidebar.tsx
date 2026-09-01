@@ -78,6 +78,15 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
   // Tracks which parent menu item (by id/label) is expanded.
   const [expanded, setExpanded] = useState<string | null>(null);
 
+  // Tracks which href is "active" for highlighting purposes.
+  // IMPORTANT: this is intentionally NOT derived from `pathname` on every
+  // render. It only updates when the user clicks something *inside the
+  // sidebar itself* (see handleNavClick below). This way, navigating to a
+  // page via a button elsewhere in the app (e.g. a Dashboard quick-action
+  // card) changes the page but does NOT change what's highlighted/expanded
+  // in the sidebar.
+  const [activeHref, setActiveHref] = useState<string>(pathname);
+
   // Main navigation items dynamically localized
   const menuItems: MenuItem[] = useMemo(
     () => [
@@ -238,7 +247,11 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
     [t],
   );
 
-  // Auto-expand the parent whose child route matches the current path
+  // Run ONCE on mount only (e.g. on a hard refresh or a direct URL visit),
+  // so the sidebar opens already showing where the user actually is.
+  // Deliberately NOT re-run on every `pathname` change — that's what used to
+  // cause the sidebar to auto-expand/highlight whenever navigation happened
+  // from somewhere outside the sidebar (like a Dashboard quick-action button).
   useEffect(() => {
     const activeParent = menuItems.find(
       (item) =>
@@ -253,7 +266,8 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
     if (activeParent && activeParent.children?.length) {
       setExpanded(activeParent.id);
     }
-  }, [pathname, menuItems]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // <- empty deps: mount only, intentionally not tracking pathname
 
   const handleLogout = async () => {
     await logout();
@@ -262,6 +276,20 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
 
   const toggleExpand = (id: string) => {
     setExpanded((prev) => (prev === id ? null : id));
+  };
+
+  // Called only when the user clicks a link that lives INSIDE the sidebar.
+  // This is what's allowed to change the highlighted/expanded state.
+  const handleTopLevelNavClick = (item: MenuItem) => {
+    setActiveHref(item.href);
+    setExpanded(null); // collapse any open submenu since we navigated away
+    onClose();
+  };
+
+  const handleSubNavClick = (parentId: string, subHref: string) => {
+    setActiveHref(subHref);
+    setExpanded(parentId); // keep this parent expanded, showing the active child
+    onClose();
   };
 
   return (
@@ -317,27 +345,27 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
                 const Icon = item.icon;
                 const hasChildren = !!item.children?.length;
                 const isParentActive =
-                  pathname === item.href ||
+                  activeHref === item.href ||
                   (item.href !== "/dashboard" &&
-                    pathname.startsWith(item.href + "/")) ||
+                    activeHref.startsWith(item.href + "/")) ||
                   item.children?.some(
                     (c) =>
-                      pathname === c.href ||
+                      activeHref === c.href ||
                       (c.href !== item.href &&
-                        pathname.startsWith(c.href + "/")),
+                        activeHref.startsWith(c.href + "/")),
                   );
                 const isOpen = expanded === item.id;
 
                 // Item without children: render a plain link
                 if (!hasChildren) {
                   const isActive =
-                    pathname === item.href ||
-                    (item.href === "/dashboard" && pathname === "/products");
+                    activeHref === item.href ||
+                    (item.href === "/dashboard" && activeHref === "/products");
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
-                      onClick={onClose}
+                      onClick={() => handleTopLevelNavClick(item)}
                       className={cn(
                         "sidebar-nav-item",
                         isActive
@@ -389,20 +417,22 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
                         <div className="ml-6.75 space-y-0.5 border-l border-border pl-4">
                           {item.children!.map((sub) => {
                             const isSubActive =
-                              pathname === sub.href ||
+                              activeHref === sub.href ||
                               (sub.href !== "/channels" &&
                                 sub.href !== "/crm" &&
                                 sub.href !== "/department" &&
                                 sub.href !== "/workspace" &&
                                 sub.href !== "/settings" &&
                                 sub.href !== "/automations" &&
-                                pathname.startsWith(sub.href + "/"));
+                                activeHref.startsWith(sub.href + "/"));
                             const SubIcon = sub.icon;
                             return (
                               <Link
                                 key={sub.href}
                                 href={sub.href}
-                                onClick={onClose}
+                                onClick={() =>
+                                  handleSubNavClick(item.id, sub.href)
+                                }
                                 className={cn(
                                   "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
                                   isSubActive

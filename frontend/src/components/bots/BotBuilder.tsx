@@ -165,6 +165,12 @@ export const NODE_DEFINITIONS: Record<NodeType, NodeDefinition> = {
   end_flow: { type: "end_flow", category: "flow", label: "End Flow", description: "Terminate conversation session", icon: "Minus", color: "bg-slate-600", inputs: [{ id: "in", label: "", type: "action" }], outputs: [], configSchema: { fields: [] }, supportedChannels: ["whatsapp", "instagram", "rcs", "facebook"] },
 };
 
+// Shared style for every connection handle: a filled circle big enough to
+// comfortably hold a centered plus icon and to grab/click on, instead of the
+// default tiny xyflow dot.
+const HANDLE_CIRCLE_CLASS =
+  "!w-5 !h-5 !rounded-full !bg-primary !border-2 !border-background !shadow-sm flex items-center justify-center transition-transform hover:!scale-110";
+
 function CustomNode({
   data,
   selected,
@@ -201,14 +207,16 @@ function CustomNode({
         isDisabled && "opacity-60"
       )}
     >
-      {/* Target Input Handle (Left) */}
+      {/* Target Input Handle (Left) — plus-circle instead of a plain dot */}
       {!isTrigger && (
         <Handle
           type="target"
           position={Position.Left}
-          className="w-3 h-3 bg-primary border-2 border-background shadow-xs -left-1.5"
+          className={cn(HANDLE_CIRCLE_CLASS, "!-left-2.5")}
           id="in"
-        />
+        >
+          <Plus className="h-3 w-3 text-primary-foreground pointer-events-none" />
+        </Handle>
       )}
 
       {/* Header */}
@@ -249,7 +257,7 @@ function CustomNode({
         <span className="text-muted-foreground">{data.enabled ? "Active" : "Disabled"}</span>
       </div>
 
-      {/* Output Handles (Right) */}
+      {/* Output Handles (Right) — plus-circles instead of plain dots */}
       {definition.outputs && definition.outputs.length > 0 && (
         <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-2">
           {definition.outputs.map((out, idx) => (
@@ -257,12 +265,14 @@ function CustomNode({
               key={out.id}
               type="source"
               position={Position.Right}
-              className="w-3 h-3 bg-primary border-2 border-background shadow-xs -right-1.5"
+              className={cn(HANDLE_CIRCLE_CLASS, "!-right-2.5")}
               id={out.id}
               style={{
                 top: `${((idx + 1) / (definition.outputs.length + 1)) * 100}%`,
               }}
-            />
+            >
+              <Plus className="h-3 w-3 text-primary-foreground pointer-events-none" />
+            </Handle>
           ))}
         </div>
       )}

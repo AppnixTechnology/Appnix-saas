@@ -412,10 +412,10 @@ export default function WorkflowTemplatesPage() {
             <Button
               size="sm"
               onClick={() => setIsCustomModalOpen(true)}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-9 font-semibold gap-1.5 shadow-sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-9 font-semibold gap-1.5 shadow-sm"
             >
               <Plus className="h-3.5 w-3.5" />
-              <span>+ Create Custom Template</span>
+              <span>Create Custom Template</span>
             </Button>
           </div>
         </div>
@@ -448,7 +448,7 @@ export default function WorkflowTemplatesPage() {
             <select
               value={selectedChannel}
               onChange={(e) => setSelectedChannel(e.target.value)}
-              className="h-9 px-3 rounded-lg border bg-background text-xs font-medium text-foreground cursor-pointer shadow-2xs focus:ring-1 focus:ring-emerald-500"
+              className="h-9 px-3 rounded-lg border bg-background text-xs font-medium text-foreground cursor-pointer shadow-2xs focus:ring-1 focus:ring-primary"
             >
               {CHANNELS.map((ch) => (
                 <option key={ch} value={ch}>
@@ -495,7 +495,7 @@ export default function WorkflowTemplatesPage() {
                 className={cn(
                   "px-3 py-1.5 rounded-full font-medium transition-all flex items-center gap-1.5",
                   isSelected
-                    ? "bg-emerald-600 text-white shadow-xs font-bold"
+                    ? "bg-primary text-primary-foreground shadow-xs font-bold"
                     : "bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
@@ -503,7 +503,7 @@ export default function WorkflowTemplatesPage() {
                 <span
                   className={cn(
                     "text-[10px] px-1.5 py-0.2 rounded-full",
-                    isSelected ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
+                    isSelected ? "bg-white/20 text-primary-foreground" : "bg-muted text-muted-foreground"
                   )}
                 >
                   {count}
@@ -528,7 +528,7 @@ export default function WorkflowTemplatesPage() {
           filteredTemplates.map((template) => (
             <div
               key={template.id}
-              className="rounded-2xl border bg-card p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group hover:border-emerald-500/40 relative overflow-hidden"
+              className="rounded-2xl border bg-card p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group hover:border-primary/40 relative overflow-hidden"
             >
               {/* Top Row: Category & Badges */}
               <div>
@@ -544,7 +544,7 @@ export default function WorkflowTemplatesPage() {
                         <span>Premium</span>
                       </Badge>
                     ) : (
-                      <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[10px] font-medium">
+                      <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-medium">
                         {template.badge}
                       </Badge>
                     )}
@@ -552,7 +552,7 @@ export default function WorkflowTemplatesPage() {
                 </div>
 
                 {/* Title */}
-                <h3 className="text-base font-bold text-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-snug">
+                <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors leading-snug">
                   {template.title}
                 </h3>
 
@@ -581,7 +581,7 @@ export default function WorkflowTemplatesPage() {
                 {/* Social Proof & Steps */}
                 <div className="flex items-center justify-between text-[11px] text-muted-foreground mt-3 font-medium">
                   <span className="flex items-center gap-1">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                     <span>{template.stepsCount} Steps</span>
                   </span>
                   <span>Used by {template.installCount.toLocaleString("en-IN")} teams</span>
@@ -602,7 +602,7 @@ export default function WorkflowTemplatesPage() {
                 <Button
                   size="sm"
                   onClick={() => handleUseTemplate(template)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8.5 font-semibold gap-1 shadow-xs"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-8.5 font-semibold gap-1 shadow-xs"
                 >
                   <span>Use Template</span>
                   <ArrowRight className="h-3 w-3" />
@@ -659,7 +659,7 @@ export default function WorkflowTemplatesPage() {
                       key={step.number}
                       className="p-3 rounded-xl border bg-muted/20 flex items-start gap-3 relative"
                     >
-                      <div className="h-7 w-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                      <div className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                         {step.number}
                       </div>
                       <div className="min-w-0 flex-1">
@@ -686,7 +686,7 @@ export default function WorkflowTemplatesPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {previewTemplate.requiredConnections.map((conn) => (
                     <div key={conn} className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                      <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                       <span>{conn}</span>
                     </div>
                   ))}
@@ -712,7 +712,7 @@ export default function WorkflowTemplatesPage() {
                   size="sm"
                   disabled={isCloning}
                   onClick={() => handleUseTemplate(previewTemplate)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs h-9 px-4 gap-1.5 shadow-sm"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs h-9 px-4 gap-1.5 shadow-sm"
                 >
                   {isCloning ? (
                     <>
@@ -740,7 +740,7 @@ export default function WorkflowTemplatesPage() {
           <div className="w-full max-w-lg rounded-2xl border bg-card p-6 shadow-2xl space-y-4 animate-in zoom-in-95">
             <div className="flex items-start justify-between border-b pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                   <Sparkles className="h-4.5 w-4.5" />
                 </div>
                 <div>
@@ -815,7 +815,7 @@ export default function WorkflowTemplatesPage() {
                   type="submit"
                   size="sm"
                   disabled={!customTitle.trim()}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8 font-semibold shadow-sm"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-8 font-semibold shadow-sm"
                 >
                   Save Template
                 </Button>
