@@ -18,7 +18,7 @@ export function StickyMobileCTA({ onOpenDemoModal }: StickyMobileCTAProps) {
       <div className="flex items-center gap-2">
         {/* WhatsApp Mobile Chat Action */}
         <a
-          href="https://wa.me/919328612083?text=Hi%20Appnix%20Team!%20I%20would%20like%20to%20learn%20more%20about%20your%20Omnichannel%20SaaS%20Platform."
+          href="https://wa.me/917753983175?text=Hi%20Appnix%20Team!%20I%20would%20like%20to%20learn%20more%20about%20your%20Omnichannel%20SaaS%20Platform."
           target="_blank"
           rel="noopener noreferrer"
           aria-label="WhatsApp Chat"

@@ -48,7 +48,7 @@ const initialContacts: Contact[] = [
     createdOn: "24 Feb 2026, 05:55 PM",
     tags: [],
     fullName: "Ankit Bansal",
-    whatsappNumber: "919328612083",
+    whatsappNumber: "917753983175",
     email: "ankit.bansal@techcorp.in",
     marketingBudget: "$12,000",
     marketingGoal: "Lead Generation",

@@ -110,7 +110,7 @@ const initialWorkflows: WorkflowMetric[] = [
     executionSteps: [
       { stepNumber: 1, name: "Webhook: Cart Abandoned", type: "trigger", durationMs: 15, status: "success", details: "Received cart payload from Shopify store #4820" },
       { stepNumber: 2, name: "Condition: Cart Value > ₹1,000", type: "condition", durationMs: 8, status: "success", details: "Cart Total: ₹3,499.00 (Passed filter)" },
-      { stepNumber: 3, name: "Action: WhatsApp Template Dispatch", type: "action", durationMs: 285, status: "success", details: "Template: cart_recovery_v2 sent to +91 93286 12083" },
+      { stepNumber: 3, name: "Action: WhatsApp Template Dispatch", type: "action", durationMs: 285, status: "success", details: "Template: cart_recovery_v2 sent to +91 77539 83175" },
       { stepNumber: 4, name: "CRM: Tag Contact as 'Cart-Recovery-Sent'", type: "crm", durationMs: 32, status: "success", details: "Updated CRM contact tags successfully" },
     ],
   },

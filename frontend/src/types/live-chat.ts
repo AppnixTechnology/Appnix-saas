@@ -87,7 +87,7 @@ export interface LiveChatConversation {
   uid: string; // e.g. "CHT-948210"
   contactId: string;
   name: string;
-  identifier: string; // e.g. "+91 93286 12083" or "@nourin_s"
+  identifier: string; // e.g. "+91 77539 83175" or "@nourin_s"
   avatarUrl?: string;
   channel: ChannelType;
   department: DepartmentId;

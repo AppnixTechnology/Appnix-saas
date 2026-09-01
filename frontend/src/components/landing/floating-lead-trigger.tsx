@@ -25,7 +25,7 @@ export function FloatingLeadTrigger({ onClick }: FloatingLeadTriggerProps) {
 
         {/* WhatsApp Button with sleek pulse animation */}
         <a
-          href="https://wa.me/919328612083?text=Hi%20Appnix%20Team!%20I%20would%20like%20to%20learn%20more%20about%20your%20Omnichannel%20SaaS%20Platform."
+          href="https://wa.me/917753983175?text=Hi%20Appnix%20Team!%20I%20would%20like%20to%20learn%20more%20about%20your%20Omnichannel%20SaaS%20Platform."
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Chat on WhatsApp"

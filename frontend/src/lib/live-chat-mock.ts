@@ -116,7 +116,7 @@ export const INITIAL_CONVERSATIONS: LiveChatConversation[] = [
     uid: 'CHT-948210',
     contactId: 'cnt-1',
     name: 'Ankit Bansal',
-    identifier: '+91 93286 12083',
+    identifier: '+91 77539 83175',
     avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop&crop=faces',
     channel: 'whatsapp',
     department: 'sales',

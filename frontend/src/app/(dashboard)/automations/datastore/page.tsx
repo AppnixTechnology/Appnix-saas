@@ -130,7 +130,7 @@ const INITIAL_RECORDS: Record<string, DataStoreRecord[]> = {
   ds_1: [
     {
       id: "rec_101",
-      key: "+919328612083",
+      key: "+917753983175",
       value: {
         cartId: "shopify_cart_9921",
         customerName: "Ankit Bansal",

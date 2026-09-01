@@ -33,8 +33,8 @@ const SEED_CONVERSATIONS: ConversationEntity[] = [
   {
     id: 'conv-1',
     contactName: 'Ankit Bansal',
-    phoneNumber: '+91 93286 12083',
-    identifier: '+91 93286 12083',
+    phoneNumber: '+91 77539 83175',
+    identifier: '+91 77539 83175',
     channel: 'whatsapp',
     avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop&crop=faces',
     online: true,

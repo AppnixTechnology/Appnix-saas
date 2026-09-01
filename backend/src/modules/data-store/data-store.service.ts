@@ -99,7 +99,7 @@ const SEED_RECORDS: Record<string, DataStoreRecordEntity[]> = {
     {
       id: "rec_101",
       dataStoreId: "ds_1",
-      key: "+919328612083",
+      key: "+917753983175",
       value: {
         cartId: "shopify_cart_9921",
         customerName: "Ankit Bansal",
