@@ -626,4 +626,217 @@ export class WhatsAppTemplatesService {
     }
     return text;
   }
+
+  // In-memory workspace quotas for WhatsApp Flows
+  private flowQuotas = new Map<
+    string,
+    {
+      planTier: string;
+      maxPublishedFlows: number;
+      publishedFlowsUsed: number;
+      dynamicEndpointsUnlocked: boolean;
+      dataEncryptionUnlocked: boolean;
+      webhookRoutingUnlocked: boolean;
+      advancedAnalyticsUnlocked: boolean;
+      multiWabaUnlocked: boolean;
+      redeemedKeys: string[];
+    }
+  >();
+
+  private getTenantQuota(tenantId: string) {
+    if (!this.flowQuotas.has(tenantId)) {
+      this.flowQuotas.set(tenantId, {
+        planTier: 'Starter Plan',
+        maxPublishedFlows: 5,
+        publishedFlowsUsed: 2,
+        dynamicEndpointsUnlocked: false,
+        dataEncryptionUnlocked: true,
+        webhookRoutingUnlocked: true,
+        advancedAnalyticsUnlocked: false,
+        multiWabaUnlocked: false,
+        redeemedKeys: [],
+      });
+    }
+    return this.flowQuotas.get(tenantId)!;
+  }
+
+  async getFlowQuota(tenantId: string) {
+    const q = this.getTenantQuota(tenantId);
+    return {
+      success: true,
+      data: {
+        planTier: q.planTier,
+        maxPublishedFlows: q.maxPublishedFlows,
+        publishedFlowsUsed: q.publishedFlowsUsed,
+        availableSlots: Math.max(0, q.maxPublishedFlows - q.publishedFlowsUsed),
+        percentageUsed: Math.min(100, Math.round((q.publishedFlowsUsed / q.maxPublishedFlows) * 100)),
+        features: [
+          {
+            key: 'published_flows',
+            label: `Up to ${q.maxPublishedFlows} Published Flows`,
+            unlocked: true,
+            description: 'Simultaneously active customer-facing mini-apps',
+          },
+          {
+            key: 'dynamic_endpoints',
+            label: 'Dynamic Data API Endpoints',
+            unlocked: q.dynamicEndpointsUnlocked,
+            description: 'Fetch real-time products, pricing, and slots from external backends',
+          },
+          {
+            key: 'data_encryption',
+            label: 'AES-256 Client-Side Form Encryption',
+            unlocked: q.dataEncryptionUnlocked,
+            description: 'End-to-end tokenized payload transit inside WhatsApp',
+          },
+          {
+            key: 'webhook_routing',
+            label: 'Automation Webhook Triggers',
+            unlocked: q.webhookRoutingUnlocked,
+            description: 'Trigger workflow nodes automatically upon form completion',
+          },
+          {
+            key: 'advanced_analytics',
+            label: 'Screen Drop-off & Funnel Analytics',
+            unlocked: q.advancedAnalyticsUnlocked,
+            description: 'Detailed per-screen drop-off metrics & conversion rates',
+          },
+          {
+            key: 'multi_waba',
+            label: 'Multi-WABA Number Routing',
+            unlocked: q.multiWabaUnlocked,
+            description: 'Deploy the same flow across multiple phone numbers',
+          },
+        ],
+      },
+    };
+  }
+
+  async unlockFlowQuota(tenantId: string, licenseKey: string) {
+    const formattedKey = (licenseKey || '').trim().toUpperCase();
+
+    if (!formattedKey) {
+      throw new BadRequestException('License key is required.');
+    }
+
+    const q = this.getTenantQuota(tenantId);
+
+    // Check if key was already redeemed by this tenant
+    if (q.redeemedKeys.includes(formattedKey)) {
+      throw new ConflictException('This license key has already been redeemed for this workspace.');
+    }
+
+    // Demo Keys Dictionary
+    const KNOWN_KEYS: Record<
+      string,
+      {
+        planTier: string;
+        bonusFlows: number;
+        dynamicEndpoints: boolean;
+        analytics: boolean;
+        multiWaba: boolean;
+        status: 'active' | 'expired' | 'claimed';
+      }
+    > = {
+      'FLOW-PRO8-2026-UNLK': {
+        planTier: 'Professional Growth Plan',
+        bonusFlows: 10,
+        dynamicEndpoints: true,
+        analytics: true,
+        multiWaba: true,
+        status: 'active',
+      },
+      'FLOW-ENT9-9921-MAX': {
+        planTier: 'Enterprise Unlimited Suite',
+        bonusFlows: 95,
+        dynamicEndpoints: true,
+        analytics: true,
+        multiWaba: true,
+        status: 'active',
+      },
+      'FLOW-EXPD-2025-0001': {
+        planTier: 'Expired Promotional Key',
+        bonusFlows: 5,
+        dynamicEndpoints: false,
+        analytics: false,
+        multiWaba: false,
+        status: 'expired',
+      },
+      'FLOW-USED-8812-CLAIM': {
+        planTier: 'Claimed Single-Use Voucher',
+        bonusFlows: 5,
+        dynamicEndpoints: false,
+        analytics: false,
+        multiWaba: false,
+        status: 'claimed',
+      },
+    };
+
+    const keyConfig = KNOWN_KEYS[formattedKey];
+
+    // Check pre-configured demo keys
+    if (keyConfig) {
+      if (keyConfig.status === 'expired') {
+        throw new BadRequestException('This activation key expired on Dec 31, 2025.');
+      }
+      if (keyConfig.status === 'claimed') {
+        throw new ConflictException('This voucher key has already been claimed by another organization.');
+      }
+
+      q.planTier = keyConfig.planTier;
+      q.maxPublishedFlows += keyConfig.bonusFlows;
+      q.dynamicEndpointsUnlocked = keyConfig.dynamicEndpoints || q.dynamicEndpointsUnlocked;
+      q.advancedAnalyticsUnlocked = keyConfig.analytics || q.advancedAnalyticsUnlocked;
+      q.multiWabaUnlocked = keyConfig.multiWaba || q.multiWabaUnlocked;
+      q.redeemedKeys.push(formattedKey);
+
+      return {
+        success: true,
+        message: `Successfully unlocked ${keyConfig.planTier}! +${keyConfig.bonusFlows} published flows added.`,
+        data: {
+          planTier: q.planTier,
+          newMaxPublishedFlows: q.maxPublishedFlows,
+          publishedFlowsUsed: q.publishedFlowsUsed,
+          unlockedFeatures: [
+            `+${keyConfig.bonusFlows} Active Published Flows`,
+            'Dynamic Data API Endpoints',
+            'Screen Drop-off & Funnel Analytics',
+            'Multi-WABA Number Routing',
+          ],
+        },
+      };
+    }
+
+    // Pattern validator for dynamic keys (FLOW-XXXX-XXXX-XXXX or APNX-FLOW-XXXX-XXXX)
+    const validPattern = /^(FLOW|APNX-FLOW)-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(formattedKey);
+    if (!validPattern) {
+      throw new BadRequestException(
+        'Invalid license key format. Expected format: FLOW-XXXX-XXXX-XXXX (e.g. FLOW-PRO8-2026-UNLK).',
+      );
+    }
+
+    // Redeem valid custom key
+    q.planTier = 'Pro Plan (Custom License)';
+    q.maxPublishedFlows += 10;
+    q.dynamicEndpointsUnlocked = true;
+    q.advancedAnalyticsUnlocked = true;
+    q.multiWabaUnlocked = true;
+    q.redeemedKeys.push(formattedKey);
+
+    return {
+      success: true,
+      message: `Successfully activated license key ${formattedKey}! Your workspace limit has been upgraded to ${q.maxPublishedFlows} published flows.`,
+      data: {
+        planTier: q.planTier,
+        newMaxPublishedFlows: q.maxPublishedFlows,
+        publishedFlowsUsed: q.publishedFlowsUsed,
+        unlockedFeatures: [
+          '+10 Active Published Flows',
+          'Dynamic Data API Endpoints',
+          'Screen Drop-off & Funnel Analytics',
+          'Multi-WABA Channel Routing',
+        ],
+      },
+    };
+  }
 }

@@ -47,6 +47,7 @@ import {
   Briefcase,
   MessageCircle,
   LifeBuoy,
+  Sliders,
 } from "lucide-react";
 
 // Sub-item type for expandable menu sections
@@ -111,6 +112,7 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
         icon: Users,
         children: [
           { label: "Contacts", href: "/crm/contacts", icon: Contact },
+          { label: "Super Fields", href: "/crm/super-fields", icon: Sliders },
           { label: "Bulk Campaign", href: "/crm/bulk-campaign", icon: Send },
           { label: "Live Chat", href: "/crm/live-chat", icon: MessageSquare },
         ],
@@ -144,8 +146,8 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
             icon: FileText,
           },
           {
-            label: "App Authentications",
-            href: "/automations/app-authentications",
+            label: "App Authentication",
+            href: "/automations/app-authentication",
             icon: KeyRound,
           },
         ],

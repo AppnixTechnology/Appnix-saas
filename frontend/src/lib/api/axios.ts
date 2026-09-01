@@ -161,6 +161,17 @@ export const apiEndpoints = {
     delete: (id: string) => `/automations/${id}`,
     toggle: (id: string) => `/automations/${id}/toggle`,
   },
+  appCredentials: {
+    catalog: "/automations/app-credentials/catalog",
+    summary: "/automations/app-credentials/summary",
+    list: "/automations/app-credentials",
+    create: "/automations/app-credentials",
+    get: (id: string) => `/automations/app-credentials/${id}`,
+    update: (id: string) => `/automations/app-credentials/${id}`,
+    delete: (id: string) => `/automations/app-credentials/${id}`,
+    test: (id: string) => `/automations/app-credentials/${id}/test`,
+    validateLive: "/automations/app-credentials/validate-live",
+  },
   analytics: {
     overview: "/analytics/overview",
     conversations: "/analytics/conversations",

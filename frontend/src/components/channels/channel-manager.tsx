@@ -40,6 +40,7 @@ import {
   Search,
   ExternalLink,
 } from "lucide-react";
+import { ConnectFacebookModal } from "@/components/channels/ConnectFacebookModal";
 
 
 
@@ -190,6 +191,7 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
   const [channels, setChannels] = useState<Channel[]>(defaultChannels);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isFacebookModalOpen, setIsFacebookModalOpen] = useState(false);
   const [newChannelType, setNewChannelType] = useState<ChannelType>(
     filterType === "all" ? "whatsapp" : filterType
   );
@@ -283,14 +285,34 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
             <Button
               onClick={() => {
-                setNewChannelType(filterType === "all" ? "whatsapp" : filterType);
-                setIsAddModalOpen(true);
+                if (filterType === "facebook") {
+                  setIsFacebookModalOpen(true);
+                } else {
+                  setNewChannelType(filterType === "all" ? "whatsapp" : filterType);
+                  setIsAddModalOpen(true);
+                }
               }}
               className="bg-emerald-600 hover:bg-emerald-700 text-white shrink-0 shadow-sm"
             >
               <Plus className="h-4 w-4 sm:mr-1" />
               <span>Add New Channel</span>
             </Button>
+            {filterType === "rcs" && (
+              <Link href="/channels/rcs/templates">
+                <Button variant="outline" className="shrink-0 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900 bg-indigo-50/50 dark:bg-indigo-950/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50">
+                  <FileText className="h-4 w-4 sm:mr-1" />
+                  <span>RCS Message Templates</span>
+                </Button>
+              </Link>
+            )}
+            {filterType === "whatsapp" && (
+              <Link href="/channels/whatsapp/templates">
+                <Button variant="outline" className="shrink-0 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900 bg-emerald-50/50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50">
+                  <FileText className="h-4 w-4 sm:mr-1" />
+                  <span>WhatsApp Templates</span>
+                </Button>
+              </Link>
+            )}
             <Link href="/channels/statistics">
               <Button variant="outline" className="shrink-0">
                 <BarChart3 className="h-4 w-4 sm:mr-1" />
@@ -373,7 +395,13 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
           </p>
           <Button
             size="sm"
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={() => {
+              if (filterType === "facebook") {
+                setIsFacebookModalOpen(true);
+              } else {
+                setIsAddModalOpen(true);
+              }
+            }}
             className="bg-emerald-600 hover:bg-emerald-700 text-white mt-2"
           >
             <Plus className="h-4 w-4 mr-1" /> Connect Channel
@@ -427,21 +455,25 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
                   </div>
 
                   {channel.topRight ? (
-                    <div className="text-right shrink-0">
-                      <p className="text-xs font-semibold flex items-center gap-1 justify-end whitespace-nowrap text-foreground">
+                    <Link
+                      href={
+                        channel.type === "whatsapp"
+                          ? "/channels/whatsapp/balance"
+                          : "/channels/balance"
+                      }
+                      className="text-right shrink-0 block group/bal hover:opacity-85 transition-opacity"
+                    >
+                      <p className="text-xs font-semibold flex items-center gap-1 justify-end whitespace-nowrap text-foreground group-hover/bal:text-emerald-600 dark:group-hover/bal:text-emerald-400">
                         <Wallet className="h-3.5 w-3.5 text-primary" />
                         {channel.topRight.label}
                       </p>
                       {channel.topRight.sub && (
-                        <button
-                          onClick={() => alert("Refreshed channel balance!")}
-                          className="text-[11px] text-primary flex items-center gap-1 justify-end mt-0.5 whitespace-nowrap hover:underline"
-                        >
+                        <p className="text-[11px] text-primary flex items-center gap-1 justify-end mt-0.5 whitespace-nowrap group-hover/bal:underline">
                           <RefreshCw className="h-2.5 w-2.5" />
                           {channel.topRight.sub}
-                        </button>
+                        </p>
                       )}
-                    </div>
+                    </Link>
                   ) : (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -493,8 +525,18 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
                     let href = "";
 
                     if (ActionIcon === FileText) {
-                      title = "Message Templates (Meta Approval)";
-                      href = channel.type === "whatsapp" ? "/channels/whatsapp/templates" : "/automations/templates";
+                      title =
+                        channel.type === "whatsapp"
+                          ? "WhatsApp Templates (Meta Approval)"
+                          : channel.type === "rcs"
+                          ? "RCS Message Templates (Carrier Approval)"
+                          : "Message Templates";
+                      href =
+                        channel.type === "whatsapp"
+                          ? "/channels/whatsapp/templates"
+                          : channel.type === "rcs"
+                          ? "/channels/rcs/templates"
+                          : "/automations/templates";
                     } else if (ActionIcon === Bot) {
                       title = "Chatbot Automation Builder";
                       href = "/chatbots";
@@ -507,8 +549,14 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
                     } else if (ActionIcon === Link2) {
                       title = "Webhook & API Integration";
                     } else if (ActionIcon === CreditCard) {
-                      title = "Channel Balance & Wallet";
-                      href = "/billing";
+                      title =
+                        channel.type === "whatsapp"
+                          ? "WhatsApp Balance & Micro-Deduction Ledger"
+                          : "Channel Balance & Wallet";
+                      href =
+                        channel.type === "whatsapp"
+                          ? "/channels/whatsapp/balance"
+                          : "/channels/balance";
                     } else if (ActionIcon === Zap) {
                       title = "Workflow Automation";
                       href = "/automations/workflow";
@@ -522,7 +570,9 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
                             variant="ghost"
                             className={cn(
                               "h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors",
-                              ActionIcon === FileText && channel.type === "whatsapp" && "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/60"
+                              ActionIcon === FileText && channel.type === "whatsapp" && "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/60",
+                              ActionIcon === FileText && channel.type === "rcs" && "text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/60",
+                              ActionIcon === CreditCard && channel.type === "whatsapp" && "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/60"
                             )}
                           >
                             <ActionIcon className="h-3.5 w-3.5" />
@@ -595,7 +645,14 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
                         <button
                           key={type}
                           type="button"
-                          onClick={() => setNewChannelType(type)}
+                          onClick={() => {
+                            if (type === "facebook") {
+                              setIsAddModalOpen(false);
+                              setIsFacebookModalOpen(true);
+                            } else {
+                              setNewChannelType(type);
+                            }
+                          }}
                           className={cn(
                             "flex flex-col items-center justify-center p-2.5 rounded-lg border text-center transition-all",
                             isSelected
@@ -677,6 +734,16 @@ export function ChannelManager({ filterType = "all" }: ChannelManagerProps) {
           </div>
         </div>
       )}
+
+      {/* Connect Facebook Page Modal */}
+      <ConnectFacebookModal
+        isOpen={isFacebookModalOpen}
+        onClose={() => setIsFacebookModalOpen(false)}
+        onChannelCreated={(newCh) => {
+          setChannels((prev) => [newCh, ...prev]);
+        }}
+        existingChannels={channels}
+      />
     </div>
   );
 }

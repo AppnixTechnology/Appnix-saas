@@ -19,6 +19,7 @@ import {
   UpdateWhatsAppTemplateDto,
   TemplateQueryDto,
   SimulateReviewDto,
+  UnlockFlowQuotaDto,
 } from './dto/whatsapp-template.dto';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
 import { TenantGuard } from '../../common/guards/tenant.guard';
@@ -93,5 +94,20 @@ export class WhatsAppTemplatesController {
   ) {
     const tenantId = req.user?.tenantId || 'demo-tenant';
     return this.templatesService.simulateReview(tenantId, id, dto);
+  }
+
+  @Get('flows/quota')
+  @ApiOperation({ summary: 'Get workspace WhatsApp Flow publishing quota and feature breakdown' })
+  async getFlowQuota(@Request() req: any) {
+    const tenantId = req.user?.tenantId || 'demo-tenant';
+    return this.templatesService.getFlowQuota(tenantId);
+  }
+
+  @Post('flows/unlock')
+  @ApiOperation({ summary: 'Redeem license key or feature token to unlock WhatsApp flow limits' })
+  @HttpCode(HttpStatus.OK)
+  async unlockFlowQuota(@Request() req: any, @Body() dto: UnlockFlowQuotaDto) {
+    const tenantId = req.user?.tenantId || 'demo-tenant';
+    return this.templatesService.unlockFlowQuota(tenantId, dto.licenseKey);
   }
 }

@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Param,
   Body,
   Query,
   UsePipes,
@@ -10,8 +11,7 @@ import {
 import { WorkflowsService } from './workflows.service';
 import { CreateWorkflowDto } from './dto/create-workflow.dto';
 import { UnlockWorkflowDto } from './dto/unlock-workflow.dto';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { AuthUser } from '../../common/interfaces/auth-user.interface';
+import { CurrentUser, AuthUser } from '../auth/decorators/current-user.decorator';
 
 @Controller('automations/workflows')
 export class WorkflowsController {

@@ -33,6 +33,7 @@ import {
   FileSpreadsheet,
   Printer,
   Sparkles,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -545,6 +546,15 @@ export default function ChannelsBalancePage() {
               </div>
               <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                 <div className="h-full bg-emerald-500 rounded-full" style={{ width: "65.5%" }} />
+              </div>
+              <div className="pt-1.5 border-t">
+                <Link
+                  href="/channels/whatsapp/balance"
+                  className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center justify-between"
+                >
+                  <span>View Micro-Deduction Ledger</span>
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
               </div>
             </div>
           </div>

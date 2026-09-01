@@ -21,6 +21,7 @@ model Tenant {
   campaignAudiences CampaignAudience[]
   channelConfigs ChannelConfig[]
   metaTemplates MetaTemplate[]
+  appCredentials AppCredential[]
 
   @@map("tenants")
 }
@@ -257,6 +258,32 @@ model WorkflowTemplate {
   updatedAt    DateTime @updatedAt
 
   @@map("workflow_templates")
+}
+
+model AppCredential {
+  id                   String    @id @default(uuid())
+  tenantId             String?
+  appName              String    // SHOPIFY, OPENAI, RAZORPAY, CUSTOM_WEBHOOK, STRIPE, HUBSPOT, etc.
+  accountName          String    // User label: e.g., "Production Shopify"
+  authType             AuthType
+  credentials          Json      // Encrypted credentials payload (API keys, secret tokens)
+  isActive             Boolean   @default(true)
+  lastTestedAt         DateTime?
+  isHealthy            Boolean   @default(true)
+  linkedWorkflowsCount Int       @default(0)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  tenant               Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("app_credentials")
+}
+
+enum AuthType {
+  API_KEY
+  BEARER_TOKEN
+  OAUTH2
+  BASIC_AUTH
 }
 
 enum TriggerType {

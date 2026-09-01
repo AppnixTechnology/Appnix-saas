@@ -8,9 +8,8 @@ import {
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { GetConversationsDto } from './dto/get-conversations.dto';
-import { JwtAccessGuard } from '../../common/guards/jwt-access.guard';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { AuthUser } from '../../common/interfaces/auth-user.interface';
+import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
+import { CurrentUser, AuthUser } from '../auth/decorators/current-user.decorator';
 
 @Controller('chat')
 export class ChatController {

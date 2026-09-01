@@ -31,11 +31,15 @@ import {
   History,
   FileSpreadsheet,
   Layers,
+  Sliders,
 } from "lucide-react";
 import { Contact, ImportHistoryRecord } from "@/components/crm/types";
 import { ImportContactsModal } from "@/components/crm/ImportContactsModal";
 import { ImportHistoryTable } from "@/components/crm/ImportHistoryTable";
 import { downloadCsv, escapeCsvField } from "@/components/crm/csv-utils";
+import { ManageTagsModal } from "@/components/crm/tags/ManageTagsModal";
+import { TagBadge } from "@/components/crm/tags/TagBadge";
+import { InlineContactTagPicker } from "@/components/crm/tags/InlineContactTagPicker";
 
 // ---------- Initial Mock Contacts ----------
 const initialContacts: Contact[] = [
@@ -137,6 +141,24 @@ export default function CrmContactsPage() {
   // Modals state
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isManageTagsModalOpen, setIsManageTagsModalOpen] = useState(false);
+
+  const handleUpdateContactTags = (contactId: string, newLabels: string[]) => {
+    setContactsList((prev) =>
+      prev.map((c) => {
+        if (c.id === contactId) {
+          return {
+            ...c,
+            tags: newLabels.map((l) => ({
+              label: l,
+              variant: l.toLowerCase().includes("vip") ? "vip" : "none",
+            })),
+          };
+        }
+        return c;
+      })
+    );
+  };
 
   // Inline editing state
   const [editingCell, setEditingCell] = useState<{
@@ -362,6 +384,27 @@ export default function CrmContactsPage() {
 
           {/* Action Button Bar: Filters | Import Contacts | Export | + Add New Contact */}
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible sm:justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsManageTagsModalOpen(true)}
+              className="shrink-0 text-xs shadow-xs gap-1.5"
+            >
+              <Tag className="h-3.5 w-3.5" />
+              <span>Tags</span>
+            </Button>
+
+            <Link href="/crm/super-fields">
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0 text-xs shadow-xs gap-1.5"
+              >
+                <Sliders className="h-3.5 w-3.5" />
+                <span>Super Fields</span>
+              </Button>
+            </Link>
+
             <Button
               variant={filterTag ? "default" : "outline"}
               size="sm"
@@ -637,36 +680,27 @@ export default function CrmContactsPage() {
                         {contact.createdOn}
                       </td>
                       <td className="p-3 whitespace-nowrap">
-                        {contact.tags.length === 0 ? (
-                          <span className="text-xs text-muted-foreground/60 italic">
-                            --No Tags--
-                          </span>
-                        ) : (
-                          <div className="flex items-center gap-1">
-                            {contact.tags.map((tag, i) =>
-                              tag.variant === "vip" ? (
-                                <Badge
-                                  key={i}
-                                  className="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-semibold text-[11px] px-2 py-0.5 border-amber-200"
-                                >
-                                  VIP
-                                </Badge>
-                              ) : (
-                                <span
-                                  key={i}
-                                  className={cn(
-                                    "h-5 w-5 rounded-full flex items-center justify-center text-white text-[10px] shadow-xs",
-                                    tag.variant === "star"
-                                      ? "bg-rose-500"
-                                      : "bg-blue-600"
-                                  )}
-                                >
-                                  {tag.variant === "star" ? "★" : "✓"}
-                                </span>
-                              )
-                            )}
-                          </div>
-                        )}
+                        <div className="flex items-center gap-1.5 flex-wrap max-w-xs">
+                          {contact.tags.map((t, idx) => (
+                            <TagBadge
+                              key={idx}
+                              name={t.label}
+                              size="xs"
+                              onRemove={() =>
+                                handleUpdateContactTags(
+                                  contact.id,
+                                  contact.tags.filter((_, i) => i !== idx).map((x) => x.label)
+                                )
+                              }
+                            />
+                          ))}
+                          <InlineContactTagPicker
+                            assignedTagLabels={contact.tags.map((t) => t.label)}
+                            onTagsChange={(newLabels) =>
+                              handleUpdateContactTags(contact.id, newLabels)
+                            }
+                          />
+                        </div>
                       </td>
                       <td className="p-3 whitespace-nowrap">
                         {editingCell?.id === contact.id &&
@@ -967,6 +1001,12 @@ export default function CrmContactsPage() {
           </div>
         </div>
       )}
+
+      {/* Manage Tags Taxonomy Modal */}
+      <ManageTagsModal
+        isOpen={isManageTagsModalOpen}
+        onClose={() => setIsManageTagsModalOpen(false)}
+      />
     </div>
   );
 }

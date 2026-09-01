@@ -12,8 +12,7 @@ import {
 import { DataStoreService } from './data-store.service';
 import { CreateDataStoreDto } from './dto/create-data-store.dto';
 import { UpsertRecordDto } from './dto/data-store-record.dto';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { AuthUser } from '../../common/interfaces/auth-user.interface';
+import { CurrentUser, AuthUser } from '../auth/decorators/current-user.decorator';
 
 @Controller('automations/data-stores')
 export class DataStoreController {

@@ -411,3 +411,10 @@ export class SimulateReviewDto {
   @IsString()
   recommendation?: string;
 }
+
+export class UnlockFlowQuotaDto {
+  @ApiProperty({ example: 'FLOW-PRO8-2026-UNLK', description: 'Activation or License Key' })
+  @IsString()
+  @IsNotEmpty()
+  licenseKey: string;
+}

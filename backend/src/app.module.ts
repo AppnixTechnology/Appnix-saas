@@ -12,6 +12,7 @@ import { WhatsAppTemplatesModule } from './modules/whatsapp-templates/whatsapp-t
 import { ChatModule } from './modules/chat/chat.module';
 import { WorkflowsModule } from './modules/workflows/workflows.module';
 import { DataStoreModule } from './modules/data-store/data-store.module';
+import { AppCredentialsModule } from './modules/app-credentials/app-credentials.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -29,6 +30,7 @@ import { PrismaModule } from './prisma/prisma.module';
     ChatModule,
     WorkflowsModule,
     DataStoreModule,
+    AppCredentialsModule,
     SupportModule,
   ],
 })
