@@ -15,11 +15,8 @@ import {
   ChevronRight,
   Plus,
   Search,
-  MoreVertical,
   Mail,
   Clock,
-  CheckCircle2,
-  ShieldAlert,
   UserX,
   Edit2,
 } from "lucide-react";
@@ -48,10 +45,10 @@ export default function SuperAdminTeamPage() {
   return (
     <div className="space-y-6">
       {/* Breadcrumb Back Navigation */}
-      <div className="flex items-center text-xs text-muted-foreground gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
         <Link
           href="/super-admin/dashboard"
-          className="inline-flex items-center gap-1 font-medium text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           <span>Super Admin</span>
@@ -61,20 +58,20 @@ export default function SuperAdminTeamPage() {
       </div>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-5">
+      <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
-            <ShieldCheck className="h-6 w-6 text-emerald-600" />
+          <h1 className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+            <ShieldCheck className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
             Team & Operational Staff
           </h1>
-          <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
             Manage platform root administrators, support specialists, billing operators, and role-based permissions.
           </p>
         </div>
 
         <Button
           onClick={() => setIsAddModalOpen(true)}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs gap-1.5 shadow-sm"
+          className="w-full gap-1.5 bg-primary text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           Add Staff Member
@@ -82,25 +79,25 @@ export default function SuperAdminTeamPage() {
       </div>
 
       {/* Search Bar */}
-      <div className="flex items-center justify-between border rounded-xl bg-card p-3 shadow-xs">
-        <div className="relative w-72 max-w-full">
+      <div className="flex flex-col gap-2 rounded-xl border bg-card p-3 shadow-xs sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:w-72">
           <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             placeholder="Search staff by name or email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8.5 h-8.5 text-xs bg-background"
+            className="h-8.5 bg-background pl-8.5 text-xs"
           />
         </div>
-        <div className="text-xs text-muted-foreground font-medium">
+        <div className="text-xs font-medium text-muted-foreground">
           Showing {filteredStaff.length} members
         </div>
       </div>
 
       {/* Staff Table */}
-      <div className="rounded-2xl border bg-card overflow-hidden shadow-xs">
+      <div className="overflow-hidden rounded-2xl border bg-card shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[760px] text-sm">
             <thead>
               <tr className="border-b bg-muted/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 <th className="p-4 text-left">Staff Member</th>
@@ -115,17 +112,17 @@ export default function SuperAdminTeamPage() {
               {filteredStaff.map((staff) => (
                 <tr
                   key={staff.id}
-                  className="border-b last:border-0 hover:bg-muted/30 transition-colors text-xs"
+                  className="border-b text-xs transition-colors last:border-0 hover:bg-muted/30"
                 >
                   {/* Name & Avatar */}
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                         {staff.name.charAt(0)}
                       </div>
                       <div>
                         <p className="font-bold text-foreground">{staff.name}</p>
-                        <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
                           <Mail className="h-3 w-3" />
                           {staff.email}
                         </p>
@@ -138,12 +135,12 @@ export default function SuperAdminTeamPage() {
                     <Badge
                       variant="outline"
                       className={cn(
-                        "text-[10px] font-bold px-2 py-0.5",
-                        staff.role === "Super Admin" && "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300",
-                        staff.role === "Admin" && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300",
-                        staff.role === "Developer" && "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-300",
-                        staff.role === "Billing Manager" && "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300",
-                        staff.role === "Support Agent" && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300"
+                        "px-2 py-0.5 text-[10px] font-bold",
+                        staff.role === "Super Admin" && "border-purple-200 bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+                        staff.role === "Admin" && "border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+                        staff.role === "Developer" && "border-indigo-200 bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300",
+                        staff.role === "Billing Manager" && "border-primary/30 bg-primary/10 text-primary",
+                        staff.role === "Support Agent" && "border-amber-200 bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
                       )}
                     >
                       {staff.role}
@@ -156,7 +153,7 @@ export default function SuperAdminTeamPage() {
                       variant="secondary"
                       className={cn(
                         "text-[10px] font-semibold",
-                        staff.status === "Active" && "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+                        staff.status === "Active" && "bg-primary/10 text-primary",
                         staff.status === "Inactive" && "bg-muted text-muted-foreground",
                         staff.status === "Suspended" && "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
                       )}
@@ -166,7 +163,7 @@ export default function SuperAdminTeamPage() {
                   </td>
 
                   {/* Last Active */}
-                  <td className="p-4 text-muted-foreground whitespace-nowrap">
+                  <td className="whitespace-nowrap p-4 text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <Clock className="h-3 w-3" />
                       <span>{staff.lastActive}</span>
@@ -174,12 +171,12 @@ export default function SuperAdminTeamPage() {
                   </td>
 
                   {/* Added Date */}
-                  <td className="p-4 text-muted-foreground whitespace-nowrap">
+                  <td className="whitespace-nowrap p-4 text-muted-foreground">
                     {staff.createdAt}
                   </td>
 
                   {/* Actions */}
-                  <td className="p-4 text-right whitespace-nowrap">
+                  <td className="whitespace-nowrap p-4 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <Button
                         size="icon"

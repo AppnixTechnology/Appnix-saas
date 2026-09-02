@@ -15,21 +15,11 @@ import {
   Plus,
   Search,
   Filter,
-  ArrowUpDown,
-  MoreVertical,
-  CheckCircle2,
-  AlertCircle,
-  Clock,
-  MessageSquare,
-  Wallet,
-  ExternalLink,
   ChevronRight,
-  ShieldAlert,
   Trash2,
   PauseCircle,
   PlayCircle,
   Eye,
-  Edit,
 } from "lucide-react";
 
 export default function SuperAdminClientsPage() {
@@ -83,10 +73,10 @@ export default function SuperAdminClientsPage() {
   return (
     <div className="space-y-6">
       {/* Breadcrumb Back Navigation */}
-      <div className="flex items-center text-xs text-muted-foreground gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
         <Link
           href="/super-admin/dashboard"
-          className="inline-flex items-center gap-1 font-medium text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           <span>Super Admin</span>
@@ -96,20 +86,20 @@ export default function SuperAdminClientsPage() {
       </div>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-5">
+      <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
-            <Building2 className="h-6 w-6 text-emerald-600" />
+          <h1 className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+            <Building2 className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
             Clients
           </h1>
-          <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
             Manage organizations, provision new tenant workspaces, and monitor subscription plans.
           </p>
         </div>
 
         <Button
           onClick={() => setIsAddClientOpen(true)}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs gap-1.5 shadow-sm"
+          className="w-full gap-1.5 bg-primary text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           Add Client
@@ -117,8 +107,8 @@ export default function SuperAdminClientsPage() {
       </div>
 
       {/* Filter Tabs & Search Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border rounded-xl bg-card p-3 shadow-xs">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+      <div className="flex flex-col gap-3 rounded-xl border bg-card p-3 shadow-xs sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
           {["All", "Active", "Trial", "Suspended", "Negative Balance"].map((tab) => {
             const isSelected = activeFilterTab === tab;
             const count =
@@ -133,17 +123,17 @@ export default function SuperAdminClientsPage() {
                 key={tab}
                 onClick={() => setActiveFilterTab(tab)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer",
+                  "flex shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 font-medium transition-colors",
                   isSelected
-                    ? "bg-emerald-600 text-white font-semibold shadow-xs"
+                    ? "bg-primary font-semibold text-primary-foreground shadow-xs"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
                 <span>{tab}</span>
                 <span
                   className={cn(
-                    "px-1.5 py-0.2 rounded-full text-[10px]",
-                    isSelected ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
+                    "rounded-full px-1.5 py-0.2 text-[10px]",
+                    isSelected ? "bg-white/20 text-primary-foreground" : "bg-muted text-muted-foreground"
                   )}
                 >
                   {count}
@@ -153,17 +143,17 @@ export default function SuperAdminClientsPage() {
           })}
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="relative w-64 max-w-full">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="relative w-full sm:w-64">
             <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Search clients, owner, email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8.5 h-8.5 text-xs bg-background"
+              className="h-8.5 bg-background pl-8.5 text-xs"
             />
           </div>
-          <Button variant="outline" size="sm" className="text-xs gap-1 h-8.5 text-muted-foreground">
+          <Button variant="outline" size="sm" className="h-8.5 gap-1 text-xs text-muted-foreground">
             <Filter className="h-3.5 w-3.5" />
             Filter
           </Button>
@@ -171,9 +161,9 @@ export default function SuperAdminClientsPage() {
       </div>
 
       {/* Clients Table */}
-      <div className="rounded-2xl border bg-card overflow-hidden shadow-xs">
+      <div className="overflow-hidden rounded-2xl border bg-card shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[860px] text-sm">
             <thead>
               <tr className="border-b bg-muted/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 <th className="p-4 text-left">Org Name</th>
@@ -188,7 +178,7 @@ export default function SuperAdminClientsPage() {
             <tbody>
               {filteredClients.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-muted-foreground text-xs">
+                  <td colSpan={7} className="p-8 text-center text-xs text-muted-foreground">
                     No client organizations found matching your search.
                   </td>
                 </tr>
@@ -198,16 +188,16 @@ export default function SuperAdminClientsPage() {
                   return (
                     <tr
                       key={client.id}
-                      className="border-b last:border-0 hover:bg-muted/30 transition-colors text-xs"
+                      className="border-b text-xs transition-colors last:border-0 hover:bg-muted/30"
                     >
                       {/* Org Name */}
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center font-bold text-primary text-xs shrink-0">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-xs font-bold text-primary">
                             {client.name.charAt(0)}
                           </div>
                           <div>
-                            <p className="font-bold text-foreground hover:text-emerald-600 cursor-pointer">
+                            <p className="cursor-pointer font-bold text-foreground hover:text-primary">
                               {client.name}
                             </p>
                             <p className="text-[11px] text-muted-foreground">
@@ -222,11 +212,11 @@ export default function SuperAdminClientsPage() {
                         <Badge
                           variant="outline"
                           className={cn(
-                            "text-[10px] font-bold px-2 py-0.5",
-                            client.plan === "Enterprise" && "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300",
-                            client.plan === "Pro" && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300",
-                            client.plan === "Growth" && "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300",
-                            client.plan === "Starter" && "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300"
+                            "px-2 py-0.5 text-[10px] font-bold",
+                            client.plan === "Enterprise" && "border-purple-200 bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+                            client.plan === "Pro" && "border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+                            client.plan === "Growth" && "border-primary/30 bg-primary/10 text-primary",
+                            client.plan === "Starter" && "border-slate-200 bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
                           )}
                         >
                           {client.plan}
@@ -239,7 +229,7 @@ export default function SuperAdminClientsPage() {
                           variant="secondary"
                           className={cn(
                             "text-[10px] font-bold",
-                            client.status === "Active" && "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+                            client.status === "Active" && "bg-primary/10 text-primary",
                             client.status === "Trial" && "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300",
                             client.status === "Suspended" && "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300",
                             client.status === "Inactive" && "bg-muted text-muted-foreground"
@@ -255,12 +245,12 @@ export default function SuperAdminClientsPage() {
                           <span
                             className={cn(
                               "h-2 w-2 rounded-full",
-                              client.whatsappStatus === "Connected" && "bg-emerald-500",
+                              client.whatsappStatus === "Connected" && "bg-primary",
                               client.whatsappStatus === "Pending" && "bg-amber-500",
                               client.whatsappStatus === "Disconnected" && "bg-slate-400"
                             )}
                           />
-                          <span className="text-foreground font-medium">{client.whatsappStatus}</span>
+                          <span className="font-medium text-foreground">{client.whatsappStatus}</span>
                         </span>
                       </td>
 
@@ -268,7 +258,7 @@ export default function SuperAdminClientsPage() {
                       <td className="p-4 text-right">
                         <span
                           className={cn(
-                            "font-bold font-mono",
+                            "font-mono font-bold",
                             isNegative ? "text-rose-600 dark:text-rose-400" : "text-foreground"
                           )}
                         >
@@ -277,12 +267,12 @@ export default function SuperAdminClientsPage() {
                       </td>
 
                       {/* Signup Date */}
-                      <td className="p-4 text-muted-foreground whitespace-nowrap">
+                      <td className="whitespace-nowrap p-4 text-muted-foreground">
                         {client.signupDate}
                       </td>
 
                       {/* Actions */}
-                      <td className="p-4 text-right whitespace-nowrap">
+                      <td className="whitespace-nowrap p-4 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Button
                             size="icon"
@@ -303,7 +293,7 @@ export default function SuperAdminClientsPage() {
                             {client.status === "Active" ? (
                               <PauseCircle className="h-4 w-4 text-amber-600" />
                             ) : (
-                              <PlayCircle className="h-4 w-4 text-emerald-600" />
+                              <PlayCircle className="h-4 w-4 text-primary" />
                             )}
                           </Button>
                           <Button
@@ -341,10 +331,10 @@ export default function SuperAdminClientsPage() {
       {/* View Client Details Drawer / Modal */}
       {selectedClient && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-lg rounded-2xl border bg-card p-6 shadow-2xl animate-in space-y-4">
+          <div className="animate-in w-full max-w-lg space-y-4 rounded-2xl border bg-card p-4 shadow-2xl sm:p-6">
             <div className="flex items-center justify-between border-b pb-3">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-emerald-600/10 flex items-center justify-center font-bold text-emerald-600 text-sm">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-sm font-bold text-primary">
                   {selectedClient.name.charAt(0)}
                 </div>
                 <div>
@@ -357,36 +347,36 @@ export default function SuperAdminClientsPage() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3 border rounded-lg bg-muted/20">
-                <p className="text-muted-foreground text-[10px] uppercase font-semibold">Account Owner</p>
-                <p className="font-bold text-foreground mt-0.5">{selectedClient.ownerName}</p>
+            <div className="grid grid-cols-1 gap-3 text-xs xs:grid-cols-2">
+              <div className="rounded-lg border bg-muted/20 p-3">
+                <p className="text-[10px] font-semibold uppercase text-muted-foreground">Account Owner</p>
+                <p className="mt-0.5 font-bold text-foreground">{selectedClient.ownerName}</p>
                 <p className="text-muted-foreground">{selectedClient.email}</p>
               </div>
-              <div className="p-3 border rounded-lg bg-muted/20">
-                <p className="text-muted-foreground text-[10px] uppercase font-semibold">Subscription Plan</p>
-                <p className="font-bold text-foreground mt-0.5">{selectedClient.plan} Tier</p>
-                <p className="text-emerald-600 font-semibold">${selectedClient.mrr}/mo MRR</p>
+              <div className="rounded-lg border bg-muted/20 p-3">
+                <p className="text-[10px] font-semibold uppercase text-muted-foreground">Subscription Plan</p>
+                <p className="mt-0.5 font-bold text-foreground">{selectedClient.plan} Tier</p>
+                <p className="font-semibold text-primary">${selectedClient.mrr}/mo MRR</p>
               </div>
-              <div className="p-3 border rounded-lg bg-muted/20">
-                <p className="text-muted-foreground text-[10px] uppercase font-semibold">Wallet Balance</p>
-                <p className={cn("font-bold font-mono mt-0.5 text-sm", selectedClient.walletBalance < 0 ? "text-rose-600" : "text-foreground")}>
+              <div className="rounded-lg border bg-muted/20 p-3">
+                <p className="text-[10px] font-semibold uppercase text-muted-foreground">Wallet Balance</p>
+                <p className={cn("mt-0.5 font-mono text-sm font-bold", selectedClient.walletBalance < 0 ? "text-rose-600" : "text-foreground")}>
                   ${selectedClient.walletBalance.toFixed(2)}
                 </p>
               </div>
-              <div className="p-3 border rounded-lg bg-muted/20">
-                <p className="text-muted-foreground text-[10px] uppercase font-semibold">WhatsApp Connectivity</p>
-                <p className="font-bold text-foreground mt-0.5">{selectedClient.whatsappStatus}</p>
+              <div className="rounded-lg border bg-muted/20 p-3">
+                <p className="text-[10px] font-semibold uppercase text-muted-foreground">WhatsApp Connectivity</p>
+                <p className="mt-0.5 font-bold text-foreground">{selectedClient.whatsappStatus}</p>
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t">
-              <Button size="sm" variant="outline" onClick={() => setSelectedClient(null)}>
+            <div className="flex flex-col-reverse items-center justify-end gap-2 border-t pt-3 sm:flex-row">
+              <Button size="sm" variant="outline" className="w-full sm:w-auto" onClick={() => setSelectedClient(null)}>
                 Close
               </Button>
               <Button
                 size="sm"
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+                className="w-full bg-primary font-semibold text-primary-foreground hover:bg-primary/90 sm:w-auto"
                 onClick={() => alert(`Impersonating tenant session for ${selectedClient.name}...`)}
               >
                 Login as Tenant →

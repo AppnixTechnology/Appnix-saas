@@ -5,22 +5,17 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
   Settings,
   ArrowLeft,
   ChevronRight,
-  Shield,
-  Sliders,
   Bell,
   Lock,
   Save,
   CheckCircle2,
-  Server,
   Zap,
   Globe,
-  Radio,
 } from "lucide-react";
 
 export default function SuperAdminSettingsPage() {
@@ -45,10 +40,10 @@ export default function SuperAdminSettingsPage() {
   return (
     <div className="space-y-6">
       {/* Breadcrumb Back Navigation */}
-      <div className="flex items-center text-xs text-muted-foreground gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
         <Link
           href="/super-admin/dashboard"
-          className="inline-flex items-center gap-1 font-medium text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           <span>Super Admin</span>
@@ -58,20 +53,20 @@ export default function SuperAdminSettingsPage() {
       </div>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-5">
+      <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
-            <Settings className="h-6 w-6 text-emerald-600" />
+          <h1 className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+            <Settings className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
             Super Admin Console Settings
           </h1>
-          <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
             Configure global platform parameters, security policies, rate limit defaults, and alerting webhooks.
           </p>
         </div>
 
         <Button
           onClick={handleSave}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs gap-1.5 shadow-sm"
+          className="w-full gap-1.5 bg-primary text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 sm:w-auto"
         >
           <Save className="h-4 w-4" />
           Save Settings
@@ -79,14 +74,14 @@ export default function SuperAdminSettingsPage() {
       </div>
 
       {isSaved && (
-        <div className="flex items-center gap-2 p-3 rounded-xl border border-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-xs font-semibold animate-in">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+        <div className="animate-in flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 p-3 text-xs font-semibold text-primary">
+          <CheckCircle2 className="h-4 w-4 text-primary" />
           Platform configuration changes propagated to all edge clusters!
         </div>
       )}
 
       {/* Settings Tab Selector */}
-      <div className="flex items-center gap-2 border-b pb-2 text-xs font-semibold overflow-x-auto">
+      <div className="flex items-center gap-2 overflow-x-auto border-b pb-2 text-xs font-semibold no-scrollbar">
         {[
           { id: "general", label: "General & Branding", icon: Globe },
           { id: "security", label: "Security & 2FA Governance", icon: Lock },
@@ -100,9 +95,9 @@ export default function SuperAdminSettingsPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={cn(
-                "flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all cursor-pointer whitespace-nowrap",
+                "flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-lg px-3.5 py-2 transition-all",
                 isSelected
-                  ? "bg-emerald-600 text-white shadow-xs"
+                  ? "bg-primary text-primary-foreground shadow-xs"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
@@ -114,7 +109,7 @@ export default function SuperAdminSettingsPage() {
       </div>
 
       {/* Tab Panels */}
-      <div className="rounded-2xl border bg-card p-6 shadow-xs max-w-3xl">
+      <div className="max-w-3xl rounded-2xl border bg-card p-4 shadow-xs sm:p-6">
         {activeTab === "general" && (
           <form onSubmit={handleSave} className="space-y-4 text-xs">
             <div className="space-y-1">
@@ -136,7 +131,7 @@ export default function SuperAdminSettingsPage() {
               />
             </div>
 
-            <div className="flex items-center justify-between p-3.5 rounded-xl border bg-muted/20 mt-4">
+            <div className="mt-4 flex flex-col gap-3 rounded-xl border bg-muted/20 p-3.5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-bold text-foreground">Global Platform Maintenance Mode</p>
                 <p className="text-[11px] text-muted-foreground">
@@ -150,7 +145,7 @@ export default function SuperAdminSettingsPage() {
 
         {activeTab === "security" && (
           <div className="space-y-4 text-xs">
-            <div className="flex items-center justify-between p-3.5 rounded-xl border bg-muted/20">
+            <div className="flex flex-col gap-3 rounded-xl border bg-muted/20 p-3.5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-bold text-foreground">Mandatory 2FA for All Staff Members</p>
                 <p className="text-[11px] text-muted-foreground">
@@ -166,7 +161,7 @@ export default function SuperAdminSettingsPage() {
                 type="number"
                 value={sessionTimeoutHours}
                 onChange={(e) => setSessionTimeoutHours(e.target.value)}
-                className="h-9 text-xs w-48"
+                className="h-9 w-full text-xs sm:w-48"
               />
             </div>
 
@@ -175,7 +170,7 @@ export default function SuperAdminSettingsPage() {
               <Input
                 placeholder="103.21.124.0/24, 49.207.210.0/24"
                 defaultValue="0.0.0.0/0 (Global Access)"
-                className="h-9 text-xs font-mono"
+                className="h-9 font-mono text-xs"
               />
               <p className="text-[10px] text-muted-foreground">Restrict Super Admin console access to office VPN CIDRs.</p>
             </div>
@@ -184,7 +179,7 @@ export default function SuperAdminSettingsPage() {
 
         {activeTab === "limits" && (
           <div className="space-y-4 text-xs">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-1">
                 <label className="font-semibold text-muted-foreground">Global Tenant Concurrency Bucket</label>
                 <Input
@@ -204,7 +199,7 @@ export default function SuperAdminSettingsPage() {
 
             <div className="space-y-1">
               <label className="font-semibold text-muted-foreground">Background Queue BullMQ Max Concurrency</label>
-              <Input defaultValue="64 workers" className="h-9 text-xs w-48" />
+              <Input defaultValue="64 workers" className="h-9 w-full text-xs sm:w-48" />
             </div>
           </div>
         )}
@@ -216,7 +211,7 @@ export default function SuperAdminSettingsPage() {
               <Input
                 value={webhookAlertUrl}
                 onChange={(e) => setWebhookAlertUrl(e.target.value)}
-                className="h-9 text-xs font-mono"
+                className="h-9 font-mono text-xs"
               />
               <p className="text-[10px] text-muted-foreground">Dispatches real-time alerts on 5xx spike or worker queue backpressure.</p>
             </div>
@@ -226,16 +221,16 @@ export default function SuperAdminSettingsPage() {
               <Input
                 placeholder="pd-prod-routing-key-xxxx"
                 defaultValue="pd-appnix-prod-981a20"
-                className="h-9 text-xs font-mono"
+                className="h-9 font-mono text-xs"
               />
             </div>
           </div>
         )}
 
-        <div className="pt-5 border-t mt-5 flex justify-end">
+        <div className="mt-5 flex justify-end border-t pt-5">
           <Button
             onClick={handleSave}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs"
+            className="w-full bg-primary text-xs font-semibold text-primary-foreground hover:bg-primary/90 sm:w-auto"
           >
             Apply Changes
           </Button>

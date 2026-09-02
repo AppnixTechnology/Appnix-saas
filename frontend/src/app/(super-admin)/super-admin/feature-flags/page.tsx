@@ -16,13 +16,7 @@ import {
   ChevronRight,
   Plus,
   Search,
-  Filter,
-  CheckCircle2,
-  AlertTriangle,
-  Clock,
-  Layers,
   Edit2,
-  Trash2,
 } from "lucide-react";
 
 export default function SuperAdminFeatureFlagsPage() {
@@ -80,10 +74,10 @@ export default function SuperAdminFeatureFlagsPage() {
   return (
     <div className="space-y-6">
       {/* Breadcrumb Back Navigation */}
-      <div className="flex items-center text-xs text-muted-foreground gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
         <Link
           href="/super-admin/dashboard"
-          className="inline-flex items-center gap-1 font-medium text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           <span>Super Admin</span>
@@ -93,20 +87,20 @@ export default function SuperAdminFeatureFlagsPage() {
       </div>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-5">
+      <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
-            <Flag className="h-6 w-6 text-emerald-600" />
+          <h1 className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+            <Flag className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
             Feature Flags & Capabilities
           </h1>
-          <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
             Control platform capabilities, experimental rollouts, and multi-tenant feature gating.
           </p>
         </div>
 
         <Button
           onClick={handleCreate}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs gap-1.5 shadow-sm"
+          className="w-full gap-1.5 bg-primary text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           Add Feature Flag
@@ -114,8 +108,8 @@ export default function SuperAdminFeatureFlagsPage() {
       </div>
 
       {/* Filter Tabs & Search */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border rounded-xl bg-card p-3 shadow-xs">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+      <div className="flex flex-col gap-3 rounded-xl border bg-card p-3 shadow-xs sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
           {["All", "Enabled", "Disabled"].map((tab) => {
             const isSelected = activeFilter === tab;
             const count =
@@ -130,17 +124,17 @@ export default function SuperAdminFeatureFlagsPage() {
                 key={tab}
                 onClick={() => setActiveFilter(tab)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer",
+                  "flex shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 font-medium transition-colors",
                   isSelected
-                    ? "bg-emerald-600 text-white font-semibold shadow-xs"
+                    ? "bg-primary font-semibold text-primary-foreground shadow-xs"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
                 <span>{tab}</span>
                 <span
                   className={cn(
-                    "px-1.5 py-0.2 rounded-full text-[10px]",
-                    isSelected ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
+                    "rounded-full px-1.5 py-0.2 text-[10px]",
+                    isSelected ? "bg-white/20 text-primary-foreground" : "bg-muted text-muted-foreground"
                   )}
                 >
                   {count}
@@ -150,25 +144,25 @@ export default function SuperAdminFeatureFlagsPage() {
           })}
         </div>
 
-        <div className="relative w-64 max-w-full">
+        <div className="relative w-full sm:w-64">
           <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             placeholder="Search feature flags by key..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8.5 h-8.5 text-xs bg-background"
+            className="h-8.5 bg-background pl-8.5 text-xs"
           />
         </div>
       </div>
 
       {/* Feature Flags Table */}
-      <div className="rounded-2xl border bg-card overflow-hidden shadow-xs">
+      <div className="overflow-hidden rounded-2xl border bg-card shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[880px] text-sm">
             <thead>
               <tr className="border-b bg-muted/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 <th className="p-4 text-left">Feature Name & Key</th>
-                <th className="p-4 text-left min-w-64">Description</th>
+                <th className="min-w-64 p-4 text-left">Description</th>
                 <th className="p-4 text-center">Status</th>
                 <th className="p-4 text-left">Environment</th>
                 <th className="p-4 text-left">Impact</th>
@@ -180,18 +174,18 @@ export default function SuperAdminFeatureFlagsPage() {
               {filteredFlags.map((flag) => (
                 <tr
                   key={flag.id}
-                  className="border-b last:border-0 hover:bg-muted/30 transition-colors text-xs"
+                  className="border-b text-xs transition-colors last:border-0 hover:bg-muted/30"
                 >
                   {/* Name & Key */}
                   <td className="p-4">
                     <p className="font-bold text-foreground">{flag.name}</p>
-                    <p className="font-mono text-[11px] text-muted-foreground mt-0.5">
+                    <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
                       {flag.key}
                     </p>
                   </td>
 
                   {/* Description */}
-                  <td className="p-4 text-muted-foreground text-xs leading-relaxed">
+                  <td className="p-4 text-xs leading-relaxed text-muted-foreground">
                     {flag.description}
                   </td>
 
@@ -204,8 +198,8 @@ export default function SuperAdminFeatureFlagsPage() {
                       />
                       <span
                         className={cn(
-                          "font-bold text-[11px]",
-                          flag.isEnabled ? "text-emerald-600" : "text-muted-foreground"
+                          "text-[11px] font-bold",
+                          flag.isEnabled ? "text-primary" : "text-muted-foreground"
                         )}
                       >
                         {flag.isEnabled ? "ON" : "OFF"}
@@ -219,9 +213,9 @@ export default function SuperAdminFeatureFlagsPage() {
                       variant="outline"
                       className={cn(
                         "text-[10px] font-semibold",
-                        flag.environment === "Production" && "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300",
-                        flag.environment === "Beta" && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300",
-                        flag.environment === "Staging" && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300"
+                        flag.environment === "Production" && "border-primary/30 bg-primary/10 text-primary",
+                        flag.environment === "Beta" && "border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+                        flag.environment === "Staging" && "border-amber-200 bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
                       )}
                     >
                       {flag.environment}
@@ -244,13 +238,13 @@ export default function SuperAdminFeatureFlagsPage() {
                   </td>
 
                   {/* Updated By */}
-                  <td className="p-4 text-muted-foreground whitespace-nowrap">
+                  <td className="whitespace-nowrap p-4 text-muted-foreground">
                     <p className="font-medium text-foreground">{flag.updatedBy}</p>
                     <p className="text-[10px]">{flag.lastUpdated}</p>
                   </td>
 
                   {/* Actions */}
-                  <td className="p-4 text-right whitespace-nowrap">
+                  <td className="whitespace-nowrap p-4 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <Button
                         size="icon"

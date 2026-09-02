@@ -13,15 +13,11 @@ import {
   ArrowLeft,
   ChevronRight,
   Search,
-  Filter,
-  Shield,
   Sliders,
-  UserMinus,
+  User,
   Key,
   Flag,
   CreditCard,
-  CheckCircle2,
-  AlertTriangle,
   FileText,
   Download,
 } from "lucide-react";
@@ -40,13 +36,13 @@ export default function SuperAdminAuditLogsPage() {
       case "Configuration":
         return <Sliders className="h-4 w-4 text-primary" />;
       case "User":
-        return <UserMinus className="h-4 w-4 text-rose-600" />;
+        return <User className="h-4 w-4 text-rose-600" />;
       case "Security":
         return <Key className="h-4 w-4 text-amber-500" />;
       case "FeatureFlag":
         return <Flag className="h-4 w-4 text-indigo-600" />;
       case "Billing":
-        return <CreditCard className="h-4 w-4 text-emerald-600" />;
+        return <CreditCard className="h-4 w-4 text-primary" />;
       default:
         return <FileText className="h-4 w-4 text-muted-foreground" />;
     }
@@ -66,10 +62,10 @@ export default function SuperAdminAuditLogsPage() {
   return (
     <div className="space-y-6">
       {/* Breadcrumb Back Navigation */}
-      <div className="flex items-center text-xs text-muted-foreground gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
         <Link
           href="/super-admin/dashboard"
-          className="inline-flex items-center gap-1 font-medium text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           <span>Super Admin</span>
@@ -79,13 +75,13 @@ export default function SuperAdminAuditLogsPage() {
       </div>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-5">
+      <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
-            <History className="h-6 w-6 text-emerald-600" />
+          <h1 className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+            <History className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
             Audit Log & System Events
           </h1>
-          <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
             Immutable chronicle of administrative interventions, permission shifts, and security events.
           </p>
         </div>
@@ -94,7 +90,7 @@ export default function SuperAdminAuditLogsPage() {
           variant="outline"
           size="sm"
           onClick={() => alert("Exporting tamper-evident JSON/CSV audit ledger...")}
-          className="text-xs font-semibold gap-1.5"
+          className="w-full gap-1.5 text-xs font-semibold sm:w-auto"
         >
           <Download className="h-3.5 w-3.5" />
           Export Audit Trail
@@ -102,8 +98,8 @@ export default function SuperAdminAuditLogsPage() {
       </div>
 
       {/* Filter Tabs & Search */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border rounded-xl bg-card p-3 shadow-xs">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+      <div className="flex flex-col gap-3 rounded-xl border bg-card p-3 shadow-xs sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
           {["All", "Configuration", "Security", "FeatureFlag", "Billing", "User"].map((tab) => {
             const isSelected = categoryFilter === tab;
             return (
@@ -111,9 +107,9 @@ export default function SuperAdminAuditLogsPage() {
                 key={tab}
                 onClick={() => setCategoryFilter(tab)}
                 className={cn(
-                  "px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer",
+                  "shrink-0 cursor-pointer whitespace-nowrap rounded-lg px-3 py-1.5 font-medium transition-colors",
                   isSelected
-                    ? "bg-emerald-600 text-white font-semibold shadow-xs"
+                    ? "bg-primary font-semibold text-primary-foreground shadow-xs"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
@@ -123,21 +119,21 @@ export default function SuperAdminAuditLogsPage() {
           })}
         </div>
 
-        <div className="relative w-64 max-w-full">
+        <div className="relative w-full sm:w-64">
           <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             placeholder="Search action or actor..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8.5 h-8.5 text-xs bg-background"
+            className="h-8.5 bg-background pl-8.5 text-xs"
           />
         </div>
       </div>
 
       {/* Audit Log Table */}
-      <div className="rounded-2xl border bg-card overflow-hidden shadow-xs">
+      <div className="overflow-hidden rounded-2xl border bg-card shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[920px] text-sm">
             <thead>
               <tr className="border-b bg-muted/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 <th className="p-4 text-left">Action & Summary</th>
@@ -152,17 +148,17 @@ export default function SuperAdminAuditLogsPage() {
               {filteredLogs.map((log) => (
                 <tr
                   key={log.id}
-                  className="border-b last:border-0 hover:bg-muted/30 transition-colors text-xs"
+                  className="border-b text-xs transition-colors last:border-0 hover:bg-muted/30"
                 >
                   {/* Action & Description */}
                   <td className="p-4">
                     <div className="flex items-start gap-3">
-                      <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
                         {getActionIcon(log.category)}
                       </div>
                       <div>
                         <p className="font-bold text-foreground">{log.action}</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed max-w-md">
+                        <p className="mt-0.5 max-w-md text-[11px] leading-relaxed text-muted-foreground">
                           {log.description}
                         </p>
                       </div>
@@ -170,14 +166,14 @@ export default function SuperAdminAuditLogsPage() {
                   </td>
 
                   {/* Category */}
-                  <td className="p-4 whitespace-nowrap">
+                  <td className="whitespace-nowrap p-4">
                     <Badge variant="outline" className="text-[10px] font-semibold">
                       {log.category}
                     </Badge>
                   </td>
 
                   {/* Actor */}
-                  <td className="p-4 whitespace-nowrap">
+                  <td className="whitespace-nowrap p-4">
                     <p className="font-semibold text-foreground">{log.actor}</p>
                     {log.actorEmail && (
                       <p className="text-[10px] text-muted-foreground">{log.actorEmail}</p>
@@ -185,22 +181,22 @@ export default function SuperAdminAuditLogsPage() {
                   </td>
 
                   {/* Timestamp */}
-                  <td className="p-4 text-muted-foreground whitespace-nowrap">
+                  <td className="whitespace-nowrap p-4 text-muted-foreground">
                     {log.timestamp}
                   </td>
 
                   {/* IP */}
-                  <td className="p-4 font-mono text-[11px] text-muted-foreground whitespace-nowrap">
+                  <td className="whitespace-nowrap p-4 font-mono text-[11px] text-muted-foreground">
                     {log.ip}
                   </td>
 
                   {/* Status Result */}
-                  <td className="p-4 text-right whitespace-nowrap">
+                  <td className="whitespace-nowrap p-4 text-right">
                     <Badge
                       variant="secondary"
                       className={cn(
                         "text-[10px] font-bold",
-                        log.status === "Success" && "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+                        log.status === "Success" && "bg-primary/10 text-primary",
                         log.status === "Warning" && "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
                         log.status === "Failed" && "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
                       )}
