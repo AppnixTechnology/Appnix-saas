@@ -26,12 +26,16 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { SettingsModule } from './modules/settings/settings.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { HealthModule } from './modules/health/health.module';
+import { StorageModule } from './modules/storage/storage.module';
+import { MediaModule } from './modules/media/media.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
+    StorageModule,
+    MediaModule,
     MailModule,
     AuthModule,
     UsersModule,

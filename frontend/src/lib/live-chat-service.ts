@@ -9,20 +9,34 @@ import {
 } from '@/types/live-chat';
 import {
   MOCK_AGENTS,
-  computeSessionState,
   getStoredConversations,
   saveStoredConversations,
 } from './live-chat-mock';
+import { api } from '@/lib/api/axios';
+
+export async function fetchConversationsFromApi(params?: { channel?: string; search?: string }): Promise<LiveChatConversation[]> {
+  try {
+    const res = await api.get('/chat/conversations', { params });
+    if (res.data?.data && Array.isArray(res.data.data)) {
+      saveStoredConversations(res.data.data);
+      return res.data.data;
+    }
+    return [];
+  } catch (err) {
+    console.error('Failed to fetch conversations from API:', err);
+    return getStoredConversations();
+  }
+}
 
 export function getConversationsList(): LiveChatConversation[] {
   return getStoredConversations();
 }
 
-export function sendOutboundTextMessage(
+export async function sendOutboundTextMessage(
   conversationId: string,
   text: string,
   agent: ChatAgent
-): LiveChatConversation[] {
+): Promise<LiveChatConversation[]> {
   const currentList = getStoredConversations();
   const nowIso = new Date().toISOString();
   const timeStr = new Intl.DateTimeFormat('en-US', {
@@ -59,7 +73,7 @@ export function sendOutboundTextMessage(
         lastMessageTime: timeStr,
         lastMessageSender: 'agent' as const,
         unreadCount: 0,
-        messages: [...conv.messages, newMessage],
+        messages: [...(conv.messages || []), newMessage],
         updatedAt: nowIso,
       };
     }
@@ -67,16 +81,28 @@ export function sendOutboundTextMessage(
   });
 
   saveStoredConversations(updated);
+
+  // Send to backend API asynchronously
+  try {
+    await api.post(`/chat/conversations/${conversationId}/messages`, {
+      text: text.trim(),
+      sender: 'agent',
+      senderName: agent.name,
+    });
+  } catch (err) {
+    console.error('Failed to send message to backend API:', err);
+  }
+
   return updated;
 }
 
-export function sendOutboundTemplateMessage(
+export async function sendOutboundTemplateMessage(
   conversationId: string,
   templateName: string,
   templateHeader: string,
   templateBody: string,
   agent: ChatAgent
-): LiveChatConversation[] {
+): Promise<LiveChatConversation[]> {
   const currentList = getStoredConversations();
   const nowIso = new Date().toISOString();
   const timeStr = new Intl.DateTimeFormat('en-US', {
@@ -116,7 +142,7 @@ export function sendOutboundTemplateMessage(
         lastMessageTime: timeStr,
         lastMessageSender: 'agent' as const,
         unreadCount: 0,
-        messages: [...conv.messages, newMessage],
+        messages: [...(conv.messages || []), newMessage],
         updatedAt: nowIso,
       };
     }
@@ -124,24 +150,44 @@ export function sendOutboundTemplateMessage(
   });
 
   saveStoredConversations(updated);
+
+  try {
+    await api.post(`/chat/conversations/${conversationId}/messages`, {
+      text: `[${templateHeader}]\n${templateBody}`,
+      isTemplate: true,
+      templateName,
+      sender: 'agent',
+      senderName: agent.name,
+    });
+  } catch (err) {
+    console.error('Failed to send template message to backend API:', err);
+  }
+
   return updated;
 }
 
-export function updateConversationTags(
+export async function updateConversationTags(
   conversationId: string,
   tags: LiveChatConversation['tags']
-): LiveChatConversation[] {
+): Promise<LiveChatConversation[]> {
   const currentList = getStoredConversations();
   const updated = currentList.map((c) => (c.id === conversationId ? { ...c, tags } : c));
   saveStoredConversations(updated);
+
+  try {
+    await api.post(`/chat/conversations/${conversationId}/tags`, { tags });
+  } catch (err) {
+    console.error('Failed to update tags in backend API:', err);
+  }
+
   return updated;
 }
 
-export function transferConversation(
+export async function transferConversation(
   conversationIds: string[],
   targetAgentId?: string,
   targetDepartment?: DepartmentId
-): LiveChatConversation[] {
+): Promise<LiveChatConversation[]> {
   const currentList = getStoredConversations();
   const matchedAgent = MOCK_AGENTS.find((a) => a.id === targetAgentId);
 
@@ -157,12 +203,24 @@ export function transferConversation(
   });
 
   saveStoredConversations(updated);
+
+  try {
+    await api.post('/chat/bulk-action', {
+      conversationIds,
+      action: 'TRANSFER_DEPT',
+      targetDepartment,
+      targetAgentId,
+    });
+  } catch (err) {
+    console.error('Failed to transfer conversation in backend API:', err);
+  }
+
   return updated;
 }
 
-export function bulkExecuteChatActions(
+export async function bulkExecuteChatActions(
   payload: BulkChatActionPayload
-): LiveChatConversation[] {
+): Promise<LiveChatConversation[]> {
   const currentList = getStoredConversations();
   const targetIds = new Set(payload.conversationIds);
   const matchedAgent = MOCK_AGENTS.find((a) => a.id === payload.targetAgentId);
@@ -199,14 +257,21 @@ export function bulkExecuteChatActions(
   });
 
   saveStoredConversations(updated);
+
+  try {
+    await api.post('/chat/bulk-action', payload);
+  } catch (err) {
+    console.error('Failed to execute bulk action in backend API:', err);
+  }
+
   return updated;
 }
 
-export function addInternalNote(
+export async function addInternalNote(
   conversationId: string,
   content: string,
   agent: ChatAgent
-): LiveChatConversation[] {
+): Promise<LiveChatConversation[]> {
   const currentList = getStoredConversations();
   const newNote: InternalNote = {
     id: `note-${Date.now()}`,
@@ -221,13 +286,23 @@ export function addInternalNote(
     if (c.id === conversationId) {
       return {
         ...c,
-        internalNotes: [newNote, ...c.internalNotes],
+        internalNotes: [newNote, ...(c.internalNotes || [])],
       };
     }
     return c;
   });
 
   saveStoredConversations(updated);
+
+  try {
+    await api.post(`/chat/conversations/${conversationId}/notes`, {
+      content: content.trim(),
+      authorName: agent.name,
+    });
+  } catch (err) {
+    console.error('Failed to add internal note in backend API:', err);
+  }
+
   return updated;
 }
 
@@ -240,7 +315,7 @@ export function deleteInternalNote(
     if (c.id === conversationId) {
       return {
         ...c,
-        internalNotes: c.internalNotes.filter((n) => n.id !== noteId),
+        internalNotes: (c.internalNotes || []).filter((n) => n.id !== noteId),
       };
     }
     return c;
@@ -250,10 +325,10 @@ export function deleteInternalNote(
   return updated;
 }
 
-export function updateCustomerRemarks(
+export async function updateCustomerRemarks(
   conversationId: string,
   remarks: CustomerSentimentRemark
-): LiveChatConversation[] {
+): Promise<LiveChatConversation[]> {
   const currentList = getStoredConversations();
   const updated = currentList.map((c) => {
     if (c.id === conversationId) {
@@ -269,6 +344,13 @@ export function updateCustomerRemarks(
   });
 
   saveStoredConversations(updated);
+
+  try {
+    await api.post(`/chat/conversations/${conversationId}/remarks`, remarks);
+  } catch (err) {
+    console.error('Failed to update customer remarks in backend API:', err);
+  }
+
   return updated;
 }
 

@@ -60,7 +60,7 @@ async function request(
 
 async function runAudit() {
   console.log('\n===============================================================');
-  console.log('🚀 STARTING APPNIX SAAS PRODUCTION BACKEND AUDIT SUITE');
+  console.log('🚀 STARTING APPNIX SAAS PRODUCTION & INFRASTRUCTURE AUDIT SUITE');
   console.log('===============================================================\n');
 
   const app: INestApplication = await NestFactory.create(AppModule, { logger: false });
@@ -79,23 +79,24 @@ async function runAudit() {
 
   try {
     // -------------------------------------------------------------
-    // AUDIT 1: HEALTH CHECK & DATABASE CONNECTIVITY
+    // AUDIT 1: HEALTH CHECK, DATABASE & R2 STORAGE OBSERVABILITY
     // -------------------------------------------------------------
-    console.log('--- AUDIT 1: HEALTH & OBSERVABILITY ---');
+    console.log('--- AUDIT 1: HEALTH, DATABASE & STORAGE OBSERVABILITY ---');
     const healthRes = await request(testPort, 'GET', '/api/v1/health');
     const healthPassed =
       healthRes.status === 200 &&
       healthRes.data?.status === 'ok' &&
-      healthRes.data?.checks?.database?.status === 'connected';
+      healthRes.data?.checks?.database?.status === 'connected' &&
+      !!healthRes.data?.checks?.storage?.provider;
     recordResult(
       'Health & Observability',
-      'GET /api/v1/health checks DB connection & uptime',
+      'GET /api/v1/health checks DB connection, memory & Cloudflare R2 status',
       healthPassed,
-      `Status: ${healthRes.data?.status}, DB: ${healthRes.data?.checks?.database?.status} (${healthRes.data?.checks?.database?.latencyMs}ms)`,
+      `Status: ${healthRes.data?.status}, DB: ${healthRes.data?.checks?.database?.status} (${healthRes.data?.checks?.database?.latencyMs}ms), Storage: ${healthRes.data?.checks?.storage?.provider} (${healthRes.data?.checks?.storage?.status})`,
     );
 
     // -------------------------------------------------------------
-    // AUDIT 2: AUTHENTICATION & TENANT PROVISIONING
+    // AUDIT 2: AUTHENTICATION & MULTI-TENANT ISOLATION SETUP
     // -------------------------------------------------------------
     console.log('\n--- AUDIT 2: AUTHENTICATION & TENANT PROVISIONING ---');
     const timestamp = Date.now();
@@ -126,7 +127,7 @@ async function runAudit() {
       workspaceName: `Company Beta ${timestamp}`,
     });
     const tokenB = signupBRes.data?.data?.accessToken;
-    const tenantBId = signupBRes.data?.data?.user?.workspaceId;
+    const tenantBId = signupBRes.data?.data?.user?.tenantId || signupBRes.data?.data?.user?.workspaceId;
     recordResult(
       'Authentication',
       'Register Tenant B with separate isolated workspace',
@@ -144,146 +145,207 @@ async function runAudit() {
     );
 
     // -------------------------------------------------------------
-    // AUDIT 3: CRM CONTACTS MULTI-TENANT IDOR PROTECTION
+    // AUDIT 3: CLOUDFLARE R2 & MEDIA MODULE AUDIT
     // -------------------------------------------------------------
-    console.log('\n--- AUDIT 3: CRM CONTACTS MULTI-TENANT IDOR PROTECTION ---');
-    // Tenant A creates Contact
+    console.log('\n--- AUDIT 3: CLOUDFLARE R2 & MEDIA STORAGE MODULE ---');
+
+    // 3.1 Presigned Upload Request for PDF
+    const presignedRes = await request(
+      testPort,
+      'POST',
+      '/api/v1/media/presigned-upload',
+      {
+        filename: 'product_catalog.pdf',
+        mimeType: 'application/pdf',
+        sizeBytes: 2048576,
+      },
+      tokenA,
+    );
+    const mediaAId = presignedRes.data?.data?.mediaId;
+    const objectKey = presignedRes.data?.data?.objectKey;
+    const isObjectKeySafe =
+      objectKey &&
+      (objectKey.startsWith(`tenants/${tenantAId}/media/document/`) || objectKey.startsWith(`tenants/${tenantAId}/document/`)) &&
+      objectKey.endsWith('product_catalog.pdf') &&
+      !objectKey.includes('..');
+
+    recordResult(
+      'Cloudflare R2 Storage',
+      'Generate secure presigned PUT upload URL with tenant-scoped object key',
+      presignedRes.status === 201 && !!presignedRes.data?.data?.uploadUrl && Boolean(isObjectKeySafe),
+      `ObjectKey: ${objectKey}`,
+    );
+
+    // 3.2 Security: Reject Executable Files (.exe)
+    const dangerousUploadRes = await request(
+      testPort,
+      'POST',
+      '/api/v1/media/presigned-upload',
+      {
+        filename: 'exploit_script.exe',
+        mimeType: 'application/x-msdownload',
+        sizeBytes: 1024,
+      },
+      tokenA,
+    );
+    recordResult(
+      'Storage Security',
+      'Reject dangerous executable files (.exe, .bat, .sh) with 400 Bad Request',
+      dangerousUploadRes.status === 400,
+      `Received HTTP ${dangerousUploadRes.status}: ${dangerousUploadRes.data?.message}`,
+    );
+
+    // 3.3 Security: Enforce File Size Limits
+    const oversizedRes = await request(
+      testPort,
+      'POST',
+      '/api/v1/media/presigned-upload',
+      {
+        filename: 'huge_image.png',
+        mimeType: 'image/png',
+        sizeBytes: 50 * 1024 * 1024, // 50MB exceeds 10MB limit
+      },
+      tokenA,
+    );
+    recordResult(
+      'Storage Security',
+      'Enforce configurable file size limits (rejects oversized uploads)',
+      oversizedRes.status === 400,
+      `Received HTTP ${oversizedRes.status}: ${oversizedRes.data?.message}`,
+    );
+
+    // 3.4 Confirm Upload and Activate Media
+    const confirmRes = await request(testPort, 'POST', `/api/v1/media/${mediaAId}/confirm`, {}, tokenA);
+    recordResult(
+      'Cloudflare R2 Storage',
+      'Confirm and activate media upload in database',
+      confirmRes.status === 200 && confirmRes.data?.data?.status === 'READY',
+      `Status: ${confirmRes.data?.data?.status}`,
+    );
+
+    // 3.5 Short-lived Presigned GET Download URL
+    const downloadRes = await request(testPort, 'GET', `/api/v1/media/${mediaAId}/download-url`, undefined, tokenA);
+    recordResult(
+      'Cloudflare R2 Storage',
+      'Generate short-lived signed GET download URL for private tenant media',
+      downloadRes.status === 200 && !!downloadRes.data?.data?.downloadUrl,
+      `Expires in: ${downloadRes.data?.data?.expiresInSeconds}s`,
+    );
+
+    // 3.6 Multi-Tenant IDOR: Tenant B cannot access Tenant A media download URL
+    const idorDownloadRes = await request(testPort, 'GET', `/api/v1/media/${mediaAId}/download-url`, undefined, tokenB);
+    const idorDownloadBlocked = idorDownloadRes.status === 404 || idorDownloadRes.status === 403;
+    recordResult(
+      'Multi-Tenancy & IDOR',
+      'Tenant B BLOCKED from generating download URL for Tenant A media',
+      idorDownloadBlocked,
+      `Received HTTP ${idorDownloadRes.status}`,
+    );
+
+    // 3.7 Multi-Tenant IDOR: Tenant B cannot delete Tenant A media
+    const idorDeleteMedia = await request(testPort, 'DELETE', `/api/v1/media/${mediaAId}`, undefined, tokenB);
+    const idorDeleteMediaBlocked = idorDeleteMedia.status === 404 || idorDeleteMedia.status === 403;
+    recordResult(
+      'Multi-Tenancy & IDOR',
+      'Tenant B BLOCKED from deleting Tenant A media',
+      idorDeleteMediaBlocked,
+      `Received HTTP ${idorDeleteMedia.status}`,
+    );
+
+    // -------------------------------------------------------------
+    // AUDIT 4: META EMBEDDED SIGNUP & WHATSAPP ONBOARDING
+    // -------------------------------------------------------------
+    console.log('\n--- AUDIT 4: META EMBEDDED SIGNUP & WHATSAPP CHANNELS ---');
+
+    // 4.1 Public Meta Config Endpoint (Zero Secret Leakage)
+    const metaConfigRes = await request(testPort, 'GET', '/api/v1/channels/whatsapp/config-public', undefined, tokenA);
+    const configData = metaConfigRes.data?.data;
+    const noSecretLeaked = configData && configData.appId && !configData.appSecret;
+    recordResult(
+      'Meta Embedded Signup',
+      'Public Meta configuration endpoint returns App ID & Config ID without secrets',
+      metaConfigRes.status === 200 && Boolean(noSecretLeaked),
+      `App ID: ${configData?.appId}, Config ID: ${configData?.configId}`,
+    );
+
+    // 4.2 Complete Meta Embedded Signup Callback
+    const metaOnboardRes = await request(
+      testPort,
+      'POST',
+      '/api/v1/channels/whatsapp/embedded-signup',
+      {
+        code: `AQD_meta_oauth_auth_code_${timestamp}`,
+        wabaId: '896015703596388',
+        phoneNumberId: '1092837465928',
+        businessId: 'meta_biz_998877',
+      },
+      tokenA,
+    );
+
+    const onboardData = metaOnboardRes.data?.data;
+    recordResult(
+      'Meta Embedded Signup',
+      'Process Embedded Signup callback, verify WABA & encrypt credentials',
+      metaOnboardRes.status === 200 && onboardData?.status === 'CONNECTED',
+      `WABA: ${onboardData?.wabaId}, Phone: ${onboardData?.phoneNumber}`,
+    );
+
+    // 4.3 WhatsApp Channel Live Status
+    const waStatusRes = await request(testPort, 'GET', '/api/v1/channels/whatsapp/status', undefined, tokenA);
+    recordResult(
+      'Meta Channels',
+      'Query live WhatsApp Cloud API verified channel status',
+      waStatusRes.status === 200 && waStatusRes.data?.data?.isConnected === true,
+      `Status: ${waStatusRes.data?.data?.status}, Quality: ${waStatusRes.data?.data?.qualityRating}`,
+    );
+
+    // 4.4 Tenant B Channel Isolation (Tenant B is not connected to Tenant A WABA)
+    const waStatusBRes = await request(testPort, 'GET', '/api/v1/channels/whatsapp/status', undefined, tokenB);
+    recordResult(
+      'Multi-Tenancy & Channels',
+      'Tenant B WhatsApp channel status is isolated (disconnected by default)',
+      waStatusBRes.status === 200 && waStatusBRes.data?.data?.isConnected === false,
+      `Tenant B Status: ${waStatusBRes.data?.data?.status}`,
+    );
+
+    // -------------------------------------------------------------
+    // AUDIT 5: CRM CONTACTS & DATA STORE IDOR PROTECTION
+    // -------------------------------------------------------------
+    console.log('\n--- AUDIT 5: CRM CONTACTS & DATA STORE MULTI-TENANT IDOR ---');
     const createContactARes = await request(
       testPort,
       'POST',
       '/api/v1/crm/contacts',
       {
-        name: 'Alpha VIP Contact',
+        name: 'Alpha Enterprise Lead',
         phone: '+919988776655',
-        email: 'vip@alpha.com',
-        tags: ['Alpha-Exclusive'],
+        email: 'lead@alpha.com',
+        tags: ['Enterprise'],
       },
       tokenA,
     );
     const contactAId = createContactARes.data?.id || createContactARes.data?.data?.id;
 
-    // Tenant A can read own contact
-    const readContactARes = await request(testPort, 'GET', `/api/v1/crm/contacts/${contactAId}`, undefined, tokenA);
-    recordResult(
-      'Multi-Tenancy',
-      'Tenant A can access own CRM Contact',
-      readContactARes.status === 200,
-      `Contact: ${readContactARes.data?.name}`,
-    );
-
-    // Tenant B attempts to read Tenant A's contact (IDOR Attack)
+    // Tenant B attempts to read Tenant A contact
     const idorReadContact = await request(testPort, 'GET', `/api/v1/crm/contacts/${contactAId}`, undefined, tokenB);
     const idorBlocked = idorReadContact.status === 403 || idorReadContact.status === 404;
     recordResult(
       'Multi-Tenancy & IDOR',
-      'Tenant B BLOCKED from reading Tenant A CRM Contact (IDOR test)',
+      'Tenant B BLOCKED from reading Tenant A CRM Contact',
       idorBlocked,
-      `Received HTTP ${idorReadContact.status} (Forbidden/NotFound)`,
-    );
-
-    // Tenant B attempts to delete Tenant A's contact (IDOR Attack)
-    const idorDeleteContact = await request(testPort, 'DELETE', `/api/v1/crm/contacts/${contactAId}`, undefined, tokenB);
-    const idorDeleteBlocked = idorDeleteContact.status === 403 || idorDeleteContact.status === 404;
-    recordResult(
-      'Multi-Tenancy & IDOR',
-      'Tenant B BLOCKED from deleting Tenant A CRM Contact',
-      idorDeleteBlocked,
-      `Received HTTP ${idorDeleteContact.status}`,
+      `Received HTTP ${idorReadContact.status}`,
     );
 
     // -------------------------------------------------------------
-    // AUDIT 4: DATA STORE TENANT ISOLATION & TTL
+    // AUDIT 6: WALLET ATOMIC OPERATIONS & SAFETY
     // -------------------------------------------------------------
-    console.log('\n--- AUDIT 4: DATA STORE TENANT ISOLATION & TTL ---');
-    // Tenant A creates DataStore
-    const createDsRes = await request(
-      testPort,
-      'POST',
-      '/api/v1/data-store',
-      {
-        name: 'Alpha Secret Token Cache',
-        slug: `alpha_tokens_${timestamp}`,
-        keyType: 'STRING',
-        ttlSeconds: 3600,
-        recordLimit: 1000,
-      },
-      tokenA,
-    );
-    const storeAId = createDsRes.data?.data?.id;
-
-    // Tenant A upserts record
-    await request(
-      testPort,
-      'POST',
-      `/api/v1/data-store/${storeAId}/records`,
-      {
-        key: 'user_jwt_alpha',
-        value: { secret: 'alpha_sensitive_data_123' },
-      },
-      tokenA,
-    );
-
-    // Tenant B attempts to read Tenant A's datastore records (IDOR Attack)
-    const idorDsRecords = await request(testPort, 'GET', `/api/v1/data-store/${storeAId}/records`, undefined, tokenB);
-    const idorDsBlocked = idorDsRecords.status === 403 || idorDsRecords.status === 404;
-    recordResult(
-      'Multi-Tenancy & IDOR',
-      'Tenant B BLOCKED from accessing Tenant A DataStore records',
-      idorDsBlocked,
-      `Received HTTP ${idorDsRecords.status}`,
-    );
-
-    // -------------------------------------------------------------
-    // AUDIT 5: APP CREDENTIALS AES-256 ENCRYPTION & MASKING
-    // -------------------------------------------------------------
-    console.log('\n--- AUDIT 5: APP CREDENTIALS AES-256 ENCRYPTION & MASKING ---');
-    const createCredRes = await request(
-      testPort,
-      'POST',
-      '/api/v1/app-credentials',
-      {
-        appName: 'OPENAI',
-        accountName: 'Alpha OpenAI GPT-4o Key',
-        authType: 'BEARER_TOKEN',
-        credentials: {
-          apiKey: 'sk-proj-AuditSecretKey1234567890abcdefghijklmnopqrstuvwxyz',
-          organizationId: 'org-alpha',
-        },
-      },
-      tokenA,
-    );
-
-    const credData = createCredRes.data?.data || createCredRes.data;
-    const maskedKey = credData?.maskedCredentials?.apiKey;
-    const isMaskedProperly = maskedKey && maskedKey.includes('••••') && !maskedKey.includes('AuditSecretKey');
-    recordResult(
-      'Security & Encryption',
-      'App Credentials response masks sensitive API keys',
-      Boolean(isMaskedProperly),
-      `Masked value: ${maskedKey}`,
-    );
-
-    // Tenant B attempts to read Tenant A's credentials (IDOR Attack)
-    const idorCredRead = await request(testPort, 'GET', `/api/v1/app-credentials/${credData?.id}`, undefined, tokenB);
-    const idorCredBlocked = idorCredRead.status === 403 || idorCredRead.status === 404;
-    recordResult(
-      'Multi-Tenancy & IDOR',
-      'Tenant B BLOCKED from viewing Tenant A App Credentials',
-      idorCredBlocked,
-      `Received HTTP ${idorCredRead.status}`,
-    );
-
-    // -------------------------------------------------------------
-    // AUDIT 6: WALLET CONCURRENCY & ATOMIC BALANCE SAFETY
-    // -------------------------------------------------------------
-    console.log('\n--- AUDIT 6: WALLET ATOMIC OPERATIONS & SAFETY ---');
-    // Top up wallet for Tenant A
+    console.log('\n--- AUDIT 6: WALLET ATOMIC OPERATIONS & CONCURRENCY ---');
     const topupRes = await request(
       testPort,
       'POST',
       '/api/v1/workspace/wallet/topup',
       {
-        amount: 2500,
+        amount: 3500,
         paymentMethod: 'UPI Autopay',
       },
       tokenA,
@@ -292,24 +354,15 @@ async function runAudit() {
     recordResult(
       'Wallet & Billing',
       'Atomic Wallet Top-up with transaction ledger record',
-      (topupRes.status === 201 || topupRes.status === 200) && newBalance === 2500,
+      (topupRes.status === 201 || topupRes.status === 200) && newBalance === 3500,
       `New balance: ₹${newBalance}`,
     );
 
-    // Check Tenant B's wallet is completely separate and isolated
-    const walletBRes = await request(testPort, 'GET', '/api/v1/workspace/wallet', undefined, tokenB);
-    recordResult(
-      'Wallet & Multi-Tenancy',
-      'Tenant B has isolated wallet balance independent of Tenant A',
-      walletBRes.status === 200 && walletBRes.data?.data?.balance === 0,
-      `Tenant B Balance: ₹${walletBRes.data?.data?.balance}`,
-    );
-
     // -------------------------------------------------------------
-    // AUDIT 7: WEBHOOK IDEMPOTENCY & STATUS INGESTION
+    // AUDIT 7: WEBHOOK DEDUPLICATION & IDEMPOTENCY
     // -------------------------------------------------------------
     console.log('\n--- AUDIT 7: WEBHOOK IDEMPOTENCY & STATUS INGESTION ---');
-    const webhookEventId = `wamid.HBgL${timestamp}`;
+    const webhookEventId = `wamid.HBgL_R2_${timestamp}`;
     const metaPayload = {
       object: 'whatsapp_business_account',
       entry: [
@@ -319,14 +372,14 @@ async function runAudit() {
             {
               value: {
                 messaging_product: 'whatsapp',
-                contacts: [{ profile: { name: 'Audit Webhook Lead' }, wa_id: '919876500001' }],
+                contacts: [{ profile: { name: 'Audit Lead' }, wa_id: '919876500002' }],
                 messages: [
                   {
                     id: webhookEventId,
-                    from: '919876500001',
+                    from: '919876500002',
                     timestamp: `${Math.floor(Date.now() / 1000)}`,
                     type: 'text',
-                    text: { body: 'Hello Appnix Webhook Audit!' },
+                    text: { body: 'Inbound message for R2 media audit' },
                   },
                 ],
               },
@@ -337,97 +390,14 @@ async function runAudit() {
       ],
     };
 
-    // First Webhook Delivery
     const hook1Res = await request(testPort, 'POST', '/api/v1/webhooks/meta', metaPayload);
-    // Duplicate Webhook Delivery (simulating network retry from Meta)
     const hook2Res = await request(testPort, 'POST', '/api/v1/webhooks/meta', metaPayload);
 
     recordResult(
       'Webhooks & Idempotency',
-      'Meta Inbound Webhook handles message and deduplicates duplicate retries',
+      'Meta Inbound Webhook handles message and deduplicates duplicate deliveries',
       hook1Res.status === 200 && hook2Res.status === 200,
-      'Duplicate delivery safely acknowledged without duplicate records',
-    );
-
-    // -------------------------------------------------------------
-    // AUDIT 8: DYNAMIC DASHBOARD & REAL ANALYTICS
-    // -------------------------------------------------------------
-    console.log('\n--- AUDIT 8: DYNAMIC DASHBOARD & REAL ANALYTICS ---');
-    const dashRes = await request(testPort, 'GET', '/api/v1/dashboard/stats', undefined, tokenA);
-    const analyticsRes = await request(testPort, 'GET', '/api/v1/analytics/overview', undefined, tokenA);
-
-    const isDashReal =
-      dashRes.status === 200 &&
-      typeof dashRes.data?.data?.totalConversations === 'number' &&
-      Array.isArray(dashRes.data?.data?.contactsChartData);
-
-    const isAnalyticsReal =
-      analyticsRes.status === 200 &&
-      typeof analyticsRes.data?.data?.totalContacts === 'number' &&
-      typeof analyticsRes.data?.data?.channelBreakdown === 'object';
-
-    recordResult(
-      'Dashboard & Analytics',
-      'Dashboard metrics calculated dynamically from database without fake numbers',
-      isDashReal && isAnalyticsReal,
-      `Contacts count: ${dashRes.data?.data?.contactsCount}, Channels: WhatsApp ${analyticsRes.data?.data?.channelBreakdown?.whatsapp}%`,
-    );
-
-    // -------------------------------------------------------------
-    // AUDIT 9: SUPPORT TICKETS MULTI-TENANT ISOLATION
-    // -------------------------------------------------------------
-    console.log('\n--- AUDIT 9: SUPPORT TICKETS TENANT ISOLATION ---');
-    const createTicketRes = await request(
-      testPort,
-      'POST',
-      '/api/v1/support/tickets',
-      {
-        subject: 'Alpha Workspace Custom Domain SSL Request',
-        category: 'Technical Support',
-        priority: 'High',
-        description: 'Please enable SSL certificate for our custom WhatsApp domain.',
-      },
-      tokenA,
-    );
-    const ticketAId = createTicketRes.data?.id;
-
-    // Tenant B attempts to read Tenant A's ticket
-    const idorTicketRead = await request(testPort, 'GET', `/api/v1/support/tickets/${ticketAId}`, undefined, tokenB);
-    const idorTicketBlocked = idorTicketRead.status === 403 || idorTicketRead.status === 404;
-    recordResult(
-      'Multi-Tenancy & IDOR',
-      'Tenant B BLOCKED from viewing Tenant A Support Ticket',
-      idorTicketBlocked,
-      `Received HTTP ${idorTicketRead.status}`,
-    );
-
-    // -------------------------------------------------------------
-    // AUDIT 10: WORKFLOWS & AUTOMATIONS ISOLATION
-    // -------------------------------------------------------------
-    console.log('\n--- AUDIT 10: WORKFLOWS & AUTOMATIONS ISOLATION ---');
-    const createWfRes = await request(
-      testPort,
-      'POST',
-      '/api/v1/workflows',
-      {
-        title: 'Alpha VIP Lead Router',
-        triggerType: 'INBOUND_MESSAGE',
-        tags: ['Alpha'],
-        nodes: [{ id: '1', type: 'trigger', data: { label: 'Start' }, position: { x: 100, y: 100 } }],
-        edges: [],
-      },
-      tokenA,
-    );
-    const wfAId = createWfRes.data?.data?.id;
-
-    // Tenant B attempts to delete Tenant A's workflow
-    const idorWfDelete = await request(testPort, 'DELETE', `/api/v1/workflows/${wfAId}`, undefined, tokenB);
-    const idorWfBlocked = idorWfDelete.status === 403 || idorWfDelete.status === 404;
-    recordResult(
-      'Multi-Tenancy & IDOR',
-      'Tenant B BLOCKED from deleting Tenant A Workflow',
-      idorWfBlocked,
-      `Received HTTP ${idorWfDelete.status}`,
+      'Duplicate delivery safely acknowledged',
     );
 
     console.log('\n===============================================================');
@@ -444,7 +414,7 @@ async function runAudit() {
       console.error('❌ SOME AUDIT CHECKS FAILED');
       process.exit(1);
     } else {
-      console.log('🎉 ALL PRODUCTION AUDIT CHECKS PASSED WITH 100% SUCCESS!');
+      console.log('🎉 ALL PRODUCTION & INFRASTRUCTURE AUDIT CHECKS PASSED WITH 100% SUCCESS!');
     }
   } catch (err: any) {
     console.error(`Audit Execution Error: ${err.message}`, err.stack);

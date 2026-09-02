@@ -14,6 +14,7 @@ import {
   getStoredConversations,
 } from "@/lib/live-chat-mock";
 import {
+  fetchConversationsFromApi,
   sendOutboundTextMessage,
   sendOutboundTemplateMessage,
   updateConversationTags,
@@ -28,7 +29,7 @@ import {
 
 export function useLiveChat() {
   const [conversations, setConversations] = useState<LiveChatConversation[]>([]);
-  const [activeConvId, setActiveConvId] = useState<string>("conv-1");
+  const [activeConvId, setActiveConvId] = useState<string>("");
   const [selectedDepartment, setSelectedDepartment] = useState<DepartmentId>("all");
   const [assignedScope, setAssignedScope] = useState<"all" | "me">("all");
   const [selectedChannel, setSelectedChannel] = useState<ChannelType | "all">("all");
@@ -37,13 +38,32 @@ export function useLiveChat() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedConvIds, setSelectedConvIds] = useState<string[]>([]);
   const [isBulkMode, setIsBulkMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const currentAgent: ChatAgent = MOCK_AGENTS[0]; // Jitendra Kumar
+  const currentAgent: ChatAgent = MOCK_AGENTS[0]; // Active Support Agent
 
-  // Initial load
+  // Load from backend API
+  const loadConversations = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await fetchConversationsFromApi({
+        channel: selectedChannel !== "all" ? selectedChannel : undefined,
+        search: searchQuery.trim() ? searchQuery : undefined,
+      });
+      setConversations(data);
+      if (data.length > 0 && !activeConvId) {
+        setActiveConvId(data[0].id);
+      }
+    } catch (err) {
+      console.error("Failed to load conversations:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedChannel, searchQuery, activeConvId]);
+
   useEffect(() => {
-    setConversations(getStoredConversations());
-  }, []);
+    loadConversations();
+  }, [loadConversations]);
 
   // Sync on local events
   useEffect(() => {
@@ -73,25 +93,25 @@ export function useLiveChat() {
       }
 
       // 4. Tag filter
-      if (selectedTagId && !conv.tags.some((t) => t.id === selectedTagId)) {
+      if (selectedTagId && !conv.tags?.some((t) => t.id === selectedTagId)) {
         return false;
       }
 
       // 5. 24-hr Session filter
-      if (sessionFilter === "active_24h" && !conv.session.isActive) {
+      if (sessionFilter === "active_24h" && !conv.session?.isActive) {
         return false;
       }
-      if (sessionFilter === "expired_24h" && conv.session.isActive) {
+      if (sessionFilter === "expired_24h" && conv.session?.isActive) {
         return false;
       }
 
       // 6. Search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const matchesName = conv.name.toLowerCase().includes(q);
-        const matchesIdent = conv.identifier.toLowerCase().includes(q);
-        const matchesMsg = conv.lastMessage.toLowerCase().includes(q);
-        const matchesUid = conv.uid.toLowerCase().includes(q);
+        const matchesName = conv.name?.toLowerCase().includes(q);
+        const matchesIdent = conv.identifier?.toLowerCase().includes(q);
+        const matchesMsg = conv.lastMessage?.toLowerCase().includes(q);
+        const matchesUid = conv.uid?.toLowerCase().includes(q);
         if (!matchesName && !matchesIdent && !matchesMsg && !matchesUid) {
           return false;
         }
@@ -110,56 +130,66 @@ export function useLiveChat() {
     currentAgent.id,
   ]);
 
-  // Active Conversation Selector
+  // Active Conversation Object
   const activeConversation = useMemo(() => {
     return (
-      conversations.find((c) => c.id === activeConvId) ||
+      conversations.find((c) => c.id === activeConvId || c.uid === activeConvId) ||
       filteredConversations[0] ||
       null
     );
   }, [conversations, activeConvId, filteredConversations]);
 
-  // Department counts
+  // Counts for filter pills
   const departmentCounts = useMemo(() => {
-    return {
+    const counts: Record<DepartmentId, number> = {
       all: conversations.length,
-      sales: conversations.filter((c) => c.department === "sales").length,
-      support: conversations.filter((c) => c.department === "support").length,
-      billing: conversations.filter((c) => c.department === "billing").length,
-      onboarding: conversations.filter((c) => c.department === "onboarding").length,
+      sales: 0,
+      support: 0,
+      billing: 0,
+      onboarding: 0,
     };
+    conversations.forEach((c) => {
+      if (c.department && counts[c.department] !== undefined) {
+        counts[c.department]++;
+      }
+    });
+    return counts;
   }, [conversations]);
 
-  // Channel counts
   const channelCounts = useMemo(() => {
-    return {
+    const counts: Record<ChannelType | "all", number> = {
       all: conversations.length,
-      whatsapp: conversations.filter((c) => c.channel === "whatsapp").length,
-      instagram: conversations.filter((c) => c.channel === "instagram").length,
-      rcs: conversations.filter((c) => c.channel === "rcs").length,
-      facebook: conversations.filter((c) => c.channel === "facebook").length,
+      whatsapp: 0,
+      instagram: 0,
+      facebook: 0,
+      rcs: 0,
     };
+    conversations.forEach((c) => {
+      if (c.channel && counts[c.channel] !== undefined) {
+        counts[c.channel]++;
+      }
+    });
+    return counts;
   }, [conversations]);
 
-  // --- ACTIONS ---
-
+  // Actions
   const handleSendMessage = useCallback(
-    (text: string) => {
+    async (text: string) => {
       if (!activeConversation) return;
-      const updated = sendOutboundTextMessage(activeConversation.id, text, currentAgent);
+      const updated = await sendOutboundTextMessage(activeConversation.id, text, currentAgent);
       setConversations(updated);
     },
     [activeConversation, currentAgent]
   );
 
   const handleSendTemplate = useCallback(
-    (templateName: string, header: string, body: string) => {
+    async (templateName: string, templateHeader: string, templateBody: string) => {
       if (!activeConversation) return;
-      const updated = sendOutboundTemplateMessage(
+      const updated = await sendOutboundTemplateMessage(
         activeConversation.id,
         templateName,
-        header,
-        body,
+        templateHeader,
+        templateBody,
         currentAgent
       );
       setConversations(updated);
@@ -168,26 +198,26 @@ export function useLiveChat() {
   );
 
   const handleUpdateTags = useCallback(
-    (tags: LiveChatConversation["tags"]) => {
+    async (tags: LiveChatConversation["tags"]) => {
       if (!activeConversation) return;
-      const updated = updateConversationTags(activeConversation.id, tags);
+      const updated = await updateConversationTags(activeConversation.id, tags);
       setConversations(updated);
     },
     [activeConversation]
   );
 
   const handleTransfer = useCallback(
-    (targetAgentId?: string, targetDept?: DepartmentId) => {
+    async (targetAgentId?: string, targetDept?: DepartmentId) => {
       if (!activeConversation) return;
-      const updated = transferConversation([activeConversation.id], targetAgentId, targetDept);
+      const updated = await transferConversation([activeConversation.id], targetAgentId, targetDept);
       setConversations(updated);
     },
     [activeConversation]
   );
 
   const handleBulkAction = useCallback(
-    (payload: BulkChatActionPayload) => {
-      const updated = bulkExecuteChatActions(payload);
+    async (payload: BulkChatActionPayload) => {
+      const updated = await bulkExecuteChatActions(payload);
       setConversations(updated);
       setSelectedConvIds([]);
       setIsBulkMode(false);
@@ -196,9 +226,9 @@ export function useLiveChat() {
   );
 
   const handleAddNote = useCallback(
-    (content: string) => {
+    async (content: string) => {
       if (!activeConversation) return;
-      const updated = addInternalNote(activeConversation.id, content, currentAgent);
+      const updated = await addInternalNote(activeConversation.id, content, currentAgent);
       setConversations(updated);
     },
     [activeConversation, currentAgent]
@@ -214,9 +244,9 @@ export function useLiveChat() {
   );
 
   const handleUpdateRemarks = useCallback(
-    (remarks: CustomerSentimentRemark) => {
+    async (remarks: CustomerSentimentRemark) => {
       if (!activeConversation) return;
-      const updated = updateCustomerRemarks(activeConversation.id, remarks);
+      const updated = await updateCustomerRemarks(activeConversation.id, remarks);
       setConversations(updated);
     },
     [activeConversation]
@@ -281,6 +311,7 @@ export function useLiveChat() {
     departmentCounts,
     channelCounts,
     currentAgent,
+    isLoading,
     sendMessage: handleSendMessage,
     sendTemplate: handleSendTemplate,
     updateTags: handleUpdateTags,

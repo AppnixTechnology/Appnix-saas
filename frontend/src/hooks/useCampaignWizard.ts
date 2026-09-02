@@ -334,9 +334,9 @@ export function useCampaignWizard(campaignId?: string) {
   const [currentStep, setCurrentStep] = useState<WizardStep>("details");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [audiences, setAudiences] = useState<AudienceItem[]>(MOCK_AUDIENCES);
-  const [channels, setChannels] = useState<ChannelItem[]>(MOCK_CHANNELS);
-  const [templates, setTemplates] = useState<MetaTemplate[]>(MOCK_TEMPLATES.WHATSAPP);
+  const [audiences, setAudiences] = useState<AudienceItem[]>([]);
+  const [channels, setChannels] = useState<ChannelItem[]>([]);
+  const [templates, setTemplates] = useState<MetaTemplate[]>([]);
   const [testSent, setTestSent] = useState(false);
   const [isRefreshingTemplates, setIsRefreshingTemplates] = useState(false);
 
@@ -345,8 +345,8 @@ export function useCampaignWizard(campaignId?: string) {
     if (!campaignId) return;
     setIsLoading(true);
     try {
-      const response = await api.get(`/api/campaigns/${campaignId}`);
-      const data = response.data;
+      const response = await api.get(`/campaigns/${campaignId}`);
+      const data = response.data?.data || response.data;
       if (data) {
         setCampaign({
           id: data.id,
@@ -373,37 +373,33 @@ export function useCampaignWizard(campaignId?: string) {
         }
       }
     } catch (err) {
-      console.warn("Could not load campaign from API, creating fresh draft session", err);
+      console.warn("Could not load campaign from API", err);
     } finally {
       setIsLoading(false);
     }
   }, [campaignId]);
 
-  // Load audiences from backend with mock fallback
+  // Load audiences from backend API
   const loadAudiences = useCallback(async () => {
     try {
-      const response = await api.get("/api/campaigns/audiences");
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        setAudiences(response.data);
-      } else {
-        setAudiences(MOCK_AUDIENCES);
-      }
+      const response = await api.get("/campaigns/audiences");
+      const list = Array.isArray(response.data?.data) ? response.data.data : Array.isArray(response.data) ? response.data : [];
+      setAudiences(list);
     } catch (err) {
-      setAudiences(MOCK_AUDIENCES);
+      console.error("Failed to load campaign audiences:", err);
+      setAudiences([]);
     }
   }, []);
 
-  // Load channels from backend with mock fallback
+  // Load channels from backend API
   const loadChannels = useCallback(async () => {
     try {
-      const response = await api.get("/api/campaigns/channels");
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        setChannels(response.data);
-      } else {
-        setChannels(MOCK_CHANNELS);
-      }
+      const response = await api.get("/campaigns/channels");
+      const list = Array.isArray(response.data?.data) ? response.data.data : Array.isArray(response.data) ? response.data : [];
+      setChannels(list);
     } catch (err) {
-      setChannels(MOCK_CHANNELS);
+      console.error("Failed to load campaign channels:", err);
+      setChannels([]);
     }
   }, []);
 
@@ -412,16 +408,14 @@ export function useCampaignWizard(campaignId?: string) {
     const targetChannel = channelName || campaign.channel || "WHATSAPP";
     setIsRefreshingTemplates(true);
     try {
-      const response = await api.get("/api/campaigns/templates", {
+      const response = await api.get("/campaigns/templates", {
         params: { channel: targetChannel },
       });
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        setTemplates(response.data);
-      } else {
-        setTemplates(MOCK_TEMPLATES[targetChannel] || []);
-      }
+      const list = Array.isArray(response.data?.data) ? response.data.data : Array.isArray(response.data) ? response.data : [];
+      setTemplates(list);
     } catch (err) {
-      setTemplates(MOCK_TEMPLATES[targetChannel] || []);
+      console.error("Failed to load channel templates:", err);
+      setTemplates([]);
     } finally {
       setIsRefreshingTemplates(false);
     }

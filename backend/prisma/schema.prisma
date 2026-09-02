@@ -44,6 +44,7 @@ model Tenant {
   notifications      Notification[]
   bots               Bot[]
   webhookEvents      WebhookEvent[]
+  media              Media[]
 
   @@map("tenants")
 }
@@ -371,15 +372,16 @@ model CampaignAudience {
 }
 
 model ChannelConfig {
-  id           String      @id @default(uuid())
-  tenantId     String
-  channel      ChannelType
-  isConnected  Boolean     @default(false)
-  config       Json?
-  connectedAt  DateTime?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  tenant       Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id              String      @id @default(uuid())
+  tenantId        String
+  channel         ChannelType
+  isConnected     Boolean     @default(false)
+  config          Json?
+  connectedAt     DateTime?
+  lastVerifiedAt  DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  tenant          Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, channel])
   @@index([tenantId])
@@ -687,6 +689,30 @@ model WebhookEvent {
   @@map("webhook_events")
 }
 
+model Media {
+  id           String      @id @default(uuid())
+  tenantId     String
+  uploadedBy   String?
+  objectKey    String      @unique
+  bucket       String
+  originalName String
+  mimeType     String
+  size         Int
+  category     String      // IMAGE, DOCUMENT, AUDIO, VIDEO, OTHER
+  status       String      @default("PENDING") // PENDING, READY, FAILED, DELETED
+  provider     String      @default("CLOUDFLARE_R2")
+  isPrivate    Boolean     @default(true)
+  metadata     Json?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  tenant       Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([category])
+  @@index([status])
+  @@map("media")
+}
+
 enum AuthType {
   API_KEY
   BEARER_TOKEN
@@ -768,3 +794,4 @@ enum SubscriptionStatus {
   PAST_DUE
   CANCELLED
 }
+

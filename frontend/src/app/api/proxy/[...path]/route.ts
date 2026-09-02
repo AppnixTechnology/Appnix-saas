@@ -4,10 +4,13 @@ import { config } from "@/lib/config";
 const ALLOWED_ORIGINS = [
   "http://localhost:4000",
   "http://localhost:3000",
-  "https://api.appnix.com",
-  "https://staging-api.appnix.com",
   "http://localhost:8000",
   "http://localhost:3001",
+  "https://api.appnix.co.in",
+  "https://www.appnix.co.in",
+  "https://appnix.co.in",
+  "https://api.appnix.com",
+  "https://staging-api.appnix.com",
 ];
 
 export async function GET(

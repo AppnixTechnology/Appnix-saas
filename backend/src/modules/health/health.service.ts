@@ -1,12 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class HealthService {
   private readonly logger = new Logger(HealthService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storageService: StorageService,
+  ) {}
 
   async checkHealth() {
     let dbStatus = 'disconnected';
@@ -22,6 +26,7 @@ export class HealthService {
       dbStatus = 'error';
     }
 
+    const storageHealth = await this.storageService.checkHealth();
     const memoryUsage = process.memoryUsage();
 
     return {
@@ -34,6 +39,11 @@ export class HealthService {
         database: {
           status: dbStatus,
           latencyMs: dbLatencyMs,
+        },
+        storage: {
+          status: storageHealth.status,
+          provider: 'Cloudflare R2',
+          bucket: storageHealth.bucket,
         },
         memory: {
           rssMb: Math.round(memoryUsage.rss / (1024 * 1024)),

@@ -13,6 +13,28 @@ export class ConnectChannelDto {
   config?: any;
 }
 
+export class MetaEmbeddedSignupDto {
+  @ApiProperty({ description: 'OAuth Authorization code received from Meta Embedded Signup SDK callback', example: 'AQDxxxx...' })
+  @IsString()
+  @IsNotEmpty()
+  code: string;
+
+  @ApiPropertyOptional({ description: 'WhatsApp Business Account ID', example: '896015703596388' })
+  @IsOptional()
+  @IsString()
+  wabaId?: string;
+
+  @ApiPropertyOptional({ description: 'Phone Number ID', example: '1092837465928' })
+  @IsOptional()
+  @IsString()
+  phoneNumberId?: string;
+
+  @ApiPropertyOptional({ description: 'Meta Business Manager ID', example: '209384756192' })
+  @IsOptional()
+  @IsString()
+  businessId?: string;
+}
+
 export class CreateRcsTemplateDto {
   @ApiProperty({ example: 'Summer Offer RCS' })
   @IsString()
