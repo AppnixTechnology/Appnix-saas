@@ -9,17 +9,24 @@ import { X, Building2 } from "lucide-react";
 interface AddClientModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onClientAdded: (client: Omit<Client, "id" | "mrr" | "totalUsers" | "lastActive">) => void;
+  onClientAdded: (
+    client: Omit<Client, "id" | "mrr" | "totalUsers" | "lastActive">,
+  ) => void;
 }
 
-export function AddClientModal({ isOpen, onClose, onClientAdded }: AddClientModalProps) {
+export function AddClientModal({
+  isOpen,
+  onClose,
+  onClientAdded,
+}: AddClientModalProps) {
   const [name, setName] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [plan, setPlan] = useState<Client["plan"]>("Pro");
   const [status, setStatus] = useState<Client["status"]>("Active");
-  const [whatsappStatus, setWhatsappStatus] = useState<Client["whatsappStatus"]>("Connected");
+  const [whatsappStatus, setWhatsappStatus] =
+    useState<Client["whatsappStatus"]>("Connected");
   const [walletBalance, setWalletBalance] = useState("1000.00");
 
   if (!isOpen) return null;
@@ -52,15 +59,22 @@ export function AddClientModal({ isOpen, onClose, onClientAdded }: AddClientModa
       <div className="w-full max-w-lg rounded-2xl border bg-card p-6 shadow-2xl animate-in max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between border-b pb-3">
           <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-emerald-600/10 flex items-center justify-center text-emerald-600">
+            <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
               <Building2 className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-foreground">Add New Client Organization</h2>
-              <p className="text-xs text-muted-foreground">Provision a new tenant workspace and subscription.</p>
+              <h2 className="text-base font-bold text-foreground">
+                Add New Client Organization
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Provision a new tenant workspace and subscription.
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -68,7 +82,9 @@ export function AddClientModal({ isOpen, onClose, onClientAdded }: AddClientModa
         <form onSubmit={handleSubmit} className="space-y-4 pt-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="font-semibold text-muted-foreground">Organization Name *</label>
+              <label className="font-semibold text-muted-foreground">
+                Organization Name *
+              </label>
               <Input
                 required
                 placeholder="e.g. Apex Global Corp"
@@ -78,7 +94,9 @@ export function AddClientModal({ isOpen, onClose, onClientAdded }: AddClientModa
               />
             </div>
             <div className="space-y-1">
-              <label className="font-semibold text-muted-foreground">Owner / Contact Name *</label>
+              <label className="font-semibold text-muted-foreground">
+                Owner / Contact Name *
+              </label>
               <Input
                 required
                 placeholder="e.g. Robert Smith"
@@ -91,7 +109,9 @@ export function AddClientModal({ isOpen, onClose, onClientAdded }: AddClientModa
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="font-semibold text-muted-foreground">Work Email Address *</label>
+              <label className="font-semibold text-muted-foreground">
+                Work Email Address *
+              </label>
               <Input
                 required
                 type="email"
@@ -102,7 +122,9 @@ export function AddClientModal({ isOpen, onClose, onClientAdded }: AddClientModa
               />
             </div>
             <div className="space-y-1">
-              <label className="font-semibold text-muted-foreground">Phone Number</label>
+              <label className="font-semibold text-muted-foreground">
+                Phone Number
+              </label>
               <Input
                 placeholder="+1 (555) 123-4567"
                 value={phone}
@@ -114,7 +136,9 @@ export function AddClientModal({ isOpen, onClose, onClientAdded }: AddClientModa
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="space-y-1">
-              <label className="font-semibold text-muted-foreground">Plan Tier</label>
+              <label className="font-semibold text-muted-foreground">
+                Plan Tier
+              </label>
               <select
                 value={plan}
                 onChange={(e) => setPlan(e.target.value as Client["plan"])}
@@ -128,7 +152,9 @@ export function AddClientModal({ isOpen, onClose, onClientAdded }: AddClientModa
             </div>
 
             <div className="space-y-1">
-              <label className="font-semibold text-muted-foreground">Status</label>
+              <label className="font-semibold text-muted-foreground">
+                Status
+              </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as Client["status"])}
@@ -142,10 +168,14 @@ export function AddClientModal({ isOpen, onClose, onClientAdded }: AddClientModa
             </div>
 
             <div className="space-y-1">
-              <label className="font-semibold text-muted-foreground">WhatsApp BSP</label>
+              <label className="font-semibold text-muted-foreground">
+                WhatsApp BSP
+              </label>
               <select
                 value={whatsappStatus}
-                onChange={(e) => setWhatsappStatus(e.target.value as Client["whatsappStatus"])}
+                onChange={(e) =>
+                  setWhatsappStatus(e.target.value as Client["whatsappStatus"])
+                }
                 className="w-full h-9 rounded-md border border-input bg-background px-2.5 text-xs"
               >
                 <option value="Connected">Connected</option>
@@ -156,7 +186,9 @@ export function AddClientModal({ isOpen, onClose, onClientAdded }: AddClientModa
           </div>
 
           <div className="space-y-1">
-            <label className="font-semibold text-muted-foreground">Initial Wallet Credit ($ USD)</label>
+            <label className="font-semibold text-muted-foreground">
+              Initial Wallet Credit ($ USD)
+            </label>
             <Input
               type="number"
               step="10"
@@ -170,7 +202,11 @@ export function AddClientModal({ isOpen, onClose, onClientAdded }: AddClientModa
             <Button type="button" variant="outline" size="sm" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
+            <Button
+              type="submit"
+              size="sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+            >
               Create Client
             </Button>
           </div>

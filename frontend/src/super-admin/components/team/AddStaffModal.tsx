@@ -9,10 +9,16 @@ import { X, ShieldCheck } from "lucide-react";
 interface AddStaffModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onStaffAdded: (staff: Omit<StaffMember, "id" | "lastActive" | "createdAt">) => void;
+  onStaffAdded: (
+    staff: Omit<StaffMember, "id" | "lastActive" | "createdAt">,
+  ) => void;
 }
 
-export function AddStaffModal({ isOpen, onClose, onStaffAdded }: AddStaffModalProps) {
+export function AddStaffModal({
+  isOpen,
+  onClose,
+  onStaffAdded,
+}: AddStaffModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<StaffMember["role"]>("Support Agent");
@@ -40,22 +46,31 @@ export function AddStaffModal({ isOpen, onClose, onStaffAdded }: AddStaffModalPr
       <div className="w-full max-w-md rounded-2xl border bg-card p-6 shadow-2xl animate-in">
         <div className="flex items-center justify-between border-b pb-3">
           <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-emerald-600/10 flex items-center justify-center text-emerald-600">
+            <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-foreground">Add Internal Staff Member</h2>
-              <p className="text-xs text-muted-foreground">Grant platform administrator or operator access.</p>
+              <h2 className="text-base font-bold text-foreground">
+                Add Internal Staff Member
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Grant platform administrator or operator access.
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-4 text-xs">
           <div className="space-y-1">
-            <label className="font-semibold text-muted-foreground">Full Name *</label>
+            <label className="font-semibold text-muted-foreground">
+              Full Name *
+            </label>
             <Input
               required
               placeholder="e.g. Jonathan Lee"
@@ -66,7 +81,9 @@ export function AddStaffModal({ isOpen, onClose, onStaffAdded }: AddStaffModalPr
           </div>
 
           <div className="space-y-1">
-            <label className="font-semibold text-muted-foreground">Appnix Work Email *</label>
+            <label className="font-semibold text-muted-foreground">
+              Appnix Work Email *
+            </label>
             <Input
               required
               type="email"
@@ -79,7 +96,9 @@ export function AddStaffModal({ isOpen, onClose, onStaffAdded }: AddStaffModalPr
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="font-semibold text-muted-foreground">Assigned Role</label>
+              <label className="font-semibold text-muted-foreground">
+                Assigned Role
+              </label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value as StaffMember["role"])}
@@ -95,10 +114,14 @@ export function AddStaffModal({ isOpen, onClose, onStaffAdded }: AddStaffModalPr
             </div>
 
             <div className="space-y-1">
-              <label className="font-semibold text-muted-foreground">Initial Status</label>
+              <label className="font-semibold text-muted-foreground">
+                Initial Status
+              </label>
               <select
                 value={status}
-                onChange={(e) => setStatus(e.target.value as StaffMember["status"])}
+                onChange={(e) =>
+                  setStatus(e.target.value as StaffMember["status"])
+                }
                 className="w-full h-9 rounded-md border border-input bg-background px-2.5 text-xs"
               >
                 <option value="Active">Active</option>
@@ -112,7 +135,11 @@ export function AddStaffModal({ isOpen, onClose, onStaffAdded }: AddStaffModalPr
             <Button type="button" variant="outline" size="sm" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
+            <Button
+              type="submit"
+              size="sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+            >
               Provision Staff Access
             </Button>
           </div>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -9,15 +10,13 @@ import {
   CreditCard,
   Flag,
   LifeBuoy,
-  ShieldCheck,
+  Users,
   History,
   Activity,
   Settings,
   LogOut,
   X,
   Shield,
-  Layers,
-  Sparkles,
 } from "lucide-react";
 
 interface SuperAdminSidebarProps {
@@ -31,7 +30,7 @@ const navItems = [
   { label: "Billing & Plans", href: "/super-admin/billing", icon: CreditCard },
   { label: "Feature Flags", href: "/super-admin/feature-flags", icon: Flag },
   { label: "Support Tickets", href: "/super-admin/support", icon: LifeBuoy },
-  { label: "Team / Staff", href: "/super-admin/team", icon: ShieldCheck },
+  { label: "Team / Staff", href: "/super-admin/team", icon: Users },
   { label: "Audit Logs", href: "/super-admin/audit-logs", icon: History },
   { label: "System Health", href: "/super-admin/system-health", icon: Activity },
   { label: "Settings", href: "/super-admin/settings", icon: Settings },
@@ -40,6 +39,23 @@ const navItems = [
 export function SuperAdminSidebar({ open, onClose }: SuperAdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const asideRef = useRef<HTMLElement>(null);
+
+  // Tracks whether the last click that caused navigation originated inside the sidebar.
+  // Starts as true so the correct item is highlighted on first load / direct URL visit.
+  const [highlightEnabled, setHighlightEnabled] = useState(true);
+
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const clickedInsideSidebar = asideRef.current?.contains(target) ?? false;
+      setHighlightEnabled(clickedInsideSidebar);
+    };
+
+    // capture phase so this runs before Link's own navigation logic
+    document.addEventListener("click", handleGlobalClick, true);
+    return () => document.removeEventListener("click", handleGlobalClick, true);
+  }, []);
 
   const handleLogout = () => {
     if (confirm("Sign out from Super Admin Console?")) {
@@ -58,30 +74,31 @@ export function SuperAdminSidebar({ open, onClose }: SuperAdminSidebarProps) {
       )}
 
       <aside
+        ref={asideRef}
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r bg-card text-card-foreground transition-transform duration-200 ease-in-out shadow-sm",
-          "lg:static lg:z-0 lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-[80vw] max-w-64 flex-col border-r bg-card text-card-foreground transition-transform duration-200 ease-in-out shadow-sm",
+          "lg:static lg:z-0 lg:w-64 lg:max-w-none lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Brand Header */}
-        <div className="flex h-16 shrink-0 items-center justify-between border-b px-5">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white font-black shadow-xs">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b px-4 sm:px-5">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground font-black shadow-xs">
               <Shield className="h-5 w-5" />
             </div>
-            <div>
-              <p className="text-sm font-extrabold tracking-tight text-foreground uppercase">
+            <div className="min-w-0">
+              <p className="text-sm font-extrabold tracking-tight text-foreground uppercase truncate">
                 Appnix
               </p>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-primary truncate">
                 Super Admin Console
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-muted lg:hidden"
+            className="shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-muted lg:hidden"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />
@@ -99,8 +116,9 @@ export function SuperAdminSidebar({ open, onClose }: SuperAdminSidebarProps) {
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive =
-                  pathname === item.href ||
-                  (item.href !== "/super-admin" && pathname.startsWith(item.href + "/"));
+                  highlightEnabled &&
+                  (pathname === item.href ||
+                    (item.href !== "/super-admin" && pathname.startsWith(item.href + "/")));
 
                 return (
                   <Link
@@ -110,14 +128,14 @@ export function SuperAdminSidebar({ open, onClose }: SuperAdminSidebarProps) {
                     className={cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer",
                       isActive
-                        ? "bg-indigo-50/80 text-indigo-950 dark:bg-indigo-950/50 dark:text-indigo-200 font-bold border-l-4 border-emerald-600 -ml-1 pl-3 shadow-xs"
+                        ? "bg-primary/10 text-primary font-bold border-l-4 border-primary -ml-1 pl-3 shadow-xs"
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                     )}
                   >
                     <Icon
                       className={cn(
                         "h-4 w-4 shrink-0 transition-colors",
-                        isActive ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
+                        isActive ? "text-primary" : "text-muted-foreground"
                       )}
                     />
                     <span className="truncate">{item.label}</span>

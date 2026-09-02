@@ -21,17 +21,11 @@ import {
   Maximize2,
   Bell,
   QrCode,
-  Shield,
-  User,
-  Users,
   Settings,
+  Users,
   LogOut,
   ChevronDown,
   Clock,
-  X,
-  CheckCircle2,
-  AlertTriangle,
-  LifeBuoy,
 } from "lucide-react";
 
 interface SuperAdminHeaderProps {
@@ -76,47 +70,47 @@ export function SuperAdminHeader({ onMenuClick }: SuperAdminHeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-card px-4 sm:px-6 shadow-2xs">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-2 border-b bg-card px-3 sm:px-6 shadow-2xs">
       {/* Left side: Mobile Toggle & Global Search */}
-      <div className="flex items-center gap-3 flex-1 max-w-lg">
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 max-w-lg">
         <button
           onClick={onMenuClick}
-          className="rounded-lg p-2 text-muted-foreground hover:bg-muted lg:hidden"
+          className="shrink-0 rounded-lg p-2 text-muted-foreground hover:bg-muted lg:hidden"
           aria-label="Toggle menu"
         >
           <Menu className="h-5 w-5" />
         </button>
 
-        <div className="relative w-full">
+        <div className="relative w-full min-w-0">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search clients, tickets, plans, staff, logs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-9 text-xs bg-muted/30 border-border/70 focus-visible:ring-1 focus-visible:ring-emerald-600"
+            className="pl-9 h-9 text-xs bg-muted/30 border-border/70 focus-visible:ring-1 focus-visible:ring-primary"
           />
         </div>
       </div>
 
       {/* Right side: Utilities, Notifications, Admin Profile */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        {/* QR Utility Icon */}
+      <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+        {/* QR Utility Icon - hidden on mobile to save space */}
         <Button
           variant="ghost"
           size="icon"
           onClick={() => alert("Platform Authenticator QR & Token Console")}
-          className="h-9 w-9 text-muted-foreground hover:text-foreground"
+          className="hidden sm:inline-flex h-9 w-9 text-muted-foreground hover:text-foreground"
           title="Security QR"
         >
           <QrCode className="h-4.5 w-4.5" />
         </Button>
 
-        {/* Fullscreen Icon */}
+        {/* Fullscreen Icon - hidden on mobile */}
         <Button
           variant="ghost"
           size="icon"
           onClick={handleToggleFullscreen}
-          className="h-9 w-9 text-muted-foreground hover:text-foreground"
+          className="hidden sm:inline-flex h-9 w-9 text-muted-foreground hover:text-foreground"
           title="Toggle Fullscreen"
         >
           <Maximize2 className="h-4.5 w-4.5" />
@@ -138,7 +132,7 @@ export function SuperAdminHeader({ onMenuClick }: SuperAdminHeaderProps) {
           </Button>
 
           {isNotificationsOpen && (
-            <div className="absolute right-0 mt-2 w-80 rounded-xl border bg-card p-3 shadow-xl z-50 animate-in space-y-2">
+            <div className="absolute right-0 mt-2 w-[90vw] max-w-sm sm:w-80 sm:max-w-none rounded-xl border bg-card p-3 shadow-xl z-50 animate-in space-y-2">
               <div className="flex items-center justify-between border-b pb-2 px-1">
                 <span className="font-bold text-xs text-foreground">Platform Alerts</span>
                 <Badge className="bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 text-[10px]">
@@ -169,7 +163,7 @@ export function SuperAdminHeader({ onMenuClick }: SuperAdminHeaderProps) {
                 <Link
                   href="/super-admin/audit-logs"
                   onClick={() => setIsNotificationsOpen(false)}
-                  className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold hover:underline"
+                  className="text-xs text-primary font-semibold hover:underline"
                 >
                   View All Audit Alerts →
                 </Link>
@@ -179,29 +173,29 @@ export function SuperAdminHeader({ onMenuClick }: SuperAdminHeaderProps) {
         </div>
 
         {/* Admin Profile & Avatar Menu */}
-        <div className="border-l pl-2 sm:pl-3">
+        <div className="border-l pl-1.5 sm:pl-3">
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-2 p-1 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group outline-none focus-visible:ring-1 focus-visible:ring-emerald-600 data-[state=open]:bg-muted/80">
-              <div className="hidden text-right sm:block">
-                <p className="text-xs font-bold leading-tight text-foreground group-hover:text-emerald-600 transition-colors">
+            <DropdownMenuTrigger className="flex items-center gap-2 p-1 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group outline-none focus-visible:ring-1 focus-visible:ring-primary data-[state=open]:bg-muted/80">
+              <div className="hidden text-right md:block">
+                <p className="text-xs font-bold leading-tight text-foreground group-hover:text-primary transition-colors">
                   Sarah Jenkins
                 </p>
-                <p className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                <p className="text-[10px] font-semibold text-primary uppercase tracking-wider">
                   Super Admin
                 </p>
               </div>
-              <div className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs ring-2 ring-emerald-600/30">
+              <div className="h-8 w-8 shrink-0 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs ring-2 ring-primary/30">
                 SJ
               </div>
-              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              <ChevronDown className="hidden sm:block h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-60 p-1.5 shadow-lg">
+            <DropdownMenuContent align="end" className="w-60 max-w-[90vw] p-1.5 shadow-lg">
               <DropdownMenuLabel className="font-normal px-2 py-2">
                 <div className="flex flex-col space-y-1">
                   <div className="flex items-center justify-between">
                     <p className="text-xs font-bold text-foreground">Sarah Jenkins</p>
-                    <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-semibold">
+                    <Badge className="bg-primary/10 text-primary text-[10px] font-semibold">
                       Root Admin
                     </Badge>
                   </div>
