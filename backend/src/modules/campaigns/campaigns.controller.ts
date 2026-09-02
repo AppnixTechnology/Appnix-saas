@@ -36,7 +36,7 @@ import { TenantGuard } from '../../common/guards/tenant.guard';
 @ApiTags('Campaigns')
 @ApiBearerAuth()
 @UseGuards(JwtAccessGuard, TenantGuard)
-@Controller('api/campaigns')
+@Controller(['campaigns', 'api/campaigns', 'crm/campaigns', 'crm/bulk-campaign'])
 export class CampaignsController {
   constructor(private readonly campaignsService: CampaignsService) {}
 

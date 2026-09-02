@@ -1,8 +1,8 @@
 import { Controller, Get, Param, UseGuards, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { TenantId } from '@/common/decorators/tenant.decorator';
-import { TenantGuard } from '@/common/guards/tenant.guard';
+import { TenantId } from '../../common/decorators/tenant.decorator';
+import { TenantGuard } from '../../common/guards/tenant.guard';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
 import { CurrentUser, AuthUser } from '../auth/decorators/current-user.decorator';
 

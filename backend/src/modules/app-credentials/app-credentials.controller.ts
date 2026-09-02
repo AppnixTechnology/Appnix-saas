@@ -9,29 +9,38 @@ import {
   Query,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AppCredentialsService } from './app-credentials.service';
 import { CreateAppCredentialDto } from './dto/create-app-credential.dto';
 import { UpdateAppCredentialDto } from './dto/update-app-credential.dto';
 import { ValidateLiveCredentialDto } from './dto/test-connection.dto';
+import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
 import { CurrentUser, AuthUser } from '../auth/decorators/current-user.decorator';
 
-@Controller('automations/app-credentials')
+@ApiTags('App Credentials')
+@ApiBearerAuth()
+@UseGuards(JwtAccessGuard)
+@Controller(['automations/app-credentials', 'app-credentials', 'api/app-credentials'])
 export class AppCredentialsController {
   constructor(private readonly appCredentialsService: AppCredentialsService) {}
 
   @Get('catalog')
+  @ApiOperation({ summary: 'Get catalog of 3rd party apps (Shopify, OpenAI, Stripe, Google Sheets, Razorpay)' })
   getAvailableApps() {
     return this.appCredentialsService.getAvailableApps();
   }
 
   @Get('summary')
+  @ApiOperation({ summary: 'Get summary metrics of connected app credentials' })
   async getSummary(@CurrentUser() user?: AuthUser) {
     const tenantId = user?.tenantId || 'tenant_default';
     return this.appCredentialsService.getSummary(tenantId);
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all saved app credentials for workspace' })
   async getCredentials(
     @Query('search') search?: string,
     @Query('category') category?: string,
@@ -43,12 +52,14 @@ export class AppCredentialsController {
   }
 
   @Post('validate-live')
+  @ApiOperation({ summary: 'Validate API credentials with live 3rd party servers' })
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async validateLive(@Body() dto: ValidateLiveCredentialDto) {
     return this.appCredentialsService.validateLive(dto);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get app credential by ID' })
   async getCredentialById(
     @Param('id') id: string,
     @CurrentUser() user?: AuthUser,
@@ -58,6 +69,7 @@ export class AppCredentialsController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Store encrypted app credential' })
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async createCredential(
     @Body() dto: CreateAppCredentialDto,
@@ -68,6 +80,7 @@ export class AppCredentialsController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update credential' })
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async updateCredential(
     @Param('id') id: string,
@@ -79,6 +92,7 @@ export class AppCredentialsController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete credential' })
   async deleteCredential(
     @Param('id') id: string,
     @CurrentUser() user?: AuthUser,
@@ -88,6 +102,7 @@ export class AppCredentialsController {
   }
 
   @Post(':id/test')
+  @ApiOperation({ summary: 'Test health check connection for saved credential' })
   async testConnection(
     @Param('id') id: string,
     @CurrentUser() user?: AuthUser,

@@ -17,7 +17,7 @@ import { CurrentUser, AuthUser } from '../auth/decorators/current-user.decorator
 
 @ApiTags('Support')
 @ApiBearerAuth()
-@Controller('support/tickets')
+@Controller(['support/tickets', 'workspace/support/tickets', 'support', 'workspace/support'])
 @UseGuards(JwtAccessGuard)
 export class SupportController {
   constructor(private readonly supportService: SupportService) {}
@@ -25,10 +25,12 @@ export class SupportController {
   @Post()
   @ApiOperation({ summary: 'Raise a new support ticket' })
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateTicketDto) {
+    const tenantId = user?.tenantId || 'tenant_default';
+    const userId = user?.userId || user?.id || '';
     return this.supportService.create(
-      user.tenantId,
-      user.userId,
-      user.email,
+      tenantId,
+      userId,
+      user?.email || 'admin@appnix.io',
       dto
     );
   }
@@ -36,13 +38,15 @@ export class SupportController {
   @Get()
   @ApiOperation({ summary: "Get all tickets for current tenant/user" })
   findAll(@CurrentUser() user: AuthUser) {
-    return this.supportService.findAll(user.tenantId);
+    const tenantId = user?.tenantId || 'tenant_default';
+    return this.supportService.findAll(tenantId);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get support ticket details and conversation thread' })
   findOne(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    return this.supportService.findOne(user.tenantId, id);
+    const tenantId = user?.tenantId || 'tenant_default';
+    return this.supportService.findOne(tenantId, id);
   }
 
   @Post(':id/reply')
@@ -52,12 +56,14 @@ export class SupportController {
     @Param('id') id: string,
     @Body() dto: ReplyTicketDto
   ) {
+    const tenantId = user?.tenantId || 'tenant_default';
+    const userId = user?.userId || user?.id || '';
     return this.supportService.reply(
-      user.tenantId,
+      tenantId,
       id,
-      user.userId,
-      user.email,
-      user.role,
+      userId,
+      user?.email || 'admin@appnix.io',
+      user?.role || 'TENANT_ADMIN',
       dto
     );
   }
@@ -69,6 +75,7 @@ export class SupportController {
     @Param('id') id: string,
     @Body() dto: UpdateTicketDto
   ) {
-    return this.supportService.updateStatus(user.tenantId, id, dto);
+    const tenantId = user?.tenantId || 'tenant_default';
+    return this.supportService.updateStatus(tenantId, id, dto);
   }
 }

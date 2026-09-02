@@ -13,6 +13,19 @@ import { ChatModule } from './modules/chat/chat.module';
 import { WorkflowsModule } from './modules/workflows/workflows.module';
 import { DataStoreModule } from './modules/data-store/data-store.module';
 import { AppCredentialsModule } from './modules/app-credentials/app-credentials.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { SuperFieldsModule } from './modules/super-fields/super-fields.module';
+import { ContactTagsModule } from './modules/contact-tags/contact-tags.module';
+import { DepartmentModule } from './modules/department/department.module';
+import { WorkspaceModule } from './modules/workspace/workspace.module';
+import { ChannelsModule } from './modules/channels/channels.module';
+import { BotsModule } from './modules/bots/bots.module';
+import { TeamModule } from './modules/team/team.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { SettingsModule } from './modules/settings/settings.module';
+import { WebhooksModule } from './modules/webhooks/webhooks.module';
+import { HealthModule } from './modules/health/health.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -32,6 +45,19 @@ import { PrismaModule } from './prisma/prisma.module';
     DataStoreModule,
     AppCredentialsModule,
     SupportModule,
+    DashboardModule,
+    SuperFieldsModule,
+    ContactTagsModule,
+    DepartmentModule,
+    WorkspaceModule,
+    ChannelsModule,
+    BotsModule,
+    TeamModule,
+    AnalyticsModule,
+    NotificationsModule,
+    SettingsModule,
+    WebhooksModule,
+    HealthModule,
   ],
 })
 export class AppModule {}

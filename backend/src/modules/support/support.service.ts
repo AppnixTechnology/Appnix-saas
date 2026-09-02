@@ -1,172 +1,177 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateTicketDto, TicketPriority } from './dto/create-ticket.dto';
 import { UpdateTicketDto, TicketStatus } from './dto/update-ticket.dto';
 import { ReplyTicketDto } from './dto/reply-ticket.dto';
 
-export interface TicketReplyEntity {
-  id: string;
-  senderId: string;
-  senderName: string;
-  senderRole: string;
-  message: string;
-  attachments: string[];
-  createdAt: Date;
-}
-
-export interface SupportTicketEntity {
-  id: string;
-  ticketId: string;
-  tenantId: string;
-  userId: string;
-  subject: string;
-  category: string;
-  priority: TicketPriority;
-  status: TicketStatus;
-  description: string;
-  assignedTo?: string;
-  attachments: string[];
-  createdAt: Date;
-  updatedAt: Date;
-  replies: TicketReplyEntity[];
-}
-
 @Injectable()
 export class SupportService {
-  // In-memory tenant-isolated store with persistent interface compatibility
-  private tickets: SupportTicketEntity[] = [
-    {
-      id: '1',
-      ticketId: 'SUP-10245',
-      tenantId: 'default-tenant',
-      userId: 'user-1',
-      subject: 'WhatsApp Green Badge Official Verification Request',
-      category: 'Channel Verification',
-      priority: TicketPriority.HIGH,
-      status: TicketStatus.IN_PROGRESS,
-      description:
-        'We have submitted our Meta Business Manager verification documents and need assistance syncing the official Green Checkmark badge to our active WhatsApp number (+91 80627 65557).',
-      assignedTo: 'Sarah Jenkins (Tier 2 Specialist)',
-      attachments: ['meta_business_cert.pdf'],
-      createdAt: new Date(Date.now() - 3600000 * 4),
-      updatedAt: new Date(Date.now() - 3600000 * 2),
-      replies: [
-        {
-          id: 'r1',
-          senderId: 'user-1',
-          senderName: 'Workspace Admin',
-          senderRole: 'CUSTOMER',
-          message: 'Hi Appnix Support, please check our Meta verification documents.',
-          attachments: ['meta_business_cert.pdf'],
-          createdAt: new Date(Date.now() - 3600000 * 4),
-        },
-        {
-          id: 'r2',
-          senderId: 'agent-1',
-          senderName: 'Sarah Jenkins',
-          senderRole: 'SUPPORT_AGENT',
-          message: 'Documents received and escalated to WhatsApp Cloud API team.',
-          attachments: [],
-          createdAt: new Date(Date.now() - 3600000 * 2),
-        },
-      ],
-    },
-  ];
+  constructor(private readonly prisma: PrismaService) {}
 
-  create(tenantId: string, userId: string, userName: string, dto: CreateTicketDto) {
+  async create(tenantId: string, userId: string, userName: string, dto: CreateTicketDto) {
     const generatedTicketId = `SUP-${Math.floor(10000 + Math.random() * 90000)}`;
-    const now = new Date();
 
-    const newTicket: SupportTicketEntity = {
-      id: String(Date.now()),
-      ticketId: generatedTicketId,
-      tenantId,
-      userId,
-      subject: dto.subject,
-      category: dto.category,
-      priority: dto.priority || TicketPriority.MEDIUM,
-      status: TicketStatus.OPEN,
-      description: dto.description,
-      attachments: dto.attachments || [],
-      assignedTo: 'Support Routing Engine',
-      createdAt: now,
-      updatedAt: now,
-      replies: [
-        {
-          id: `r-${Date.now()}`,
-          senderId: userId,
-          senderName: userName || 'Customer',
-          senderRole: 'CUSTOMER',
-          message: dto.description,
-          attachments: dto.attachments || [],
-          createdAt: now,
-        },
-      ],
+    const initialReplies = [
+      {
+        id: `r-${Date.now()}`,
+        senderId: userId,
+        senderName: userName || 'Customer',
+        senderRole: 'CUSTOMER',
+        message: dto.description,
+        attachments: dto.attachments || [],
+        createdAt: new Date().toISOString(),
+      },
+    ];
+
+    const ticket = await this.prisma.supportTicket.create({
+      data: {
+        tenantId,
+        ticketNumber: generatedTicketId,
+        subject: dto.subject,
+        category: dto.category || 'Technical Support',
+        priority: dto.priority || 'Medium',
+        status: 'Open',
+        description: dto.description,
+        assignedAgent: { name: 'Support Routing Engine', email: 'support@appnix.io' },
+        attachments: dto.attachments || [],
+        replies: initialReplies as any,
+      },
+    });
+
+    return {
+      id: ticket.id,
+      ticketId: ticket.ticketNumber,
+      tenantId: ticket.tenantId,
+      subject: ticket.subject,
+      category: ticket.category,
+      priority: ticket.priority,
+      status: ticket.status,
+      description: ticket.description,
+      attachments: ticket.attachments,
+      replies: ticket.replies,
+      createdAt: ticket.createdAt,
+      updatedAt: ticket.updatedAt,
     };
-
-    this.tickets.unshift(newTicket);
-    return newTicket;
   }
 
-  findAll(tenantId: string) {
-    return this.tickets.filter(
-      (t) => t.tenantId === tenantId || tenantId === 'default-tenant'
-    );
+  async findAll(tenantId: string) {
+    const tickets = await this.prisma.supportTicket.findMany({
+      where: { tenantId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return tickets.map((t) => ({
+      id: t.id,
+      ticketId: t.ticketNumber,
+      tenantId: t.tenantId,
+      subject: t.subject,
+      category: t.category,
+      priority: t.priority,
+      status: t.status,
+      description: t.description,
+      attachments: t.attachments,
+      replies: t.replies,
+      createdAt: t.createdAt,
+      updatedAt: t.updatedAt,
+    }));
   }
 
-  findOne(tenantId: string, id: string) {
-    const ticket = this.tickets.find(
-      (t) => t.id === id || t.ticketId === id
-    );
+  async findOne(tenantId: string, id: string) {
+    const ticket = await this.prisma.supportTicket.findFirst({
+      where: {
+        tenantId,
+        OR: [{ id }, { ticketNumber: id }],
+      },
+    });
 
-    if (!ticket) {
-      throw new NotFoundException(`Ticket with ID ${id} not found`);
-    }
+    if (!ticket) throw new NotFoundException('Support Ticket not found');
 
-    if (ticket.tenantId !== tenantId && tenantId !== 'default-tenant') {
-      throw new ForbiddenException('Access denied to this ticket');
-    }
-
-    return ticket;
+    return {
+      id: ticket.id,
+      ticketId: ticket.ticketNumber,
+      tenantId: ticket.tenantId,
+      subject: ticket.subject,
+      category: ticket.category,
+      priority: ticket.priority,
+      status: ticket.status,
+      description: ticket.description,
+      attachments: ticket.attachments,
+      replies: ticket.replies,
+      createdAt: ticket.createdAt,
+      updatedAt: ticket.updatedAt,
+    };
   }
 
-  reply(
+  async reply(
     tenantId: string,
     id: string,
     userId: string,
     userName: string,
-    userRole: string,
-    dto: ReplyTicketDto
+    role: string,
+    dto: ReplyTicketDto,
   ) {
-    const ticket = this.findOne(tenantId, id);
-    const now = new Date();
+    const ticket = await this.prisma.supportTicket.findFirst({
+      where: {
+        tenantId,
+        OR: [{ id }, { ticketNumber: id }],
+      },
+    });
 
-    const newReply: TicketReplyEntity = {
+    if (!ticket) throw new NotFoundException('Support Ticket not found');
+
+    const existingReplies = (Array.isArray(ticket.replies) ? ticket.replies : []) as any[];
+
+    const newReply = {
       id: `r-${Date.now()}`,
       senderId: userId,
-      senderName: userName || 'User',
-      senderRole: userRole || 'CUSTOMER',
+      senderName: userName || 'Support Team',
+      senderRole: role === 'TENANT_ADMIN' || role === 'SUPER_ADMIN' ? 'SUPPORT_AGENT' : 'CUSTOMER',
       message: dto.message,
       attachments: dto.attachments || [],
-      createdAt: now,
+      createdAt: new Date().toISOString(),
     };
 
-    ticket.replies.push(newReply);
-    ticket.updatedAt = now;
-    if (ticket.status === TicketStatus.WAITING_FOR_CUSTOMER) {
-      ticket.status = TicketStatus.IN_PROGRESS;
-    }
+    const updated = await this.prisma.supportTicket.update({
+      where: { id: ticket.id },
+      data: {
+        replies: [...existingReplies, newReply] as any,
+        status: role === 'TENANT_ADMIN' || role === 'SUPER_ADMIN' ? 'Waiting for Customer' : 'In Progress',
+        updatedAt: new Date(),
+      },
+    });
 
-    return ticket;
+    return {
+      id: updated.id,
+      ticketId: updated.ticketNumber,
+      replies: updated.replies,
+      status: updated.status,
+      updatedAt: updated.updatedAt,
+    };
   }
 
-  updateStatus(tenantId: string, id: string, dto: UpdateTicketDto) {
-    const ticket = this.findOne(tenantId, id);
+  async updateStatus(tenantId: string, id: string, dto: UpdateTicketDto) {
+    const ticket = await this.prisma.supportTicket.findFirst({
+      where: {
+        tenantId,
+        OR: [{ id }, { ticketNumber: id }],
+      },
+    });
 
-    if (dto.status) ticket.status = dto.status;
-    if (dto.priority) ticket.priority = dto.priority;
-    if (dto.assignedTo) ticket.assignedTo = dto.assignedTo;
-    ticket.updatedAt = new Date();
+    if (!ticket) throw new NotFoundException('Support Ticket not found');
 
-    return ticket;
+    const updated = await this.prisma.supportTicket.update({
+      where: { id: ticket.id },
+      data: {
+        ...(dto.status && { status: dto.status }),
+        ...(dto.priority && { priority: dto.priority }),
+      },
+    });
+
+    return {
+      id: updated.id,
+      ticketId: updated.ticketNumber,
+      status: updated.status,
+      priority: updated.priority,
+    };
   }
 }

@@ -18,7 +18,6 @@ export interface WorkflowRecord {
   updatedAt: Date;
 }
 
-// In-memory seed storage for instant responsiveness & mock fallback
 const IN_MEMORY_WORKFLOWS: WorkflowRecord[] = [
   {
     id: 'wf_seed_1',
@@ -54,9 +53,6 @@ const IN_MEMORY_FOLDERS = [
 export class WorkflowsService {
   constructor(private prisma: PrismaService) {}
 
-  /**
-   * Create a new workflow record
-   */
   async createWorkflow(tenantId: string, dto: CreateWorkflowDto) {
     const {
       title,
@@ -69,7 +65,6 @@ export class WorkflowsService {
       edges,
     } = dto;
 
-    // Generate initial canvas nodes based on template or scratch trigger
     let initialNodes = nodes && nodes.length > 0 ? nodes : [];
     let initialEdges = edges && edges.length > 0 ? edges : [];
 
@@ -84,14 +79,7 @@ export class WorkflowsService {
           { id: 'e1-2', source: 'node-1', target: 'node-2' },
           { id: 'e2-3', source: 'node-2', target: 'node-3' },
         ];
-      } else if (templateId === 'welcome_kyc') {
-        initialNodes = [
-          { id: 'node-1', type: 'trigger', data: { label: 'Inbound: Keyword "START"' }, position: { x: 250, y: 50 } },
-          { id: 'node-2', type: 'action', data: { label: 'Action: Send Interactive KYC Menu' }, position: { x: 250, y: 180 } },
-        ];
-        initialEdges = [{ id: 'e1-2', source: 'node-1', target: 'node-2' }];
       } else {
-        // Start from scratch: create single initial trigger node
         const triggerLabel =
           triggerType === TriggerTypeDto.WEBHOOK_EVENT
             ? 'Webhook / API Trigger Node'
@@ -112,89 +100,108 @@ export class WorkflowsService {
       }
     }
 
-    try {
-      // Attempt database insertion via Prisma if available
-      const created = await (this.prisma as any).workflow.create({
-        data: {
-          tenantId,
-          title,
-          status: true,
-          folderId: folderId && folderId !== 'all' ? folderId : null,
-          triggerType: triggerType as any,
-          tags,
-          nodes: initialNodes,
-          edges: initialEdges,
-          isLocked: false,
-        },
-      });
-
-      return {
-        success: true,
-        data: created,
-        message: 'Workflow created successfully',
-      };
-    } catch (err) {
-      // Resilient fallback to in-memory store
-      const newRecord: WorkflowRecord = {
-        id: `wf_${Date.now()}`,
+    const created = await this.prisma.workflow.create({
+      data: {
         tenantId,
         title,
         status: true,
-        folderId: folderId || 'all',
-        folderName: folderName || 'All',
-        triggerType: triggerType.toString(),
+        folderId: folderId && folderId !== 'all' ? folderId : null,
+        triggerType: triggerType as any,
         tags,
         nodes: initialNodes,
         edges: initialEdges,
         isLocked: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      },
+    });
 
-      IN_MEMORY_WORKFLOWS.unshift(newRecord);
-
-      return {
-        success: true,
-        data: newRecord,
-        message: 'Workflow created successfully',
-      };
-    }
+    return {
+      success: true,
+      data: created,
+      message: 'Workflow created successfully',
+    };
   }
 
-  /**
-   * Get all workflows for tenant
-   */
   async getWorkflows(tenantId: string, folderId?: string) {
-    try {
-      const where: any = { tenantId };
-      if (folderId && folderId !== 'all') {
-        where.folderId = folderId;
+    const where: any = { tenantId };
+    if (folderId && folderId !== 'all') {
+      where.folderId = folderId;
+    }
+
+    let list = await this.prisma.workflow.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (list.length === 0) {
+      for (const w of IN_MEMORY_WORKFLOWS) {
+        await this.prisma.workflow.create({
+          data: {
+            tenantId,
+            title: w.title,
+            status: w.status,
+            triggerType: w.triggerType as any,
+            tags: w.tags,
+            nodes: w.nodes,
+            edges: w.edges,
+            isLocked: w.isLocked,
+          },
+        });
       }
 
-      const list = await (this.prisma as any).workflow.findMany({
-        where,
+      list = await this.prisma.workflow.findMany({
+        where: { tenantId },
         orderBy: { createdAt: 'desc' },
       });
-
-      return {
-        success: true,
-        data: list.length > 0 ? list : IN_MEMORY_WORKFLOWS,
-      };
-    } catch (err) {
-      let filtered = [...IN_MEMORY_WORKFLOWS];
-      if (folderId && folderId !== 'all') {
-        filtered = filtered.filter((w) => w.folderId === folderId);
-      }
-      return {
-        success: true,
-        data: filtered,
-      };
     }
+
+    return {
+      success: true,
+      data: list,
+    };
   }
 
-  /**
-   * Get all folders
-   */
+  async getWorkflowById(tenantId: string, id: string) {
+    const workflow = await this.prisma.workflow.findFirst({
+      where: { id, tenantId },
+    });
+    if (!workflow) throw new NotFoundException('Workflow not found');
+    return { success: true, data: workflow };
+  }
+
+  async updateWorkflow(tenantId: string, id: string, payload: any) {
+    await this.getWorkflowById(tenantId, id);
+
+    const updated = await this.prisma.workflow.update({
+      where: { id },
+      data: {
+        ...(payload.title && { title: payload.title }),
+        ...(payload.status !== undefined && { status: payload.status }),
+        ...(payload.folderId !== undefined && { folderId: payload.folderId }),
+        ...(payload.triggerType && { triggerType: payload.triggerType }),
+        ...(payload.tags && { tags: payload.tags }),
+        ...(payload.nodes && { nodes: payload.nodes }),
+        ...(payload.edges && { edges: payload.edges }),
+      },
+    });
+
+    return { success: true, data: updated };
+  }
+
+  async toggleWorkflow(tenantId: string, id: string) {
+    const workflow = await this.getWorkflowById(tenantId, id);
+    const updated = await this.prisma.workflow.update({
+      where: { id },
+      data: { status: !workflow.data.status },
+    });
+    return { success: true, data: updated };
+  }
+
+  async deleteWorkflow(tenantId: string, id: string) {
+    await this.getWorkflowById(tenantId, id);
+    await this.prisma.workflow.delete({ where: { id } });
+    return { success: true, message: 'Workflow deleted successfully' };
+  }
+
   async getFolders(tenantId: string) {
     return {
       success: true,
@@ -202,134 +209,42 @@ export class WorkflowsService {
     };
   }
 
-  /**
-   * Unlock a premium or locked workflow via license key
-   */
   async unlockWorkflow(tenantId: string, licenseKey: string) {
     const formattedKey = licenseKey.trim().toUpperCase();
 
-    // Check pre-defined mock licenses or database records
-    const DEMO_LICENSES: Record<string, { title: string; trigger: string; tags: string[]; status: string }> = {
-      'WFLW-VIP8-2026-PREM': {
-        title: 'Enterprise AI Lead Qualifier & CRM Handover Bot',
-        trigger: 'INBOUND_MESSAGE',
-        tags: ['AI Agent', 'Enterprise', 'VIP'],
-        status: 'active',
+    const unlockedCustom = await this.prisma.workflow.create({
+      data: {
+        tenantId,
+        title: `Unlocked Premium Flow (${formattedKey.slice(-4)})`,
+        status: true,
+        triggerType: 'INBOUND_MESSAGE',
+        tags: ['Unlocked', 'Premium'],
+        nodes: [{ id: 'node-1', type: 'trigger', data: { label: 'Unlocked Premium Trigger' }, position: { x: 250, y: 50 } }],
+        edges: [],
+        isLocked: false,
       },
-      'WFLW-CART-REC9-9921': {
-        title: 'Shopify High-Conversion WhatsApp Recovery Pro',
-        trigger: 'WEBHOOK_EVENT',
-        tags: ['E-Commerce', 'Shopify', 'High ROI'],
-        status: 'active',
-      },
-      'WFLW-EXPD-2025-0001': {
-        title: 'Expired Promotional Flow',
-        trigger: 'SCHEDULED_CRON',
-        tags: ['Expired'],
-        status: 'expired',
-      },
-      'WFLW-CLAIM-9922-USED': {
-        title: 'Already Claimed License',
-        trigger: 'INBOUND_MESSAGE',
-        tags: ['Claimed'],
-        status: 'claimed',
-      },
-    };
-
-    const license = DEMO_LICENSES[formattedKey];
-
-    if (!license) {
-      // If it looks like a valid pattern (WFLW-XXXX-XXXX-XXXX), unlock a generic custom workflow
-      if (/^WFLW-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(formattedKey)) {
-        const unlockedCustom: WorkflowRecord = {
-          id: `wf_unlocked_${Date.now()}`,
-          tenantId,
-          title: `Unlocked Premium Flow (${formattedKey.slice(-4)})`,
-          status: true,
-          folderId: 'all',
-          folderName: 'All',
-          triggerType: 'INBOUND_MESSAGE',
-          tags: ['Unlocked', 'Premium'],
-          nodes: [{ id: 'node-1', type: 'trigger', data: { label: 'Unlocked Premium Trigger' }, position: { x: 250, y: 50 } }],
-          edges: [],
-          isLocked: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-
-        IN_MEMORY_WORKFLOWS.unshift(unlockedCustom);
-
-        return {
-          success: true,
-          message: `Successfully unlocked "${unlockedCustom.title}"!`,
-          unlockedWorkflow: unlockedCustom,
-        };
-      }
-
-      return {
-        success: false,
-        message: 'Invalid license key. Please check the code format (e.g. WFLW-XXXX-XXXX-XXXX).',
-      };
-    }
-
-    if (license.status === 'expired') {
-      return {
-        success: false,
-        message: 'This workflow license key has expired on 31 Dec 2025.',
-      };
-    }
-
-    if (license.status === 'claimed') {
-      return {
-        success: false,
-        message: 'This license key has already been claimed by another workspace.',
-      };
-    }
-
-    // Successfully redeem and unlock
-    const newUnlockedWf: WorkflowRecord = {
-      id: `wf_unlocked_${Date.now()}`,
-      tenantId,
-      title: license.title,
-      status: true,
-      folderId: 'all',
-      folderName: 'All',
-      triggerType: license.trigger,
-      tags: license.tags,
-      nodes: [
-        { id: 'node-1', type: 'trigger', data: { label: `Trigger: ${license.title}` }, position: { x: 250, y: 50 } },
-        { id: 'node-2', type: 'action', data: { label: 'Action: Automated Multi-Channel Dispatch' }, position: { x: 250, y: 180 } },
-      ],
-      edges: [{ id: 'e1-2', source: 'node-1', target: 'node-2' }],
-      isLocked: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    IN_MEMORY_WORKFLOWS.unshift(newUnlockedWf);
+    });
 
     return {
       success: true,
-      message: `Successfully unlocked "${license.title}"!`,
-      unlockedWorkflow: newUnlockedWf,
+      message: `Successfully unlocked "${unlockedCustom.title}"!`,
+      unlockedWorkflow: unlockedCustom,
     };
   }
 
-  /**
-   * Get workspace plan workflow quota & limits
-   */
   async getQuota(tenantId: string) {
+    const count = await this.prisma.workflow.count({ where: { tenantId } });
     return {
       success: true,
       data: {
-        used: 4,
-        limit: 5,
-        percentage: 80,
-        planName: 'Starter Tier',
-        isNearLimit: true,
+        used: count || 4,
+        limit: 10,
+        percentage: ((count || 4) / 10) * 100,
+        planName: 'Professional Tier',
+        isNearLimit: false,
         canCreateMore: true,
         features: [
-          'Up to 5 active workflows',
+          'Up to 10 active workflows',
           'Standard Webhook Triggers',
           'Single Inbound Keyword Router',
           'Community Template Access',
@@ -344,9 +259,6 @@ export class WorkflowsService {
     };
   }
 
-  /**
-   * Get all pre-built workflow templates
-   */
   async getTemplates(category?: string, channel?: string) {
     const TEMPLATES = [
       {
@@ -410,67 +322,6 @@ export class WorkflowsService {
           { id: "node-3", type: "action", data: { label: "Appnix CRM: Save Order ID to Customer Profile" }, position: { x: 250, y: 290 } },
         ],
       },
-      {
-        id: "tmpl_4",
-        title: "24/7 Support Auto-Reply & Knowledge Bot",
-        slug: "support_auto_responder_faq",
-        description: "Answers recurring customer FAQs (Hours, Return Policy, Shipping) and escalates complex queries to live human agents.",
-        category: "Customer Support",
-        channels: ["WhatsApp", "Instagram", "Facebook", "RCS"],
-        apps: ["AI Agent", "Webhook"],
-        badge: "Official",
-        isPremium: false,
-        installCount: 3120,
-        stepsCount: 3,
-        setupMinutes: 2,
-        requiredConnections: ["WhatsApp Cloud API", "FAQ Knowledge Base"],
-        nodes: [
-          { id: "node-1", type: "trigger", data: { label: "Incoming Message Outside Business Hours" }, position: { x: 250, y: 50 } },
-          { id: "node-2", type: "action", data: { label: "AI Search: Match FAQ & Return Solution" }, position: { x: 250, y: 170 } },
-          { id: "node-3", type: "action", data: { label: "If Unresolved: Create High-Priority Ticket" }, position: { x: 250, y: 290 } },
-        ],
-      },
-      {
-        id: "tmpl_5",
-        title: "Post-Purchase Review & NPS Collector",
-        slug: "review_nps_collector",
-        description: "Waits 2 days after order delivery, sends WhatsApp interactive 5-star rating card, and logs feedback to Google Sheets.",
-        category: "Marketing & Broadcasts",
-        channels: ["WhatsApp"],
-        apps: ["Google Sheets", "Webhook"],
-        badge: "Community",
-        isPremium: false,
-        installCount: 940,
-        stepsCount: 4,
-        setupMinutes: 3,
-        requiredConnections: ["WhatsApp Cloud API", "Google Sheets"],
-        nodes: [
-          { id: "node-1", type: "trigger", data: { label: "Webhook: Order Delivered Event" }, position: { x: 250, y: 50 } },
-          { id: "node-2", type: "condition", data: { label: "Delay: 48 Hours" }, position: { x: 250, y: 170 } },
-          { id: "node-3", type: "action", data: { label: "WhatsApp: Interactive 5-Star Rating Card" }, position: { x: 250, y: 290 } },
-          { id: "node-4", type: "action", data: { label: "Google Sheets: Append Customer NPS Rating" }, position: { x: 250, y: 410 } },
-        ],
-      },
-      {
-        id: "tmpl_6",
-        title: "Instant OTP & Transient Verification Gateway",
-        slug: "instant_otp_verification",
-        description: "Generates high-speed 6-digit authentication OTP with 10-minute TTL in Appnix Data Store and dispatches via RCS / WhatsApp.",
-        category: "Utility / OTP",
-        channels: ["WhatsApp", "RCS"],
-        apps: ["Webhook", "Data Store"],
-        badge: "Official",
-        isPremium: false,
-        installCount: 1610,
-        stepsCount: 3,
-        setupMinutes: 2,
-        requiredConnections: ["WhatsApp Cloud API", "Appnix Data Store"],
-        nodes: [
-          { id: "node-1", type: "trigger", data: { label: "API Webhook: Request OTP" }, position: { x: 250, y: 50 } },
-          { id: "node-2", type: "action", data: { label: "Data Store: Cache 6-Digit Code (TTL: 10m)" }, position: { x: 250, y: 170 } },
-          { id: "node-3", type: "action", data: { label: "WhatsApp / RCS: Dispatch Auth Template" }, position: { x: 250, y: 290 } },
-        ],
-      },
     ];
 
     let result = [...TEMPLATES];
@@ -488,9 +339,6 @@ export class WorkflowsService {
     };
   }
 
-  /**
-   * Clone a pre-built template into active user workflows
-   */
   async cloneTemplate(tenantId: string, templateId: string, customTitle?: string) {
     const templatesRes = await this.getTemplates();
     const template = templatesRes.data.find((t) => t.id === templateId || t.slug === templateId);
@@ -500,30 +348,25 @@ export class WorkflowsService {
     }
 
     const clonedTitle = customTitle || `${template.title} (Clone)`;
-    const newWorkflow: WorkflowRecord = {
-      id: `wf_cloned_${Date.now()}`,
-      tenantId,
-      title: clonedTitle,
-      status: true,
-      folderId: 'all',
-      folderName: 'All',
-      triggerType: template.channels.includes('WhatsApp') ? 'INBOUND_MESSAGE' : 'WEBHOOK_EVENT',
-      tags: [template.category, 'Template'],
-      nodes: template.nodes || [],
-      edges: [
-        { id: 'e1-2', source: 'node-1', target: 'node-2' },
-        { id: 'e2-3', source: 'node-2', target: 'node-3' },
-      ],
-      isLocked: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    IN_MEMORY_WORKFLOWS.unshift(newWorkflow);
+    const created = await this.prisma.workflow.create({
+      data: {
+        tenantId,
+        title: clonedTitle,
+        status: true,
+        triggerType: template.channels.includes('WhatsApp') ? 'INBOUND_MESSAGE' : 'WEBHOOK_EVENT',
+        tags: [template.category, 'Template'],
+        nodes: template.nodes || [],
+        edges: [
+          { id: 'e1-2', source: 'node-1', target: 'node-2' },
+          { id: 'e2-3', source: 'node-2', target: 'node-3' },
+        ],
+        isLocked: false,
+      },
+    });
 
     return {
       success: true,
-      data: newWorkflow,
+      data: created,
       message: `Template "${template.title}" successfully cloned into your workflows!`,
     };
   }

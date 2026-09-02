@@ -27,7 +27,7 @@ import { TenantGuard } from '../../common/guards/tenant.guard';
 @ApiTags('WhatsApp Templates')
 @ApiBearerAuth()
 @UseGuards(JwtAccessGuard, TenantGuard)
-@Controller('api/whatsapp-templates')
+@Controller(['channels/whatsapp/templates', 'whatsapp-templates', 'api/whatsapp-templates'])
 export class WhatsAppTemplatesController {
   constructor(private readonly templatesService: WhatsAppTemplatesService) {}
 

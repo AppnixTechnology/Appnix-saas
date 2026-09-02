@@ -1,261 +1,433 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { GetConversationsDto } from './dto/get-conversations.dto';
 
-export interface ChatMessageEntity {
-  id: string;
-  sender: 'customer' | 'agent';
-  text: string;
-  timestamp: string;
-  status?: 'sent' | 'delivered' | 'read';
-}
-
-export interface ConversationEntity {
-  id: string;
-  tenantId?: string;
-  contactName: string;
-  phoneNumber?: string;
-  identifier: string;
-  channel: 'whatsapp' | 'instagram' | 'rcs' | 'facebook';
-  avatarUrl?: string;
-  online: boolean;
-  unreadCount: number;
-  tags: string[];
-  budget?: string;
-  goal?: string;
-  lastMessage: string;
-  lastMessageAt: string; // ISO string
-  messages: ChatMessageEntity[];
-}
-
-// Initial omnichannel conversation dataset seeded with timestamps spanning multiple months
-const SEED_CONVERSATIONS: ConversationEntity[] = [
-  {
-    id: 'conv-1',
-    contactName: 'Ankit Bansal',
-    phoneNumber: '+91 77539 83175',
-    identifier: '+91 77539 83175',
-    channel: 'whatsapp',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop&crop=faces',
-    online: true,
-    unreadCount: 2,
-    tags: ['VIP', 'High Intent'],
-    budget: '$12,000',
-    goal: 'Lead Generation',
-    lastMessage: 'Can you send the pricing sheet for enterprise whatsapp bot?',
-    lastMessageAt: '2026-08-28T10:45:00.000Z',
-    messages: [
-      { id: 'm1', sender: 'customer', text: 'Hi Appnix team! We are looking to automate our lead intake.', timestamp: '10:40 AM' },
-      { id: 'm2', sender: 'agent', text: 'Hello Ankit! Happy to help. What channels are you planning to deploy on?', timestamp: '10:42 AM', status: 'read' },
-      { id: 'm3', sender: 'customer', text: 'Mainly WhatsApp and RCS for high delivery rates.', timestamp: '10:44 AM' },
-      { id: 'm4', sender: 'customer', text: 'Can you send the pricing sheet for enterprise whatsapp bot?', timestamp: '10:45 AM' },
-    ],
-  },
-  {
-    id: 'conv-2',
-    contactName: 'Com.Bot Customer Care',
-    phoneNumber: '+91 90546 18623',
-    identifier: '+91 90546 18623',
-    channel: 'whatsapp',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=faces',
-    online: false,
-    unreadCount: 0,
-    tags: ['VIP', 'Support'],
-    budget: '$8,500',
-    goal: 'Conversion & Sales',
-    lastMessage: 'Thank you! The automated flow is working flawlessly now.',
-    lastMessageAt: '2026-08-27T16:20:00.000Z',
-    messages: [
-      { id: 'm21', sender: 'customer', text: 'Thank you! The automated flow is working flawlessly now.', timestamp: '04:20 PM' },
-    ],
-  },
-  {
-    id: 'conv-3',
-    contactName: 'Nourin Sodawala',
-    phoneNumber: '+91 70486 90369',
-    identifier: '+91 70486 90369',
-    channel: 'whatsapp',
-    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&fit=crop&crop=faces',
-    online: true,
-    unreadCount: 1,
-    tags: ['Enterprise', 'Warm Lead'],
-    budget: '$15,000',
-    goal: 'Customer Retention',
-    lastMessage: 'Let us schedule a demo for our support team tomorrow.',
-    lastMessageAt: '2026-08-25T14:15:00.000Z',
-    messages: [
-      { id: 'm31', sender: 'customer', text: 'Let us schedule a demo for our support team tomorrow.', timestamp: '02:15 PM' },
-    ],
-  },
-  {
-    id: 'conv-4',
-    contactName: 'Rahul Verma',
-    phoneNumber: '+91 99112 34578',
-    identifier: '+91 99112 34578',
-    channel: 'whatsapp',
-    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=64&h=64&fit=crop&crop=faces',
-    online: false,
-    unreadCount: 0,
-    tags: ['Marketing Lead'],
-    budget: '$5,000',
-    goal: 'Brand Awareness',
-    lastMessage: 'Got the broadcast preview. Approved!',
-    lastMessageAt: '2026-07-20T09:30:00.000Z',
-    messages: [
-      { id: 'm41', sender: 'customer', text: 'Got the broadcast preview. Approved!', timestamp: '09:30 AM' },
-    ],
-  },
-  {
-    id: 'conv-5',
-    contactName: 'Sneha Patel',
-    phoneNumber: '+91 98765 43210',
-    identifier: '@sneha_ventures',
-    channel: 'instagram',
-    avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=64&h=64&fit=crop&crop=faces',
-    online: true,
-    unreadCount: 0,
-    tags: ['VIP', 'Outreach'],
-    budget: '$20,000',
-    goal: 'Enterprise Outreach',
-    lastMessage: 'Replied to your story regarding AI live chat agents.',
-    lastMessageAt: '2026-07-15T18:40:00.000Z',
-    messages: [
-      { id: 'm51', sender: 'customer', text: 'Replied to your story regarding AI live chat agents.', timestamp: '06:40 PM' },
-    ],
-  },
-  {
-    id: 'conv-6',
-    contactName: 'Priya Nair',
-    phoneNumber: '+91 97654 32109',
-    identifier: 'Priya Nair (Facebook)',
-    channel: 'facebook',
-    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=64&h=64&fit=crop&crop=faces',
-    online: false,
-    unreadCount: 0,
-    tags: ['E-Commerce'],
-    budget: '$8,000',
-    goal: 'Direct Sales',
-    lastMessage: 'Is there a WhatsApp sync option from Facebook Ad clicks?',
-    lastMessageAt: '2026-06-18T11:10:00.000Z',
-    messages: [
-      { id: 'm61', sender: 'customer', text: 'Is there a WhatsApp sync option from Facebook Ad clicks?', timestamp: '11:10 AM' },
-    ],
-  },
-  {
-    id: 'conv-7',
-    contactName: 'Marcus Aurelius Tech',
-    phoneNumber: '+44 20 7946 0912',
-    identifier: '+44 20 7946 0912',
-    channel: 'rcs',
-    avatarUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=64&h=64&fit=crop&crop=faces',
-    online: true,
-    unreadCount: 0,
-    tags: ['Fintech', 'RCS Verified'],
-    budget: '$40,000',
-    goal: 'Transactional OTPs',
-    lastMessage: 'Our telecom carrier approved the RCS agent profile.',
-    lastMessageAt: '2026-05-12T15:25:00.000Z',
-    messages: [
-      { id: 'm71', sender: 'customer', text: 'Our telecom carrier approved the RCS agent profile.', timestamp: '03:25 PM' },
-    ],
-  },
-  {
-    id: 'conv-8',
-    contactName: 'Elena Rostova',
-    phoneNumber: '+1 415 555 2671',
-    identifier: '@elena_design',
-    channel: 'instagram',
-    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=64&h=64&fit=crop&crop=faces',
-    online: false,
-    unreadCount: 0,
-    tags: ['Design Partner'],
-    budget: '$7,000',
-    goal: 'Brand Collaboration',
-    lastMessage: 'Sent the story mockup assets for our product launch.',
-    lastMessageAt: '2026-03-10T12:00:00.000Z',
-    messages: [
-      { id: 'm81', sender: 'customer', text: 'Sent the story mockup assets for our product launch.', timestamp: '12:00 PM' },
-    ],
-  },
-];
-
 @Injectable()
 export class ChatService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * Retrieves omnichannel conversations with month-wise filtering and date sorting
-   */
   async getConversations(tenantId: string, dto: GetConversationsDto) {
-    const { channel, search, year, month, sortOrder = 'desc' } = dto;
+    const { channel, search, sortOrder = 'desc' } = dto;
 
-    let startDate: Date | null = null;
-    let endDate: Date | null = null;
+    let conversations = await this.prisma.conversation.findMany({
+      where: {
+        tenantId,
+        ...(channel && channel.toLowerCase() !== 'all' ? { channel: channel.toLowerCase() } : {}),
+        ...(search
+          ? {
+              OR: [
+                { name: { contains: search, mode: 'insensitive' } },
+                { identifier: { contains: search, mode: 'insensitive' } },
+                { lastMessage: { contains: search, mode: 'insensitive' } },
+              ],
+            }
+          : {}),
+      },
+      include: {
+        messages: {
+          orderBy: { timestamp: 'asc' },
+        },
+      },
+      orderBy: { lastMessageTime: sortOrder === 'asc' ? 'asc' : 'desc' },
+    });
 
-    // Parse month & year into UTC start-of-month and end-of-month dates
-    if (year && month && month !== 'all') {
-      const yearNum = parseInt(year, 10);
-      const monthNum = parseInt(month, 10); // 1 = Jan, 12 = Dec
+    if (conversations.length === 0) {
+      // Seed default conversations for active tenant
+      const sample = [
+        {
+          uid: 'CHT-948210',
+          name: 'Ankit Bansal',
+          identifier: '+91 77539 83175',
+          channel: 'whatsapp',
+          department: 'sales',
+          avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop&crop=faces',
+          online: true,
+          unreadCount: 2,
+          lastMessage: 'Can you send the pricing sheet for enterprise whatsapp bot?',
+          lastMessageSender: 'customer',
+          tags: [
+            { id: 't1', name: 'Hot Lead', color: 'emerald', icon: 'star' },
+            { id: 't2', name: 'VIP Customer', color: 'purple', icon: 'sparkles' },
+          ],
+          session: {
+            isActive: true,
+            lastCustomerMessageAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 20 * 3600000).toISOString(),
+            remainingHours: 20,
+            remainingMinutes: 15,
+            formattedRemaining: '20h 15m remaining',
+          },
+          remarks: {
+            sentiment: 'positive',
+            leadStage: 'Proposal',
+            notes: 'High intent prospect evaluating 50k monthly broadcast quota.',
+            lastUpdated: new Date().toISOString(),
+          },
+          superFields: {
+            customer_tier: 'Enterprise Platinum',
+            city: 'Mumbai',
+            annual_budget: '₹12,00,000',
+          },
+          internalNotes: [
+            {
+              id: 'note-1',
+              authorId: 'agent-1',
+              authorName: 'Sarah Jenkins',
+              content: 'Follow up tomorrow at 2:00 PM with the custom rate proposal.',
+              createdAt: new Date().toISOString(),
+            },
+          ],
+          messages: [
+            {
+              sender: 'customer',
+              senderName: 'Ankit Bansal',
+              text: 'Hi Appnix team! We are looking to automate our lead intake.',
+              status: 'delivered',
+            },
+            {
+              sender: 'agent',
+              senderName: 'Sarah Jenkins',
+              text: 'Hello Ankit! Happy to help. What channels are you planning to deploy on?',
+              status: 'read',
+            },
+            {
+              sender: 'customer',
+              senderName: 'Ankit Bansal',
+              text: 'Mainly WhatsApp and RCS for high delivery rates.',
+              status: 'delivered',
+            },
+            {
+              sender: 'customer',
+              senderName: 'Ankit Bansal',
+              text: 'Can you send the pricing sheet for enterprise whatsapp bot?',
+              status: 'delivered',
+            },
+          ],
+        },
+        {
+          uid: 'CHT-948211',
+          name: 'Com.Bot Customer Care',
+          identifier: '+91 90546 18623',
+          channel: 'whatsapp',
+          department: 'support',
+          avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=faces',
+          online: false,
+          unreadCount: 0,
+          lastMessage: 'Thank you! The automated flow is working flawlessly now.',
+          lastMessageSender: 'customer',
+          tags: [{ id: 't3', name: 'Demo Booked', color: 'blue', icon: 'check-circle' }],
+          session: {
+            isActive: true,
+            lastCustomerMessageAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 18 * 3600000).toISOString(),
+            remainingHours: 18,
+            remainingMinutes: 40,
+            formattedRemaining: '18h 40m remaining',
+          },
+          remarks: {
+            sentiment: 'positive',
+            leadStage: 'Closed Won',
+            notes: 'Successfully onboarded to WhatsApp Cloud API.',
+            lastUpdated: new Date().toISOString(),
+          },
+          messages: [
+            {
+              sender: 'customer',
+              senderName: 'Com.Bot Care',
+              text: 'Thank you! The automated flow is working flawlessly now.',
+              status: 'delivered',
+            },
+          ],
+        },
+        {
+          uid: 'CHT-948212',
+          name: 'Sneha Patel',
+          identifier: '@sneha_ventures',
+          channel: 'instagram',
+          department: 'sales',
+          avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=64&h=64&fit=crop&crop=faces',
+          online: true,
+          unreadCount: 0,
+          lastMessage: 'Replied to your story regarding AI live chat agents.',
+          lastMessageSender: 'customer',
+          tags: [{ id: 't1', name: 'Hot Lead', color: 'emerald', icon: 'star' }],
+          session: {
+            isActive: true,
+            lastCustomerMessageAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 22 * 3600000).toISOString(),
+            remainingHours: 22,
+            remainingMinutes: 0,
+            formattedRemaining: '22h remaining',
+          },
+          remarks: {
+            sentiment: 'positive',
+            leadStage: 'Demo',
+            notes: 'Interested in Instagram automated DM lead qualifying flow.',
+            lastUpdated: new Date().toISOString(),
+          },
+          messages: [
+            {
+              sender: 'customer',
+              senderName: 'Sneha Patel',
+              text: 'Replied to your story regarding AI live chat agents.',
+              status: 'delivered',
+            },
+          ],
+        },
+      ];
 
-      if (!isNaN(yearNum) && !isNaN(monthNum) && monthNum >= 1 && monthNum <= 12) {
-        startDate = new Date(Date.UTC(yearNum, monthNum - 1, 1, 0, 0, 0, 0));
-        endDate = new Date(Date.UTC(yearNum, monthNum, 0, 23, 59, 59, 999));
+      for (const conv of sample) {
+        const { messages, ...convData } = conv;
+        const createdConv = await this.prisma.conversation.create({
+          data: {
+            ...convData,
+            tenantId,
+          },
+        });
+
+        for (const msg of messages) {
+          await this.prisma.message.create({
+            data: {
+              conversationId: createdConv.id,
+              tenantId,
+              sender: msg.sender,
+              senderName: msg.senderName,
+              text: msg.text,
+              status: msg.status,
+            },
+          });
+        }
       }
-    } else if (year && (!month || month === 'all')) {
-      const yearNum = parseInt(year, 10);
-      if (!isNaN(yearNum)) {
-        startDate = new Date(Date.UTC(yearNum, 0, 1, 0, 0, 0, 0));
-        endDate = new Date(Date.UTC(yearNum, 11, 31, 23, 59, 59, 999));
-      }
-    }
 
-    // Try fetching from database if conversations table exists, otherwise filter seed data
-    let filtered = [...SEED_CONVERSATIONS];
-
-    // Filter by Channel
-    if (channel && channel.toLowerCase() !== 'all') {
-      filtered = filtered.filter((c) => c.channel.toLowerCase() === channel.toLowerCase());
-    }
-
-    // Filter by Search Term (contactName or phoneNumber or identifier)
-    if (search && search.trim()) {
-      const q = search.toLowerCase().trim();
-      filtered = filtered.filter(
-        (c) =>
-          c.contactName.toLowerCase().includes(q) ||
-          (c.phoneNumber && c.phoneNumber.toLowerCase().includes(q)) ||
-          c.identifier.toLowerCase().includes(q) ||
-          c.lastMessage.toLowerCase().includes(q)
-      );
-    }
-
-    // Filter by Date Range (Month & Year)
-    if (startDate && endDate) {
-      filtered = filtered.filter((c) => {
-        const msgDate = new Date(c.lastMessageAt);
-        return msgDate >= startDate! && msgDate <= endDate!;
+      conversations = await this.prisma.conversation.findMany({
+        where: { tenantId },
+        include: {
+          messages: {
+            orderBy: { timestamp: 'asc' },
+          },
+        },
+        orderBy: { lastMessageTime: 'desc' },
       });
     }
 
-    // Sort by lastMessageAt (asc = oldest first, desc = newest first)
-    filtered.sort((a, b) => {
-      const timeA = new Date(a.lastMessageAt).getTime();
-      const timeB = new Date(b.lastMessageAt).getTime();
-      return sortOrder === 'asc' ? timeA - timeB : timeB - timeA;
+    return {
+      success: true,
+      data: conversations.map((c) => ({
+        id: c.id,
+        uid: c.uid,
+        contactId: c.contactId || c.id,
+        name: c.name,
+        contactName: c.name,
+        phoneNumber: c.identifier,
+        identifier: c.identifier,
+        avatarUrl: c.avatarUrl,
+        channel: c.channel,
+        department: c.department,
+        online: c.online,
+        unreadCount: c.unreadCount,
+        lastMessage: c.lastMessage,
+        lastMessageTime: c.lastMessageTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        lastMessageAt: c.lastMessageTime.toISOString(),
+        tags: (c.tags as any) || [],
+        session: c.session || { isActive: true, formattedRemaining: '24h remaining' },
+        superFields: c.superFields || {},
+        internalNotes: c.internalNotes || [],
+        remarks: c.remarks || {},
+        scheduledMessages: c.scheduledMessages || [],
+        messages: c.messages.map((m) => ({
+          id: m.id,
+          sender: m.sender,
+          senderName: m.senderName,
+          text: m.text,
+          timestamp: m.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: m.status,
+        })),
+      })),
+      meta: {
+        total: conversations.length,
+        channel: channel || 'all',
+      },
+    };
+  }
+
+  async getConversationById(tenantId: string, id: string) {
+    const conv = await this.prisma.conversation.findFirst({
+      where: {
+        tenantId,
+        OR: [{ id }, { uid: id }],
+      },
+      include: {
+        messages: {
+          orderBy: { timestamp: 'asc' },
+        },
+      },
+    });
+
+    if (!conv) throw new NotFoundException('Conversation not found');
+
+    return {
+      success: true,
+      data: {
+        ...conv,
+        contactName: conv.name,
+        phoneNumber: conv.identifier,
+        messages: conv.messages.map((m) => ({
+          id: m.id,
+          sender: m.sender,
+          senderName: m.senderName,
+          text: m.text,
+          timestamp: m.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: m.status,
+        })),
+      },
+    };
+  }
+
+  async sendMessage(
+    tenantId: string,
+    conversationId: string,
+    payload: {
+      text: string;
+      sender?: string;
+      senderName?: string;
+      isTemplate?: boolean;
+      templateName?: string;
+      mediaUrl?: string;
+    },
+  ) {
+    const conv = await this.prisma.conversation.findFirst({
+      where: {
+        tenantId,
+        OR: [{ id: conversationId }, { uid: conversationId }],
+      },
+    });
+
+    if (!conv) throw new NotFoundException('Conversation not found');
+
+    const message = await this.prisma.message.create({
+      data: {
+        conversationId: conv.id,
+        tenantId,
+        sender: payload.sender || 'agent',
+        senderName: payload.senderName || 'Agent Support',
+        text: payload.text,
+        isTemplate: payload.isTemplate || false,
+        templateName: payload.templateName,
+        mediaUrl: payload.mediaUrl,
+        status: 'delivered',
+      },
+    });
+
+    await this.prisma.conversation.update({
+      where: { id: conv.id },
+      data: {
+        lastMessage: payload.text,
+        lastMessageTime: new Date(),
+        lastMessageSender: (payload.sender || 'agent') as any,
+        unreadCount: 0,
+      },
     });
 
     return {
       success: true,
-      data: filtered,
-      meta: {
-        total: filtered.length,
-        channel: channel || 'all',
-        year: year || new Date().getFullYear().toString(),
-        month: month || 'all',
-        sortOrder,
-        startDate: startDate ? startDate.toISOString() : null,
-        endDate: endDate ? endDate.toISOString() : null,
+      data: {
+        id: message.id,
+        sender: message.sender,
+        senderName: message.senderName,
+        text: message.text,
+        timestamp: message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: message.status,
       },
+    };
+  }
+
+  async addInternalNote(tenantId: string, conversationId: string, authorName: string, content: string) {
+    const conv = await this.prisma.conversation.findFirst({
+      where: {
+        tenantId,
+        OR: [{ id: conversationId }, { uid: conversationId }],
+      },
+    });
+    if (!conv) throw new NotFoundException('Conversation not found');
+
+    const existingNotes = (conv.internalNotes as any[]) || [];
+    const newNote = {
+      id: `note-${Date.now()}`,
+      authorName: authorName || 'Agent',
+      content,
+      createdAt: new Date().toISOString(),
+    };
+
+    const updated = await this.prisma.conversation.update({
+      where: { id: conv.id },
+      data: { internalNotes: [newNote, ...existingNotes] },
+    });
+
+    return { success: true, data: updated.internalNotes };
+  }
+
+  async updateRemarks(tenantId: string, conversationId: string, remarks: any) {
+    const conv = await this.prisma.conversation.findFirst({
+      where: {
+        tenantId,
+        OR: [{ id: conversationId }, { uid: conversationId }],
+      },
+    });
+    if (!conv) throw new NotFoundException('Conversation not found');
+
+    const updated = await this.prisma.conversation.update({
+      where: { id: conv.id },
+      data: {
+        remarks: {
+          ...remarks,
+          lastUpdated: new Date().toISOString(),
+        },
+      },
+    });
+
+    return { success: true, data: updated.remarks };
+  }
+
+  async updateTags(tenantId: string, conversationId: string, tags: any[]) {
+    const conv = await this.prisma.conversation.findFirst({
+      where: {
+        tenantId,
+        OR: [{ id: conversationId }, { uid: conversationId }],
+      },
+    });
+    if (!conv) throw new NotFoundException('Conversation not found');
+
+    const updated = await this.prisma.conversation.update({
+      where: { id: conv.id },
+      data: { tags },
+    });
+
+    return { success: true, data: updated.tags };
+  }
+
+  async executeBulkAction(tenantId: string, payload: any) {
+    const { conversationIds, action, targetDepartment, targetAgentId, tagToAdd } = payload;
+
+    if (action === 'MARK_READ') {
+      await this.prisma.conversation.updateMany({
+        where: { id: { in: conversationIds }, tenantId },
+        data: { unreadCount: 0 },
+      });
+    } else if (action === 'MARK_CLOSED') {
+      await this.prisma.conversation.updateMany({
+        where: { id: { in: conversationIds }, tenantId },
+        data: { status: 'closed' },
+      });
+    } else if (action === 'TRANSFER_DEPT' && targetDepartment) {
+      await this.prisma.conversation.updateMany({
+        where: { id: { in: conversationIds }, tenantId },
+        data: { department: targetDepartment },
+      });
+    }
+
+    return {
+      success: true,
+      message: `Bulk action "${action}" executed across ${conversationIds.length} conversations`,
     };
   }
 }
