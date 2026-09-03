@@ -48,6 +48,6 @@ jobs:
 
             echo "🏥 Checking backend health..."
             sleep 3
-            curl -f https://api.appnix.co.in/api/v1/health
+            curl -f http://127.0.0.1:4000/api/v1/health
 
             echo "✅ Deployment completed successfully!"
