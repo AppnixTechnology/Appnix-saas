@@ -64,23 +64,26 @@ export class UsersService {
     const slug = this.generateSlug(tenantName);
 
     // transaction: if user creation fails, the tenant creation rolls back too
-    return this.prisma.$transaction(async (tx) => {
-      const tenant = await tx.tenant.create({
-        data: { name: tenantName, slug },
-      });
+    return this.prisma.$transaction(
+      async (tx) => {
+        const tenant = await tx.tenant.create({
+          data: { name: tenantName, slug },
+        });
 
-      const user = await tx.user.create({
-        data: {
-          email,
-          passwordHash,
-          name,
-          role: Role.TENANT_ADMIN,
-          tenantId: tenant.id,
-        },
-      });
+        const user = await tx.user.create({
+          data: {
+            email,
+            passwordHash,
+            name,
+            role: Role.TENANT_ADMIN,
+            tenantId: tenant.id,
+          },
+        });
 
-      return { tenant, user };
-    });
+        return { tenant, user };
+      },
+      { maxWait: 10000, timeout: 20000 },
+    );
   }
 
   // creates the tenant AND OAuth admin user atomically
@@ -93,24 +96,27 @@ export class UsersService {
   }) {
     const slug = this.generateSlug(data.tenantName);
 
-    return this.prisma.$transaction(async (tx) => {
-      const tenant = await tx.tenant.create({
-        data: { name: data.tenantName, slug },
-      });
+    return this.prisma.$transaction(
+      async (tx) => {
+        const tenant = await tx.tenant.create({
+          data: { name: data.tenantName, slug },
+        });
 
-      const user = await tx.user.create({
-        data: {
-          email: data.email,
-          name: data.name,
-          avatar: data.avatar,
-          googleId: data.googleId,
-          role: Role.TENANT_ADMIN,
-          tenantId: tenant.id,
-        },
-      });
+        const user = await tx.user.create({
+          data: {
+            email: data.email,
+            name: data.name,
+            avatar: data.avatar,
+            googleId: data.googleId,
+            role: Role.TENANT_ADMIN,
+            tenantId: tenant.id,
+          },
+        });
 
-      return { tenant, user };
-    });
+        return { tenant, user };
+      },
+      { maxWait: 10000, timeout: 20000 },
+    );
   }
 
   linkGoogleAccount(userId: string, googleId: string, avatar?: string) {

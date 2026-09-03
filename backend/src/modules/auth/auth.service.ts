@@ -91,6 +91,9 @@ export class AuthService {
         // Link googleId to existing user
         user = await this.usersService.linkGoogleAccount(user.id, profile.googleId, profile.avatar);
       }
+    } else if (profile.avatar && user.avatar !== profile.avatar) {
+      // Update avatar for existing Google user if provided
+      user = await this.usersService.linkGoogleAccount(user.id, profile.googleId, profile.avatar);
     }
 
     // 3. If user still does not exist, provision new tenant workspace and admin user
