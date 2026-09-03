@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Client } from "@/super-admin/types";
 import { clientService } from "@/super-admin/services";
 import { AddClientModal } from "@/super-admin/components/clients/AddClientModal";
+import { UpdateClientModal } from "@/super-admin/components/clients/UpdateClientModal";
 import {
   Building2,
   ArrowLeft,
@@ -30,14 +32,32 @@ import {
   PlayCircle,
   Eye,
   Edit,
+  LogIn,
+  KeyRound,
+  Sparkles,
 } from "lucide-react";
 
-export default function SuperAdminClientsPage() {
+function SuperAdminClientsContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [clients, setClients] = useState<Client[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilterTab, setActiveFilterTab] = useState<string>("All");
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+
+  // Update client modal state
+  const [clientToUpdate, setClientToUpdate] = useState<Client | null>(null);
+  const [isUpdateClientOpen, setIsUpdateClientOpen] = useState(false);
+
+  // Success toast message
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
 
   const fetchClients = () => {
     clientService.getAll().then(setClients);
@@ -47,19 +67,90 @@ export default function SuperAdminClientsPage() {
     fetchClients();
   }, []);
 
+  // Listen to ?action=add to open Add Client modal from sidebar or links
+  useEffect(() => {
+    if (searchParams.get("action") === "add") {
+      setIsAddClientOpen(true);
+    }
+  }, [searchParams]);
+
+  const handleCloseAddModal = () => {
+    setIsAddClientOpen(false);
+    if (searchParams.get("action") === "add") {
+      router.replace("/super-admin/clients");
+    }
+  };
+
   const handleToggleStatus = (id: string, currentStatus: Client["status"]) => {
     const newStatus = currentStatus === "Active" ? "Suspended" : "Active";
     clientService.updateStatus(id, newStatus).then(() => {
       fetchClients();
+      showToast(`Client status changed to ${newStatus}`);
     });
   };
 
   const handleDeleteClient = (id: string, name: string) => {
-    if (confirm(`Are you sure you want to delete organization ${name}? This cannot be undone.`)) {
+    if (confirm(`Are you sure you want to delete organization "${name}"? This cannot be undone.`)) {
       clientService.delete(id).then(() => {
         fetchClients();
+        showToast(`Organization "${name}" deleted`);
       });
     }
+  };
+
+  const handleOpenUpdateModal = (client: Client) => {
+    setClientToUpdate(client);
+    setIsUpdateClientOpen(true);
+  };
+
+  const handleClientUpdated = (updatedData: Partial<Client>) => {
+    if (!clientToUpdate) return;
+    clientService.update(clientToUpdate.id, updatedData).then(() => {
+      fetchClients();
+      setIsUpdateClientOpen(false);
+      setClientToUpdate(null);
+      showToast(`Client "${updatedData.name || clientToUpdate.name}" updated successfully!`);
+    });
+  };
+
+  const handleLoginAsGuest = (client: Client) => {
+    // 1. Store guest session in localStorage
+    const guestSession = {
+      isGuest: true,
+      clientId: client.id,
+      clientName: client.name,
+      clientEmail: client.email,
+      ownerName: client.ownerName,
+      plan: client.plan,
+      walletBalance: client.walletBalance,
+      whatsappStatus: client.whatsappStatus,
+      loginTime: new Date().toISOString(),
+      returnUrl: "/super-admin/clients",
+    };
+    localStorage.setItem("appnix_guest_impersonation", JSON.stringify(guestSession));
+
+    // 2. Set tenant workspace credentials in localStorage so dashboard matches client
+    const tenantUser = {
+      id: client.id,
+      email: client.email,
+      name: client.ownerName,
+      role: "owner",
+      workspaceId: client.id,
+      workspaceName: client.name,
+      permissions: ["*"],
+      emailVerified: true,
+      twoFactorEnabled: false,
+      createdAt: client.signupDate,
+      updatedAt: new Date().toISOString(),
+    };
+    localStorage.setItem("appnix_user", JSON.stringify(tenantUser));
+    localStorage.setItem("appnix_token", `guest_session_${client.id}_${Date.now()}`);
+
+    // 3. Inform user & navigate
+    showToast(`Redirecting as Guest to ${client.name}...`);
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 600);
   };
 
   const filteredClients = clients.filter((client) => {
@@ -82,6 +173,14 @@ export default function SuperAdminClientsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-xs font-semibold text-white shadow-xl animate-in fade-in slide-in-from-bottom-3 border border-gray-700">
+          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Breadcrumb Back Navigation */}
       <div className="flex items-center text-xs text-muted-foreground gap-1.5">
         <Link
@@ -100,16 +199,16 @@ export default function SuperAdminClientsPage() {
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
             <Building2 className="h-6 w-6 text-emerald-600" />
-            Clients
+            Clients Management
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-            Manage organizations, provision new tenant workspaces, and monitor subscription plans.
+            Manage client organizations, provision workspaces, update details, and log in as guest.
           </p>
         </div>
 
         <Button
           onClick={() => setIsAddClientOpen(true)}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs gap-1.5 shadow-sm"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs gap-1.5 shadow-sm cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           Add Client
@@ -203,11 +302,14 @@ export default function SuperAdminClientsPage() {
                       {/* Org Name */}
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center font-bold text-primary text-xs shrink-0">
+                          <div className="h-9 w-9 rounded-xl bg-emerald-600/10 flex items-center justify-center font-bold text-emerald-700 dark:text-emerald-400 text-xs shrink-0">
                             {client.name.charAt(0)}
                           </div>
                           <div>
-                            <p className="font-bold text-foreground hover:text-emerald-600 cursor-pointer">
+                            <p
+                              onClick={() => setSelectedClient(client)}
+                              className="font-bold text-foreground hover:text-emerald-600 cursor-pointer"
+                            >
                               {client.name}
                             </p>
                             <p className="text-[11px] text-muted-foreground">
@@ -283,37 +385,65 @@ export default function SuperAdminClientsPage() {
 
                       {/* Actions */}
                       <td className="p-4 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-1">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {/* Option: Login as Guest to that particular client */}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleLoginAsGuest(client)}
+                            className="h-7.5 px-2.5 text-[11px] font-semibold gap-1 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-800 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 dark:hover:bg-emerald-900/60 transition-colors shadow-2xs cursor-pointer"
+                            title={`Login as Guest to ${client.name}`}
+                          >
+                            <LogIn className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span>Login as Guest</span>
+                          </Button>
+
+                          {/* Option: Update Client in table */}
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => handleOpenUpdateModal(client)}
+                            className="h-7.5 w-7.5 text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 cursor-pointer"
+                            title="Update Client"
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                          </Button>
+
+                          {/* Option: View Client Details */}
                           <Button
                             size="icon"
                             variant="ghost"
                             onClick={() => setSelectedClient(client)}
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            className="h-7.5 w-7.5 text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
                             title="View Client Details"
                           >
-                            <Eye className="h-4 w-4" />
+                            <Eye className="h-3.5 w-3.5" />
                           </Button>
+
+                          {/* Option: Toggle Suspend / Activate */}
                           <Button
                             size="icon"
                             variant="ghost"
                             onClick={() => handleToggleStatus(client.id, client.status)}
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            className="h-7.5 w-7.5 text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
                             title={client.status === "Active" ? "Suspend Client" : "Activate Client"}
                           >
                             {client.status === "Active" ? (
-                              <PauseCircle className="h-4 w-4 text-amber-600" />
+                              <PauseCircle className="h-3.5 w-3.5 text-amber-600" />
                             ) : (
-                              <PlayCircle className="h-4 w-4 text-emerald-600" />
+                              <PlayCircle className="h-3.5 w-3.5 text-emerald-600" />
                             )}
                           </Button>
+
+                          {/* Option: Delete Client */}
                           <Button
                             size="icon"
                             variant="ghost"
                             onClick={() => handleDeleteClient(client.id, client.name)}
-                            className="h-8 w-8 text-muted-foreground hover:text-rose-600"
+                            className="h-7.5 w-7.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
                             title="Delete Client"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       </td>
@@ -329,19 +459,30 @@ export default function SuperAdminClientsPage() {
       {/* Add Client Modal */}
       <AddClientModal
         isOpen={isAddClientOpen}
-        onClose={() => setIsAddClientOpen(false)}
+        onClose={handleCloseAddModal}
         onClientAdded={(newClient) => {
           clientService.create(newClient).then(() => {
             fetchClients();
-            alert(`Organization ${newClient.name} successfully created!`);
+            showToast(`Organization "${newClient.name}" successfully created!`);
           });
         }}
       />
 
+      {/* Update Client Modal */}
+      <UpdateClientModal
+        isOpen={isUpdateClientOpen}
+        onClose={() => {
+          setIsUpdateClientOpen(false);
+          setClientToUpdate(null);
+        }}
+        client={clientToUpdate}
+        onClientUpdated={handleClientUpdated}
+      />
+
       {/* View Client Details Drawer / Modal */}
       {selectedClient && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-lg rounded-2xl border bg-card p-6 shadow-2xl animate-in space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in">
+          <div className="w-full max-w-lg rounded-2xl border bg-card p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-emerald-600/10 flex items-center justify-center font-bold text-emerald-600 text-sm">
@@ -362,6 +503,9 @@ export default function SuperAdminClientsPage() {
                 <p className="text-muted-foreground text-[10px] uppercase font-semibold">Account Owner</p>
                 <p className="font-bold text-foreground mt-0.5">{selectedClient.ownerName}</p>
                 <p className="text-muted-foreground">{selectedClient.email}</p>
+                {selectedClient.phone && (
+                  <p className="text-muted-foreground text-[11px] mt-0.5">{selectedClient.phone}</p>
+                )}
               </div>
               <div className="p-3 border rounded-lg bg-muted/20">
                 <p className="text-muted-foreground text-[10px] uppercase font-semibold">Subscription Plan</p>
@@ -380,21 +524,49 @@ export default function SuperAdminClientsPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t">
+            <div className="flex items-center justify-between pt-3 border-t">
               <Button size="sm" variant="outline" onClick={() => setSelectedClient(null)}>
                 Close
               </Button>
-              <Button
-                size="sm"
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
-                onClick={() => alert(`Impersonating tenant session for ${selectedClient.name}...`)}
-              >
-                Login as Tenant →
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1.5 text-xs font-semibold"
+                  onClick={() => {
+                    const client = selectedClient;
+                    setSelectedClient(null);
+                    handleOpenUpdateModal(client);
+                  }}
+                >
+                  <Edit className="h-3.5 w-3.5" />
+                  Update Client
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold gap-1.5 text-xs"
+                  onClick={() => {
+                    const client = selectedClient;
+                    setSelectedClient(null);
+                    handleLoginAsGuest(client);
+                  }}
+                >
+                  <LogIn className="h-3.5 w-3.5" />
+                  Login as Guest →
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+export default function SuperAdminClientsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-muted-foreground">Loading clients console...</div>}>
+      <SuperAdminClientsContent />
+    </Suspense>
   );
 }

@@ -8,7 +8,7 @@ export function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-muted/20 text-foreground">
+    <div className="flex h-screen overflow-hidden bg-muted/20 text-foreground">
       {/* Super Admin Isolated Sidebar */}
       <SuperAdminSidebar
         open={sidebarOpen}

@@ -45,6 +45,23 @@ export const clientService = {
     }
     return client;
   },
+  update: async (id: string, updatedData: Partial<Client>): Promise<Client | undefined> => {
+    const client = mockClients.find((c) => c.id === id);
+    if (client) {
+      Object.assign(client, updatedData);
+      if (updatedData.plan) {
+        client.mrr =
+          updatedData.plan === "Enterprise"
+            ? 4500
+            : updatedData.plan === "Pro"
+            ? 1200
+            : updatedData.plan === "Growth"
+            ? 99
+            : 29;
+      }
+    }
+    return client;
+  },
   delete: async (id: string): Promise<boolean> => {
     const index = mockClients.findIndex((c) => c.id === id);
     if (index !== -1) {
