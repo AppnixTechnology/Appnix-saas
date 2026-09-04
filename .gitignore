@@ -32,3 +32,9 @@ logs/
 # Prisma / Database
 prisma/*.db
 prisma/*.db-journal
+
+# Local Runtime Data & Agent Artifacts
+.data/
+.agents/
+mcp_config.json
+

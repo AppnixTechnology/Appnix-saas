@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { AppNavbar } from "@/components/layout/app-navbar";
 import { GuestModeBanner } from "@/components/layout/GuestModeBanner";
+import { MockCashfreeModalContainer } from "@/components/billing/mock-cashfree-modal";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -13,6 +14,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     // Navbar comes first, full width, on its own row.
     <div className="dashboard-shell">
       <GuestModeBanner />
+      <MockCashfreeModalContainer />
       <AppNavbar onMenuClick={() => setSidebarOpen((p) => !p)} />
 
       {/* INNER: horizontal row for sidebar + main, placed BELOW the navbar */}

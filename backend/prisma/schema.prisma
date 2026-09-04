@@ -85,6 +85,8 @@ model Subscription {
   id                   String             @id @default(uuid())
   tenantId             String
   planId               String             @default("pro")
+  planRefId            String?
+  plan                 Plan?              @relation(fields: [planRefId], references: [id])
   planName             String             @default("Professional Tier")
   price                String             @default("₹2,999/mo")
   status               SubscriptionStatus @default(ACTIVE)
@@ -793,5 +795,52 @@ enum SubscriptionStatus {
   ACTIVE
   PAST_DUE
   CANCELLED
+  UPGRADED
+}
+
+enum PaymentOrderStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  USER_DROPPED
+}
+
+model Plan {
+  id              String         @id @default(uuid())
+  name            String
+  slug            String         @unique
+  price           Decimal        @db.Decimal(10, 2)
+  currency        String         @default("INR")
+  billingCycle    String         @default("monthly")
+  monthlyMessages Int            @default(2000)
+  botflows        Int            @default(1)
+  teamSeats       Int            @default(2)
+  features        String[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  subscriptions   Subscription[]
+  paymentOrders   PaymentOrder[]
+
+  @@map("plans")
+}
+
+model PaymentOrder {
+  id               String             @id @default(uuid())
+  orderId          String             @unique
+  workspaceId      String
+  planId           String?
+  plan             Plan?              @relation(fields: [planId], references: [id])
+  amount           Decimal            @db.Decimal(10, 2)
+  currency         String             @default("INR")
+  paymentSessionId String?
+  status           PaymentOrderStatus @default(PENDING)
+  cfPaymentId      String?
+  paymentMethod    String?
+  rawWebhookData   Json?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([workspaceId])
+  @@map("payment_orders")
 }
 
