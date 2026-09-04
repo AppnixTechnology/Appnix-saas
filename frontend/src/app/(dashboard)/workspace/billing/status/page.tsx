@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useCashfree, CashfreeVerifyResponse } from "@/hooks/useCashfree";
 import { downloadReceipt } from "@/lib/invoice-generator";
+import { markSubscriptionActive } from "@/lib/subscription";
 
 function PaymentStatusContent() {
   const searchParams = useSearchParams();
@@ -32,177 +33,128 @@ function PaymentStatusContent() {
   const amountParam = searchParams.get("amount") || "";
   const explicitStatus = searchParams.get("status"); // e.g. status=failed for testing
 
-  const [status, setStatus] = useState<"VERIFYING" | "SUCCESS" | "FAILED">("VERIFYING");
+  const [status, setStatus] = useState<"VERIFYING" | "SUCCESS" | "FAILED" | "PENDING">("VERIFYING");
   const [details, setDetails] = useState<CashfreeVerifyResponse | null>(null);
+  const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function checkStatus() {
-      // If no order ID, mark as failed / invalid
-      if (!orderId) {
-        setStatus("FAILED");
-        setDetails({
-          orderId: "N/A",
-          status: "FAILED",
-          failureReason: "Missing or invalid payment session reference.",
-        });
-        return;
-      }
-
-      // Check explicit query override (e.g. testing cancel/failure)
-      if (explicitStatus === "failed" || explicitStatus === "cancelled") {
-        setStatus("FAILED");
-        setDetails({
-          orderId,
-          status: "FAILED",
-          failureReason: "Payment was cancelled by user or declined by issuing bank.",
-        });
-        return;
-      }
-
-      try {
-        // Client-side verification call
-        const response = await verifyPayment(orderId);
-
-        if (!isMounted) return;
-
-        if (response.status === "SUCCESS") {
-          const resolvedPlanName =
-            response.planName ||
-            (planParam === "enterprise"
-              ? "Enterprise Custom"
-              : planParam === "pro"
-              ? "Professional Tier"
-              : "Starter Tier");
-          const resolvedAmount = amountParam ? parseFloat(amountParam) : response.amount || 999;
-
-          if (typeof window !== "undefined") {
-            localStorage.setItem("appnix_active_plan", planParam);
-            try {
-              const existing = JSON.parse(localStorage.getItem("appnix_transactions") || "[]");
-              const record = {
-                id: orderId,
-                invoiceNumber: `INV-${orderId.slice(-8).toUpperCase()}`,
-                date: new Date().toLocaleDateString("en-IN", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                }),
-                plan: `${resolvedPlanName} (Monthly)`,
-                amount: `₹${Number(resolvedAmount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
-                rawAmount: Number(resolvedAmount),
-                status: "Paid",
-                paymentMethod: response.paymentMethod || "Cashfree PG",
-                cfPaymentId: response.cfPaymentId,
-              };
-              const filtered = existing.filter((item: any) => item.id !== orderId);
-              localStorage.setItem("appnix_transactions", JSON.stringify([record, ...filtered]));
-            } catch {}
-          }
-
-          // Register with server history endpoint
-          fetch("/api/v1/payments/cashfree/history", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              orderId,
-              planId: planParam,
-              planName: resolvedPlanName,
-              amount: resolvedAmount,
-              status: "SUCCESS",
-              cfPaymentId: response.cfPaymentId,
-              paymentMethod: response.paymentMethod || "Cashfree PG",
-            }),
-          }).catch(() => {});
-
-          setStatus("SUCCESS");
-          setDetails({
-            ...response,
-            amount: resolvedAmount,
-            planName: resolvedPlanName,
-          });
-        } else if (response.status === "FAILED") {
-          setStatus("FAILED");
-          setDetails(response);
-        } else {
-          // If still pending, treat as verifying / retry briefly
-          setStatus("VERIFYING");
-          setTimeout(async () => {
-            if (!isMounted) return;
-            const fallbackPlanName =
-              planParam === "enterprise"
-                ? "Enterprise Custom"
-                : planParam === "pro"
-                ? "Professional Tier"
-                : "Starter Tier";
-            const fallbackAmount = amountParam ? parseFloat(amountParam) : 999;
-
-            if (typeof window !== "undefined") {
-              localStorage.setItem("appnix_active_plan", planParam);
-              try {
-                const existing = JSON.parse(localStorage.getItem("appnix_transactions") || "[]");
-                const record = {
-                  id: orderId,
-                  invoiceNumber: `INV-${orderId.slice(-8).toUpperCase()}`,
-                  date: new Date().toLocaleDateString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  }),
-                  plan: `${fallbackPlanName} (Monthly)`,
-                  amount: `₹${Number(fallbackAmount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
-                  rawAmount: Number(fallbackAmount),
-                  status: "Paid",
-                  paymentMethod: "Cashfree PG",
-                };
-                const filtered = existing.filter((item: any) => item.id !== orderId);
-                localStorage.setItem("appnix_transactions", JSON.stringify([record, ...filtered]));
-              } catch {}
-            }
-
-            fetch("/api/v1/payments/cashfree/history", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                orderId,
-                planId: planParam,
-                planName: fallbackPlanName,
-                amount: fallbackAmount,
-                status: "SUCCESS",
-                paymentMethod: "Cashfree PG",
-              }),
-            }).catch(() => {});
-
-            setStatus("SUCCESS");
-            setDetails({
-              orderId,
-              status: "SUCCESS",
-              planName: fallbackPlanName,
-              amount: fallbackAmount,
-              currency: "INR",
-              paidAt: new Date().toISOString(),
-              paymentMethod: "Cashfree Verified",
-            });
-          }, 1500);
-        }
-      } catch (err: any) {
-        if (!isMounted) return;
-        setStatus("FAILED");
-        setDetails({
-          orderId,
-          status: "FAILED",
-          failureReason: err.message || "Unable to confirm payment status.",
-        });
-      }
+  const checkStatus = async () => {
+    // If no order ID, mark as failed / invalid
+    if (!orderId) {
+      setStatus("FAILED");
+      setDetails({
+        orderId: "N/A",
+        status: "FAILED",
+        failureReason: "Missing or invalid payment session reference.",
+      });
+      return;
     }
 
-    checkStatus();
+    // Check explicit query override (e.g. testing cancel/failure)
+    if (explicitStatus === "failed" || explicitStatus === "cancelled") {
+      setStatus("FAILED");
+      setDetails({
+        orderId,
+        status: "FAILED",
+        failureReason: "Payment was cancelled by user or declined by issuing bank.",
+      });
+      return;
+    }
 
-    return () => {
-      isMounted = false;
-    };
-  }, [orderId, planParam, amountParam, explicitStatus, verifyPayment]);
+    setStatus("VERIFYING");
+
+    try {
+      const response = await verifyPayment(orderId);
+
+      if (response.status === "SUCCESS") {
+        const resolvedPlanName =
+          response.planName ||
+          (planParam === "enterprise"
+            ? "Enterprise Custom"
+            : planParam === "pro"
+            ? "Professional Tier"
+            : "Starter Tier");
+        const resolvedAmount = amountParam ? parseFloat(amountParam) : response.amount || 999;
+
+        if (typeof window !== "undefined") {
+          markSubscriptionActive(planParam);
+          try {
+            const existing = JSON.parse(localStorage.getItem("appnix_transactions") || "[]");
+            const record = {
+              id: orderId,
+              invoiceNumber: `INV-${orderId.slice(-8).toUpperCase()}`,
+              date: new Date().toLocaleDateString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              }),
+              plan: `${resolvedPlanName} (Monthly)`,
+              amount: `₹${Number(resolvedAmount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
+              rawAmount: Number(resolvedAmount),
+              status: "Paid",
+              paymentMethod: response.paymentMethod || "Cashfree PG",
+              cfPaymentId: response.cfPaymentId,
+            };
+            const filtered = existing.filter((item: any) => item.id !== orderId);
+            localStorage.setItem("appnix_transactions", JSON.stringify([record, ...filtered]));
+          } catch {}
+        }
+
+        // Register with server history endpoint
+        fetch("/api/v1/payments/cashfree/history", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId,
+            planId: planParam,
+            planName: resolvedPlanName,
+            amount: resolvedAmount,
+            status: "SUCCESS",
+            cfPaymentId: response.cfPaymentId,
+            paymentMethod: response.paymentMethod || "Cashfree PG",
+          }),
+        }).catch(() => {});
+
+        setStatus("SUCCESS");
+        setDetails({
+          ...response,
+          amount: resolvedAmount,
+          planName: resolvedPlanName,
+        });
+        setRedirectCountdown(3);
+      } else if (response.status === "FAILED") {
+        setStatus("FAILED");
+        setDetails(response);
+      } else {
+        // Status is PENDING - strictly DO NOT activate subscription or panel access
+        setStatus("PENDING");
+        setDetails(response);
+      }
+    } catch (err: any) {
+      setStatus("FAILED");
+      setDetails({
+        orderId,
+        status: "FAILED",
+        failureReason: err.message || "Unable to confirm payment status.",
+      });
+    }
+  };
+
+  useEffect(() => {
+    checkStatus();
+  }, [orderId, planParam, amountParam, explicitStatus]);
+
+  // Handle countdown redirect on SUCCESS
+  useEffect(() => {
+    if (status !== "SUCCESS" || redirectCountdown === null) return;
+    if (redirectCountdown <= 0) {
+      router.push("/dashboard");
+      return;
+    }
+    const timer = setTimeout(() => {
+      setRedirectCountdown((prev) => (prev !== null ? prev - 1 : null));
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [status, redirectCountdown, router]);
 
   // ================= 1. VERIFICATION / LOADING STATE =================
   if (status === "VERIFYING") {
@@ -318,8 +270,8 @@ function PaymentStatusContent() {
             asChild
             className="w-full h-10 bg-primary text-primary-foreground font-semibold text-xs gap-2 shadow-xs cursor-pointer"
           >
-            <Link href="/workspace/billing">
-              <span>Back to Workspace Dashboard</span>
+            <Link href="/dashboard">
+              <span>Go to Dashboard</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </Button>
@@ -345,7 +297,75 @@ function PaymentStatusContent() {
     );
   }
 
-  // ================= 3. FAILED / ABANDONED STATE =================
+  // ================= 3. PENDING STATE =================
+  if (status === "PENDING") {
+    return (
+      <div className="max-w-lg mx-auto py-8 px-4 space-y-6 animate-in fade-in-50 duration-300">
+        {/* Pending Banner */}
+        <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 via-card to-card p-6 text-center space-y-3 shadow-md">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400">
+            <Clock className="h-8 w-8" />
+          </div>
+
+          <div className="space-y-1">
+            <Badge className="bg-amber-600 text-white font-bold text-[10px] uppercase">
+              Payment Awaiting Confirmation
+            </Badge>
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+              Processing Transaction...
+            </h1>
+            <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+              Cashfree has not confirmed receipt of this transaction yet. If you already authorized the transfer in your bank or UPI app, it may take a few moments to sync.
+            </p>
+          </div>
+        </div>
+
+        {/* Transaction Reference Card */}
+        <div className="rounded-xl border bg-card p-5 shadow-xs space-y-3">
+          <div className="flex items-center justify-between border-b pb-3">
+            <span className="text-xs font-bold text-foreground">Order Reference</span>
+            <Badge variant="outline" className="text-[10px] font-mono text-amber-600 border-amber-500/30">
+              PENDING
+            </Badge>
+          </div>
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Order ID:</span>
+              <span className="font-mono font-semibold text-foreground">{orderId}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Requested Plan:</span>
+              <span className="font-semibold text-foreground capitalize">{planParam} Tier</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="space-y-2.5">
+          <Button
+            onClick={() => checkStatus()}
+            className="w-full h-10 bg-primary text-primary-foreground font-semibold text-xs gap-2 shadow-xs cursor-pointer"
+          >
+            <RotateCw className="h-3.5 w-3.5" />
+            <span>Check Payment Status Again</span>
+          </Button>
+
+          <Button
+            asChild
+            variant="outline"
+            className="w-full text-xs font-semibold text-muted-foreground hover:text-foreground"
+          >
+            <Link href="/subscription">
+              <ArrowLeft className="h-3.5 w-3.5 mr-1" />
+              <span>Back to Choose Plan</span>
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ================= 4. FAILED / ABANDONED STATE =================
   return (
     <div className="max-w-lg mx-auto py-8 px-4 space-y-6 animate-in fade-in-50 duration-300">
       {/* Failure Banner */}

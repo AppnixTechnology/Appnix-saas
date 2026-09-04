@@ -268,7 +268,7 @@ export function ConnectFacebookModal({
             value: botHandoffEnabled ? "Active (Auto-Reply)" : "Manual Live Chat",
             icon: Bot,
           },
-          { label: "WhatsApp Link", value: "+91 80627 65557", icon: MessageSquare },
+          { label: "Messenger Sync", value: "Direct Sync Enabled", icon: MessageSquare },
         ],
         actions: [],
       };

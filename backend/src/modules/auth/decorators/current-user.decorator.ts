@@ -1,11 +1,14 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { Role } from '@prisma/client';
 
 export interface AuthUser {
   userId: string;
   id?: string;
   email: string;
   tenantId: string;
-  role: string;
+  role: Role;
+  workspaceId?: string;
+  impersonatedWorkspaceId?: string;
 }
 
 export const CurrentUser = createParamDecorator(

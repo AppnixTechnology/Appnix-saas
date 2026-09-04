@@ -85,16 +85,32 @@ function CheckoutContent() {
   const { createPaymentSession, checkout, isLoaded, mode } = useCashfree();
 
   const planParam = searchParams.get("plan") || "starter";
-  const cycleParam = (searchParams.get("cycle") as "monthly" | "yearly") || "monthly";
+  const cycleParam = (searchParams.get("cycle") as "monthly" | "quarterly" | "half_yearly" | "yearly") || "monthly";
 
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(cycleParam);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "quarterly" | "half_yearly" | "yearly">(cycleParam);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const plan = AVAILABLE_PLANS[planParam.toLowerCase()] || AVAILABLE_PLANS.starter;
 
   // Calculation
-  const basePrice = billingCycle === "yearly" ? plan.yearlyPrice : plan.monthlyPrice;
+  let basePrice = plan.monthlyPrice;
+  let periodLabel = "month";
+
+  if (billingCycle === "yearly") {
+    basePrice = plan.yearlyPrice;
+    periodLabel = "year";
+  } else if (billingCycle === "half_yearly") {
+    basePrice = Math.round(plan.monthlyPrice * 6 * 0.85);
+    periodLabel = "6 months";
+  } else if (billingCycle === "quarterly") {
+    basePrice = Math.round(plan.monthlyPrice * 3 * 0.9);
+    periodLabel = "3 months";
+  } else {
+    basePrice = plan.monthlyPrice;
+    periodLabel = "month";
+  }
+
   const gstAmount = Math.round(basePrice * 0.18); // 18% GST standard in India
   const totalAmount = basePrice + gstAmount;
 
@@ -184,37 +200,67 @@ function CheckoutContent() {
               </div>
               <div className="text-right">
                 <span className="text-2xl font-black text-foreground">₹{basePrice.toLocaleString()}</span>
-                <span className="text-xs text-muted-foreground block">/{billingCycle === "yearly" ? "year" : "month"}</span>
+                <span className="text-xs text-muted-foreground block">/{periodLabel}</span>
               </div>
             </div>
 
             {/* Billing Cycle Switcher */}
-            <div className="rounded-lg border bg-muted/30 p-1 flex items-center gap-1">
+            <div className="rounded-lg border bg-muted/30 p-1 grid grid-cols-2 sm:grid-cols-4 gap-1">
               <button
                 type="button"
                 onClick={() => setBillingCycle("monthly")}
                 className={cn(
-                  "flex-1 py-2 text-xs font-semibold rounded-md transition-all",
+                  "py-2 text-xs font-semibold rounded-md transition-all text-center",
                   billingCycle === "monthly"
                     ? "bg-background text-foreground shadow-xs"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                Monthly Billing
+                1 Month
+              </button>
+              <button
+                type="button"
+                onClick={() => setBillingCycle("quarterly")}
+                className={cn(
+                  "py-2 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1",
+                  billingCycle === "quarterly"
+                    ? "bg-background text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span>3 Months</span>
+                <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+                  10% OFF
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setBillingCycle("half_yearly")}
+                className={cn(
+                  "py-2 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1",
+                  billingCycle === "half_yearly"
+                    ? "bg-background text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span>6 Months</span>
+                <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+                  15% OFF
+                </span>
               </button>
               <button
                 type="button"
                 onClick={() => setBillingCycle("yearly")}
                 className={cn(
-                  "flex-1 py-2 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5",
+                  "py-2 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1",
                   billingCycle === "yearly"
                     ? "bg-background text-foreground shadow-xs"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <span>Annual Billing</span>
-                <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
-                  SAVE 20%
+                <span>Annual</span>
+                <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+                  20% OFF
                 </span>
               </button>
             </div>

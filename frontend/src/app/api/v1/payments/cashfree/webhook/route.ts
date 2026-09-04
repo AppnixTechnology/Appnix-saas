@@ -87,6 +87,21 @@ export async function POST(req: NextRequest) {
                     remainingDays: 30,
                   },
                 });
+              } else {
+                await tx.subscription.create({
+                  data: {
+                    tenantId: workspaceId,
+                    status: "ACTIVE",
+                    planId: localOrder.plan?.slug || "pro",
+                    planRefId: localOrder.planId || undefined,
+                    planName: localOrder.plan?.name || "Professional Tier",
+                    price: `₹${Number(localOrder.amount || 2999).toLocaleString()}/mo`,
+                    currentPeriodStart: new Date(),
+                    currentPeriodEnd: oneMonthFromNow,
+                    totalDays: 30,
+                    remainingDays: 30,
+                  },
+                });
               }
             }
           });

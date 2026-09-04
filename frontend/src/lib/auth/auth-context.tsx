@@ -77,6 +77,21 @@ export type RegisterData = SignupData;
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+function persistAccessToken(token: string) {
+  localStorage.setItem(config.auth.tokenKey, token);
+  // This cookie lets Next.js Proxy block direct admin-page navigation. It is
+  // intentionally not used as an API credential; server-side API enforcement
+  // still validates the Authorization bearer token.
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `appnix_access_token=${encodeURIComponent(token)}; Path=/; SameSite=Lax${secure}`;
+}
+
+function clearAccessToken() {
+  localStorage.removeItem(config.auth.tokenKey);
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `appnix_access_token=; Path=/; Max-Age=0; SameSite=Lax${secure}`;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
     user: null,
@@ -153,7 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(response.data?.message || "Invalid credentials received");
       }
 
-      localStorage.setItem(config.auth.tokenKey, accessToken);
+      persistAccessToken(accessToken);
       if (refreshToken) {
         localStorage.setItem(config.auth.refreshTokenKey, refreshToken);
       }
@@ -198,7 +213,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(response.data?.message || "Registration failed");
       }
 
-      localStorage.setItem(config.auth.tokenKey, accessToken);
+      persistAccessToken(accessToken);
       if (refreshToken) {
         localStorage.setItem(config.auth.refreshTokenKey, refreshToken);
       }
@@ -234,7 +249,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error("Google authentication failed to return access token");
       }
 
-      localStorage.setItem(config.auth.tokenKey, accessToken);
+      persistAccessToken(accessToken);
       if (refreshToken) {
         localStorage.setItem(config.auth.refreshTokenKey, refreshToken);
       }
@@ -262,7 +277,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await api.post(apiEndpoints.auth.logout);
     } catch {
     } finally {
-      localStorage.removeItem(config.auth.tokenKey);
+      clearAccessToken();
       localStorage.removeItem(config.auth.refreshTokenKey);
       localStorage.removeItem(config.auth.userKey);
       setAuth(null);
@@ -328,7 +343,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data) {
         const { user, accessToken, refreshToken } = data;
         if (accessToken) {
-          localStorage.setItem(config.auth.tokenKey, accessToken);
+          persistAccessToken(accessToken);
         }
         if (refreshToken) {
           localStorage.setItem(config.auth.refreshTokenKey, refreshToken);

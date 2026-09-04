@@ -72,6 +72,8 @@ const createAxiosInstance = (): AxiosInstance => {
         } catch {
           if (typeof window !== "undefined") {
             localStorage.removeItem(config.auth.tokenKey);
+            const secure = window.location.protocol === "https:" ? "; Secure" : "";
+            document.cookie = `appnix_access_token=; Path=/; Max-Age=0; SameSite=Lax${secure}`;
             localStorage.removeItem(config.auth.refreshTokenKey);
             localStorage.removeItem(config.auth.userKey);
             window.location.href = "/signin";

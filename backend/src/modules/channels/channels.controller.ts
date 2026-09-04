@@ -12,11 +12,12 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagg
 import { ChannelsService } from './channels.service';
 import { ConnectChannelDto, MetaEmbeddedSignupDto } from './dto/channels.dto';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
+import { SubscriptionGuard } from '../../common/guards/subscription.guard';
 import { CurrentUser, AuthUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('Channels')
 @ApiBearerAuth()
-@UseGuards(JwtAccessGuard)
+@UseGuards(JwtAccessGuard, SubscriptionGuard)
 @Controller(['channels', 'api/channels'])
 export class ChannelsController {
   constructor(private readonly channelsService: ChannelsService) {}

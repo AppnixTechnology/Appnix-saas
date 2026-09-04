@@ -11,6 +11,8 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { RecaptchaService } from './recaptcha.service';
 import { RecaptchaGuard } from './guards/recaptcha.guard';
+import { SessionContextResolver } from '../../lib/auth/session-context';
+import { SuperAdminGuard } from './guards/super-admin.guard';
 
 @Module({
   imports: [PassportModule, JwtModule.register({}), UsersModule, MailModule],
@@ -23,7 +25,18 @@ import { RecaptchaGuard } from './guards/recaptcha.guard';
     GoogleAuthGuard,
     RecaptchaService,
     RecaptchaGuard,
+    SessionContextResolver,
+    SuperAdminGuard,
   ],
-  exports: [AuthService, RecaptchaService, RecaptchaGuard],
+  // SuperAdminModule signs short-lived support contexts with the same configured
+  // JWT provider, so re-export the module rather than creating a second signer.
+  exports: [
+    JwtModule,
+    AuthService,
+    RecaptchaService,
+    RecaptchaGuard,
+    SessionContextResolver,
+    SuperAdminGuard,
+  ],
 })
 export class AuthModule {}

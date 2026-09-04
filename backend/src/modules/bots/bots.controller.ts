@@ -12,11 +12,12 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { BotsService } from './bots.service';
 import { CreateBotDto, UpdateBotDto } from './dto/bot.dto';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
+import { SubscriptionGuard } from '../../common/guards/subscription.guard';
 import { CurrentUser, AuthUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('Bots')
 @ApiBearerAuth()
-@UseGuards(JwtAccessGuard)
+@UseGuards(JwtAccessGuard, SubscriptionGuard)
 @Controller('bots')
 export class BotsController {
   constructor(private readonly botsService: BotsService) {}

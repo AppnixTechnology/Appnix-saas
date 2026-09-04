@@ -13,24 +13,34 @@ export async function GET(req: NextRequest) {
     // 2. Fetch from PostgreSQL database
     let dbOrders: any[] = [];
     let subscription: any = null;
+    let tenant: any = null;
     try {
-      [dbOrders, subscription] = await Promise.all([
-        prisma.paymentOrder
-          .findMany({
-            orderBy: { createdAt: "desc" },
-            include: { plan: true },
-            take: 30,
-          })
-          .catch(() => []),
-        prisma.subscription
-          .findFirst({
-            where: {
-              OR: [{ tenantId: workspaceId }, { status: "ACTIVE" }],
-            },
-            orderBy: { updatedAt: "desc" },
-          })
-          .catch(() => null),
-      ]);
+      const queryTenantId = workspaceId && workspaceId !== "default" ? workspaceId : null;
+      if (queryTenantId) {
+        [dbOrders, subscription, tenant] = await Promise.all([
+          prisma.paymentOrder
+            .findMany({
+              where: { workspaceId: queryTenantId },
+              orderBy: { createdAt: "desc" },
+              take: 30,
+            })
+            .catch(() => []),
+          prisma.subscription
+            .findFirst({
+              where: {
+                tenantId: queryTenantId,
+              },
+              orderBy: { createdAt: "desc" },
+            })
+            .catch(() => null),
+          prisma.tenant
+            .findUnique({
+              where: { id: queryTenantId },
+              select: { id: true, status: true },
+            })
+            .catch(() => null),
+        ]);
+      }
     } catch (e: any) {
       console.warn("[Billing History API] DB lookup notice:", e.message);
     }
@@ -101,39 +111,60 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    // Detect latest active plan from most recent successful order
-    const latestSuccessOrder = mergedOrders.find((o) => o.status === "SUCCESS");
-    const activePlanSlug =
-      subscription?.planId ||
-      (latestSuccessOrder?.orderId.includes("enterprise")
-        ? "enterprise"
-        : latestSuccessOrder?.orderId.includes("starter")
-        ? "starter"
-        : "pro");
+    const now = new Date();
+    const isTenantSuspended = tenant?.status === "SUSPENDED";
+    const isTenantCancelled = tenant?.status === "CANCELLED";
+    const isSubCancelled = subscription?.status === "CANCELLED";
+    const isSubSuspended = (subscription as any)?.status === "SUSPENDED";
+
+    const isCancelled = isTenantCancelled || isSubCancelled;
+    const isSuspended = isTenantSuspended || isSubSuspended;
+    const isExpired =
+      subscription?.status === "PAST_DUE" ||
+      subscription?.status === "EXPIRED" ||
+      (subscription?.currentPeriodEnd ? new Date(subscription.currentPeriodEnd) < now : false);
+
+    const hasActiveSubscription =
+      Boolean(subscription) &&
+      !isExpired &&
+      !isCancelled &&
+      !isSuspended &&
+      (subscription.status === "ACTIVE" || subscription.status === "TRIALING");
+
+    const remainingDays = subscription?.currentPeriodEnd
+      ? Math.max(
+          0,
+          Math.ceil(
+            (new Date(subscription.currentPeriodEnd).getTime() - now.getTime()) /
+              (1000 * 60 * 60 * 24)
+          )
+        )
+      : 0;
+
+    const resolvedStatus = isCancelled
+      ? "CANCELLED"
+      : isSuspended
+      ? "SUSPENDED"
+      : isExpired
+      ? "EXPIRED"
+      : subscription?.status || (hasActiveSubscription ? "ACTIVE" : "NONE");
 
     return NextResponse.json({
-      activePlan: {
-        id: activePlanSlug,
-        name:
-          subscription?.planName ||
-          (activePlanSlug === "enterprise"
-            ? "Enterprise Custom"
-            : activePlanSlug === "starter"
-            ? "Starter Tier"
-            : "Professional Tier"),
-        price:
-          subscription?.price ||
-          (activePlanSlug === "enterprise"
-            ? "₹8,999/mo"
-            : activePlanSlug === "starter"
-            ? "₹999/mo"
-            : "₹2,999/mo"),
-        status: subscription?.status || "ACTIVE",
-        currentPeriodEnd:
-          subscription?.currentPeriodEnd ||
-          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        remainingDays: subscription?.remainingDays ?? 30,
-      },
+      hasActiveSubscription,
+      isExpired,
+      isCancelled,
+      isSuspended,
+      status: resolvedStatus,
+      activePlan: hasActiveSubscription
+        ? {
+            id: subscription.planId,
+            name: subscription.planName,
+            price: subscription.price,
+            status: subscription.status,
+            currentPeriodEnd: subscription.currentPeriodEnd,
+            remainingDays,
+          }
+        : null,
       invoices,
     });
   } catch (error: any) {

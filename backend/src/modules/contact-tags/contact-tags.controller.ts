@@ -12,11 +12,12 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ContactTagsService } from './contact-tags.service';
 import { CreateContactTagDto, UpdateContactTagDto, AssignTagDto } from './dto/contact-tag.dto';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
+import { SubscriptionGuard } from '../../common/guards/subscription.guard';
 import { CurrentUser, AuthUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('ContactTags')
 @ApiBearerAuth()
-@UseGuards(JwtAccessGuard)
+@UseGuards(JwtAccessGuard, SubscriptionGuard)
 @Controller(['contact-tags', 'crm/contact-tags', 'tags'])
 export class ContactTagsController {
   constructor(private readonly contactTagsService: ContactTagsService) {}

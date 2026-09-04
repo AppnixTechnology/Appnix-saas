@@ -114,7 +114,8 @@ function SignUpContent() {
         description: "Welcome aboard. Let's get you started.",
         variant: "success",
       });
-      router.push(callbackUrl);
+      // New users have no active subscription: redirect to choose plan page
+      router.push("/subscription");
       router.refresh();
     } catch (error) {
       const message =

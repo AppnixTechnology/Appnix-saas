@@ -23,10 +23,11 @@ import {
 } from './dto/whatsapp-template.dto';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
 import { TenantGuard } from '../../common/guards/tenant.guard';
+import { SubscriptionGuard } from '../../common/guards/subscription.guard';
 
 @ApiTags('WhatsApp Templates')
 @ApiBearerAuth()
-@UseGuards(JwtAccessGuard, TenantGuard)
+@UseGuards(JwtAccessGuard, TenantGuard, SubscriptionGuard)
 @Controller(['channels/whatsapp/templates', 'whatsapp-templates', 'api/whatsapp-templates'])
 export class WhatsAppTemplatesController {
   constructor(private readonly templatesService: WhatsAppTemplatesService) {}

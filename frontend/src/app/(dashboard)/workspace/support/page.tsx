@@ -79,7 +79,7 @@ const initialTickets: SupportTicket[] = [
     priority: "High",
     status: "In Progress",
     description:
-      "We have submitted our Meta Business Manager verification documents and need assistance syncing the official Green Checkmark badge to our active WhatsApp number (+91 80627 65557).",
+      "We have submitted our Meta Business Manager verification documents and need assistance syncing the official Green Checkmark badge to our active WhatsApp Business Account.",
     assignedAgent: {
       name: "Sarah Jenkins",
       role: "Tier 2 Channel Specialist",
@@ -105,7 +105,7 @@ const initialTickets: SupportTicket[] = [
         senderName: "Sarah Jenkins",
         senderRole: "Tier 2 Channel Specialist",
         message:
-          "Hello! Thanks for reaching out. I have reviewed your Meta Business ID (896015703596388). The documents look valid. We have forwarded the direct verification request to WhatsApp Cloud API telecom escalations. Expect approval within 24-48 hours.",
+          "Hello! Thanks for reaching out. I have reviewed your Meta Business Account. The documents look valid. We have forwarded the direct verification request to WhatsApp Cloud API telecom escalations. Expect approval within 24-48 hours.",
         timestamp: "24 Feb 2026, 11:30 AM",
       },
     ],

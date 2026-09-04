@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -12,6 +12,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/lib/auth/auth-context";
+import { verifySubscriptionStatus } from "@/lib/subscription";
 import { useTranslation } from "@/lib/i18n";
 import { LanguageSelector } from "@/components/landing/language-selector";
 import { config } from "@/lib/config";
@@ -64,7 +65,7 @@ function GoogleIcon() {
 function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
+  const { login, user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -72,7 +73,25 @@ function SignInContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const rawCallbackUrl = searchParams.get("callbackUrl");
+  const callbackUrl = rawCallbackUrl && !rawCallbackUrl.includes("/subscription") ? rawCallbackUrl : "/dashboard";
+
+  // If already authenticated, redirect active subscriptions to dashboard, otherwise to subscription
+  useEffect(() => {
+    if (!isAuthLoading && isAuthenticated && user) {
+      if (user.role === "owner" || (user as any).role === "SUPER_ADMIN") {
+        router.replace("/super-admin/dashboard");
+        return;
+      }
+      verifySubscriptionStatus(user.workspaceId).then((subResult) => {
+        if (subResult.hasActiveSubscription) {
+          router.replace(callbackUrl);
+        } else {
+          router.replace("/subscription");
+        }
+      });
+    }
+  }, [isAuthLoading, isAuthenticated, user, router, callbackUrl]);
 
   const {
     register,
@@ -95,7 +114,33 @@ function SignInContent() {
         description: "You have successfully signed in.",
         variant: "success",
       });
-      router.push(callbackUrl);
+
+      // Check workspace subscription status immediately after successful login
+      const storedUser = typeof window !== "undefined" ? localStorage.getItem("appnix_user") : null;
+      let parsedUser: any = null;
+      try {
+        parsedUser = storedUser ? JSON.parse(storedUser) : null;
+      } catch {}
+
+      if (parsedUser?.role === "owner" || parsedUser?.role === "SUPER_ADMIN") {
+        router.push("/super-admin/dashboard");
+      } else {
+        const workspaceId = parsedUser?.workspaceId || parsedUser?.tenantId;
+        const token =
+          typeof window !== "undefined"
+            ? localStorage.getItem("appnix_auth_token") || localStorage.getItem("token") || undefined
+            : undefined;
+
+        const subResult = await verifySubscriptionStatus(workspaceId, token);
+
+        // Active subscription: go directly to dashboard on every login.
+        // Inactive / expired / cancelled / suspended: show subscription page.
+        if (subResult.hasActiveSubscription) {
+          router.push(callbackUrl);
+        } else {
+          router.push("/subscription");
+        }
+      }
       router.refresh();
     } catch (error) {
       const message =

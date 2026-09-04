@@ -157,27 +157,53 @@ export function useCashfree() {
   const createPaymentSession = useCallback(
     async (params: {
       planId: string;
-      billingCycle?: "monthly" | "yearly";
+      billingCycle?: "monthly" | "yearly" | "quarterly" | "half_yearly";
       returnUrl?: string;
+      workspaceId?: string;
+      customerEmail?: string;
+      customerName?: string;
+      customerPhone?: string;
     }): Promise<CashfreeSessionResponse> => {
       setIsLoading(true);
       setError(null);
 
+      let storedUser: any = null;
+      if (typeof window !== "undefined") {
+        try {
+          storedUser = JSON.parse(localStorage.getItem("appnix_user") || "{}");
+        } catch {}
+      }
+
       const cycle = params.billingCycle || "monthly";
+      const resolvedEmail = params.customerEmail || storedUser?.email || "billing@appnix.io";
+      const resolvedName = params.customerName || storedUser?.name || "Workspace Admin";
+      const resolvedPhone = params.customerPhone || storedUser?.phone || "9876543210";
+
       const defaultReturnUrl =
         typeof window !== "undefined"
           ? `${window.location.origin}/workspace/billing/status?order_id={order_id}&plan=${params.planId}`
           : `/workspace/billing/status?order_id={order_id}&plan=${params.planId}`;
 
       try {
+        const token =
+          typeof window !== "undefined"
+            ? localStorage.getItem("appnix_auth_token") ||
+              localStorage.getItem("token") ||
+              localStorage.getItem("appnix_token")
+            : null;
+        if (!token) throw new Error("Please sign in before starting payment.");
         const response = await fetch("/api/v1/payments/cashfree/session", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             planId: params.planId,
             billingCycle: cycle,
+            customerEmail: resolvedEmail,
+            customerName: resolvedName,
+            customerPhone: resolvedPhone,
             returnUrl: params.returnUrl || defaultReturnUrl,
           }),
         });
@@ -194,28 +220,10 @@ export function useCashfree() {
           };
         }
 
-        // Development fallback contract
-        const generatedOrderId = `cf_ord_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-        const mockSessionId = `session_mock_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-        const mockPaymentLink = `https://sandbox.cashfree.com/pg/orders/${generatedOrderId}`;
-
-        return {
-          paymentSessionId: mockSessionId,
-          paymentLink: mockPaymentLink,
-          orderId: generatedOrderId,
-          isMock: true,
-          planId: params.planId,
-        };
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || "Unable to create a Cashfree payment session.");
       } catch (err: any) {
-        console.warn("[useCashfree] Fetch failed, falling back to mock session:", err.message);
-        const fallbackOrderId = `cf_ord_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-        return {
-          paymentSessionId: `session_mock_${Date.now()}`,
-          paymentLink: `https://sandbox.cashfree.com/pg/orders/${fallbackOrderId}`,
-          orderId: fallbackOrderId,
-          isMock: true,
-          planId: params.planId,
-        };
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -350,7 +358,16 @@ export function useCashfree() {
       setError(null);
 
       try {
-        const res = await fetch(`/api/v1/payments/cashfree/verify?order_id=${encodeURIComponent(orderId)}`);
+        const token =
+          typeof window !== "undefined"
+            ? localStorage.getItem("appnix_auth_token") ||
+              localStorage.getItem("token") ||
+              localStorage.getItem("appnix_token")
+            : null;
+        if (!token) throw new Error("Please sign in before verifying payment.");
+        const res = await fetch(`/api/v1/payments/cashfree/verify?order_id=${encodeURIComponent(orderId)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         if (res.ok) {
           const data = await res.json();
           return {
@@ -366,26 +383,14 @@ export function useCashfree() {
           };
         }
 
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error.error || "Payment verification failed.");
+      } catch (error) {
         return {
           orderId,
-          status: "SUCCESS",
-          planName: orderId.includes("enterprise") ? "Enterprise Custom" : "Starter Tier",
-          planId: orderId.includes("enterprise") ? "enterprise" : "starter",
-          amount: orderId.includes("enterprise") ? 8999 : 999,
+          status: "PENDING",
           currency: "INR",
-          paymentMethod: "Cashfree Sandbox Verified",
-          paidAt: new Date().toISOString(),
-        };
-      } catch {
-        return {
-          orderId,
-          status: "SUCCESS",
-          planName: "Starter Tier",
-          planId: "starter",
-          amount: 999,
-          currency: "INR",
-          paymentMethod: "Cashfree Gateway",
-          paidAt: new Date().toISOString(),
+          failureReason: error instanceof Error ? error.message : "Payment verification is unavailable.",
         };
       } finally {
         setIsLoading(false);

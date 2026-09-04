@@ -41,18 +41,35 @@ export class ChannelsService {
       }
 
       if (type === 'WHATSAPP') {
+        if (!found || !found.isConnected) {
+          return {
+            id: 'whatsapp',
+            name: 'WhatsApp Cloud API',
+            type: 'WHATSAPP',
+            status: 'not_configured',
+            phoneNumber: null,
+            wabaId: null,
+            phoneNumberId: null,
+            qualityRating: null,
+            tierLimit: null,
+            webhookUrl: `https://api.appnix.co.in/api/v1/webhooks/whatsapp`,
+            lastVerifiedAt: null,
+          };
+        }
+
         return {
-          id: 'whatsapp',
-          name: 'WhatsApp Cloud API',
+          id: found.id || 'whatsapp',
+          name: conf.displayName || conf.wabaName || 'WhatsApp Cloud API',
           type: 'WHATSAPP',
-          status,
-          phoneNumber: conf.phoneNumber || (status === 'connected' ? '+91 80627 65557' : 'Not Configured'),
-          wabaId: conf.wabaId || (status === 'connected' ? '896015703596388' : 'Not Configured'),
-          phoneNumberId: conf.phoneNumberId || 'Not Configured',
-          qualityRating: conf.qualityRating || (status === 'connected' ? 'High (Green)' : 'Not Connected'),
-          tierLimit: conf.messagingLimitTier || (status === 'connected' ? '100,000 conversations / day' : '0'),
+          status: 'connected',
+          phoneNumber: conf.phoneNumber || null,
+          wabaId: conf.wabaId || null,
+          phoneNumberId: conf.phoneNumberId || null,
+          qualityRating: conf.qualityRating || null,
+          tierLimit: conf.messagingLimitTier || null,
           webhookUrl: `https://api.appnix.co.in/api/v1/webhooks/whatsapp`,
-          lastVerifiedAt: found?.lastVerifiedAt,
+          lastVerifiedAt: found.lastVerifiedAt,
+          connectedAt: found.connectedAt,
         };
       }
 
@@ -179,12 +196,20 @@ export class ChannelsService {
   // ----------------- META EMBEDDED SIGNUP & WHATSAPP ONBOARDING -----------------
 
   getPublicMetaConfig() {
+    const appId = this.configService.get<string>('META_APP_ID') || '';
+    const configId = this.configService.get<string>('META_EMBEDDED_SIGNUP_CONFIG_ID') || '';
+    const graphVersion = this.configService.get<string>('META_GRAPH_API_VERSION') || 'v21.0';
+
+    const isAppIdConfigured = Boolean(appId && appId !== 'your_meta_app_id');
+    const isConfigIdConfigured = Boolean(configId && configId !== 'your_meta_embedded_signup_config_id');
+
     return {
       success: true,
       data: {
-        appId: this.configService.get<string>('META_APP_ID') || '896015703596388',
-        configId: this.configService.get<string>('META_EMBEDDED_SIGNUP_CONFIG_ID') || 'config_appnix_prod_2026',
-        graphVersion: this.configService.get<string>('META_GRAPH_API_VERSION') || 'v21.0',
+        appId: isAppIdConfigured ? appId : '',
+        configId: isConfigIdConfigured ? configId : '',
+        graphVersion,
+        isConfigured: isAppIdConfigured && isConfigIdConfigured,
       },
     };
   }
@@ -198,107 +223,121 @@ export class ChannelsService {
       throw new BadRequestException('Meta authorization code is required for Embedded Signup.');
     }
 
-    let wabaId = dto.wabaId;
-    let phoneNumberId = dto.phoneNumberId;
-    let businessId = dto.businessId;
+    if (!appId || !appSecret || appId === 'your_meta_app_id' || appSecret === 'your_meta_app_secret') {
+      throw new BadRequestException(
+        'Meta App credentials (META_APP_ID and META_APP_SECRET) are not configured in backend environment. Please configure them in backend/.env to verify and register WhatsApp Business accounts.',
+      );
+    }
+
+    let wabaId = dto.wabaId || null;
+    let phoneNumberId = dto.phoneNumberId || null;
+    let businessId = dto.businessId || null;
     let wabaName = 'WhatsApp Business Account';
-    let phoneNumber = '+91 80627 65557';
-    let displayName = 'Appnix Business';
-    let qualityRating = 'High (Green)';
-    let messagingLimitTier = '100,000 conversations / day';
-    let rawAccessToken = `meta_user_token_${dto.code.slice(0, 8)}`;
-    let webhookSubscribed = true;
+    let phoneNumber: string | null = null;
+    let displayName = 'WhatsApp Business';
+    let qualityRating = 'UNKNOWN';
+    let messagingLimitTier = 'TIER_50';
+    let rawAccessToken = '';
+    let webhookSubscribed = false;
 
-    // If Meta App Secret is configured with live production credentials, perform live server-to-server exchange
-    if (appId && appSecret && appSecret !== 'your_meta_app_secret' && !dto.code.startsWith('AQD_meta_oauth_auth_code_')) {
-      try {
-        // Step 1: Exchange code for long-lived system user access token
-        const tokenUrl = `https://graph.facebook.com/${graphVersion}/oauth/access_token?client_id=${appId}&client_secret=${appSecret}&code=${dto.code}`;
-        const tokenRes = await fetch(tokenUrl);
-        const tokenData = await tokenRes.json();
+    try {
+      // Step 1: Exchange code for long-lived system user access token
+      const tokenUrl = `https://graph.facebook.com/${graphVersion}/oauth/access_token?client_id=${encodeURIComponent(appId)}&client_secret=${encodeURIComponent(appSecret)}&code=${encodeURIComponent(dto.code)}`;
+      const tokenRes = await fetch(tokenUrl);
+      const tokenData = await tokenRes.json();
 
-        if (!tokenRes.ok || !tokenData.access_token) {
-          this.logger.error(`Meta token exchange failed: ${JSON.stringify(tokenData)}`);
-          throw new UnauthorizedException(
-            tokenData.error?.message || 'Failed to exchange Meta authorization code with Graph API.',
-          );
+      if (!tokenRes.ok || !tokenData.access_token) {
+        this.logger.error(`Meta token exchange failed: ${JSON.stringify(tokenData)}`);
+        throw new BadRequestException(
+          tokenData.error?.message || 'Failed to exchange Meta authorization code with Graph API.',
+        );
+      }
+
+      rawAccessToken = tokenData.access_token;
+
+      // Step 2: Debug token to get WABA ID if not provided in callback
+      if (!wabaId) {
+        const debugUrl = `https://graph.facebook.com/${graphVersion}/debug_token?input_token=${encodeURIComponent(rawAccessToken)}&access_token=${encodeURIComponent(appId)}|${encodeURIComponent(appSecret)}`;
+        const debugRes = await fetch(debugUrl);
+        const debugData = await debugRes.json();
+        const targetIds = debugData.data?.granular_scopes?.find(
+          (s: any) => s.scope === 'whatsapp_business_management',
+        )?.target_ids;
+
+        if (targetIds && targetIds.length > 0) {
+          wabaId = targetIds[0];
+        }
+        if (debugData.data?.business_id) {
+          businessId = debugData.data.business_id;
+        }
+      }
+
+      // Step 3: Fetch WABA details
+      if (wabaId) {
+        const wabaUrl = `https://graph.facebook.com/${graphVersion}/${wabaId}?fields=id,name,currency,timezone_id,account_review_status&access_token=${encodeURIComponent(rawAccessToken)}`;
+        const wabaRes = await fetch(wabaUrl);
+        if (wabaRes.ok) {
+          const wabaJson = await wabaRes.json();
+          wabaName = wabaJson.name || wabaName;
         }
 
-        rawAccessToken = tokenData.access_token;
-
-        // Step 2: Debug token to get WABA ID if not provided in callback
-        if (!wabaId) {
-          const debugUrl = `https://graph.facebook.com/${graphVersion}/debug_token?input_token=${rawAccessToken}&access_token=${appId}|${appSecret}`;
-          const debugRes = await fetch(debugUrl);
-          const debugData = await debugRes.json();
-          const targetIds = debugData.data?.granular_scopes?.find(
-            (s: any) => s.scope === 'whatsapp_business_management',
-          )?.target_ids;
-
-          if (targetIds && targetIds.length > 0) {
-            wabaId = targetIds[0];
+        // Step 4: Fetch Phone Numbers for WABA
+        if (phoneNumberId) {
+          const phoneUrl = `https://graph.facebook.com/${graphVersion}/${phoneNumberId}?fields=id,display_phone_number,verified_name,quality_rating,messaging_limit_tier&access_token=${encodeURIComponent(rawAccessToken)}`;
+          const phoneRes = await fetch(phoneUrl);
+          if (phoneRes.ok) {
+            const phoneJson = await phoneRes.json();
+            phoneNumber = phoneJson.display_phone_number || null;
+            displayName = phoneJson.verified_name || wabaName;
+            qualityRating = phoneJson.quality_rating || qualityRating;
+            messagingLimitTier = phoneJson.messaging_limit_tier || messagingLimitTier;
           }
-        }
-
-        // Step 3: Fetch WABA details
-        if (wabaId) {
-          const wabaUrl = `https://graph.facebook.com/${graphVersion}/${wabaId}?fields=id,name,currency,timezone_id,account_review_status&access_token=${rawAccessToken}`;
-          const wabaRes = await fetch(wabaUrl);
-          if (wabaRes.ok) {
-            const wabaJson = await wabaRes.json();
-            wabaName = wabaJson.name || wabaName;
-          }
-
-          // Step 4: Fetch Phone Numbers for WABA
-          const phoneUrl = `https://graph.facebook.com/${graphVersion}/${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name,quality_rating,messaging_limit_tier&access_token=${rawAccessToken}`;
+        } else {
+          const phoneUrl = `https://graph.facebook.com/${graphVersion}/${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name,quality_rating,messaging_limit_tier&access_token=${encodeURIComponent(rawAccessToken)}`;
           const phoneRes = await fetch(phoneUrl);
           if (phoneRes.ok) {
             const phoneJson = await phoneRes.json();
             const primaryPhone = phoneJson.data?.[0];
             if (primaryPhone) {
               phoneNumberId = primaryPhone.id;
-              phoneNumber = primaryPhone.display_phone_number;
+              phoneNumber = primaryPhone.display_phone_number || null;
               displayName = primaryPhone.verified_name || displayName;
               qualityRating = primaryPhone.quality_rating || qualityRating;
               messagingLimitTier = primaryPhone.messaging_limit_tier || messagingLimitTier;
             }
           }
+        }
 
-          // Step 5: Subscribe app to WABA webhooks
-          try {
-            const subUrl = `https://graph.facebook.com/${graphVersion}/${wabaId}/subscribed_apps`;
-            const subRes = await fetch(subUrl, {
-              method: 'POST',
-              headers: { Authorization: `Bearer ${rawAccessToken}` },
-            });
-            webhookSubscribed = subRes.ok;
-          } catch (subErr: any) {
-            this.logger.warn(`Webhook subscription request warning: ${subErr.message}`);
-          }
+        // Step 5: Subscribe app to WABA webhooks
+        try {
+          const subUrl = `https://graph.facebook.com/${graphVersion}/${wabaId}/subscribed_apps`;
+          const subRes = await fetch(subUrl, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${rawAccessToken}` },
+          });
+          webhookSubscribed = subRes.ok;
+        } catch (subErr: any) {
+          this.logger.warn(`Webhook subscription request warning: ${subErr.message}`);
         }
-      } catch (err: any) {
-        if (err instanceof UnauthorizedException || err instanceof BadRequestException) {
-          throw err;
-        }
-        this.logger.error(`Meta Embedded Signup server verification failed: ${err.message}`, err.stack);
-        throw new BadRequestException(`Meta Graph API verification failed: ${err.message}`);
       }
-    } else {
-      this.logger.log('Running Embedded Signup in test mode (META_APP_SECRET not present in env)');
-      wabaId = wabaId || '896015703596388';
-      phoneNumberId = phoneNumberId || '1092837465928';
+    } catch (err: any) {
+      if (err instanceof UnauthorizedException || err instanceof BadRequestException) {
+        throw err;
+      }
+      this.logger.error(`Meta Embedded Signup server verification failed: ${err.message}`, err.stack);
+      throw new BadRequestException(`Meta Graph API verification failed: ${err.message}`);
     }
 
     // Step 6: Encrypt the Access Token using AES-256-GCM
     const encryptedToken = encryptPayload(rawAccessToken);
 
     const configPayload = {
-      wabaId,
+      wabaId: wabaId || undefined,
       wabaName,
-      phoneNumberId,
-      phoneNumber,
-      displayName,
-      businessId: businessId || 'meta_biz_default',
+      phoneNumberId: phoneNumberId || undefined,
+      phoneNumber: phoneNumber || undefined,
+      displayName: displayName || wabaName,
+      businessId: businessId || undefined,
       qualityRating,
       messagingLimitTier,
       encryptedAccessToken: encryptedToken,
@@ -331,7 +370,7 @@ export class ChannelsService {
     await this.prisma.activityLog.create({
       data: {
         tenantId,
-        action: `Connected WhatsApp Cloud API via Meta Embedded Signup (${phoneNumber}, WABA: ${wabaId})`,
+        action: `Connected WhatsApp Cloud API via Meta Embedded Signup (${phoneNumber || displayName}, WABA: ${wabaId || 'N/A'})`,
         module: 'Channels > WhatsApp',
         status: 'Success',
       },
@@ -353,7 +392,7 @@ export class ChannelsService {
         webhookSubscribed,
         connectedAt: channelConfig.connectedAt,
       },
-      message: `WhatsApp Business Account (${phoneNumber}) connected and verified successfully!`,
+      message: `WhatsApp Business Account (${phoneNumber || displayName}) connected and verified successfully!`,
     };
   }
 
@@ -381,16 +420,17 @@ export class ChannelsService {
     return {
       success: true,
       data: {
+        channelId: config.id,
         channel: 'WHATSAPP',
         status: 'CONNECTED',
         isConnected: true,
-        wabaId: conf.wabaId,
+        wabaId: conf.wabaId || null,
         wabaName: conf.wabaName || 'WhatsApp Business Account',
-        phoneNumberId: conf.phoneNumberId,
-        phoneNumber: conf.phoneNumber,
-        displayName: conf.displayName,
-        qualityRating: conf.qualityRating || 'High (Green)',
-        messagingLimitTier: conf.messagingLimitTier || '100,000 conversations / day',
+        phoneNumberId: conf.phoneNumberId || null,
+        phoneNumber: conf.phoneNumber || null,
+        displayName: conf.displayName || null,
+        qualityRating: conf.qualityRating || null,
+        messagingLimitTier: conf.messagingLimitTier || null,
         webhookSubscribed: conf.webhookSubscribed ?? true,
         webhookUrl: `https://api.appnix.co.in/api/v1/webhooks/whatsapp`,
         connectedAt: config.connectedAt,
@@ -415,17 +455,23 @@ export class ChannelsService {
     const creditsAdded = txns.filter((t) => t.type === 'CREDIT' || t.type === 'TOPUP').reduce((sum, t) => sum + t.amount, 0);
     const refundsCount = txns.filter((t) => t.type === 'REFUND').length;
 
+    const waConfig = await this.prisma.channelConfig.findUnique({
+      where: { tenantId_channel: { tenantId, channel: 'WHATSAPP' } },
+    });
+    const waData = (waConfig?.config as any) || {};
+    const isWaConnected = Boolean(waConfig?.isConnected);
+
     return {
       success: true,
       data: {
         accountDetails: {
-          id: 'waba-primary',
-          name: 'Appnix Primary WABA',
-          phoneNumber: '+91 80627 65557',
+          id: waConfig?.id || 'waba-primary',
+          name: waData.displayName || waData.wabaName || (isWaConnected ? 'WhatsApp Business' : 'No WhatsApp Channel Connected'),
+          phoneNumber: waData.phoneNumber || (isWaConnected ? 'Connected' : 'Not Configured'),
           channelType: 'WhatsApp Cloud API',
-          wabaId: '896015703596388',
-          status: 'connected',
-          qualityScore: 'GREEN',
+          wabaId: waData.wabaId || null,
+          status: isWaConnected ? 'connected' : 'disconnected',
+          qualityScore: waData.qualityRating || (isWaConnected ? 'UNKNOWN' : 'N/A'),
           currentBalance,
           currency: wallet?.currency || 'INR',
           lastSyncedAt: new Date().toISOString(),

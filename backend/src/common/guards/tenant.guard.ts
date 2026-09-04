@@ -21,6 +21,8 @@ export class TenantGuard implements CanActivate {
       throw new ForbiddenException('Tenant mismatch');
     }
 
+    // A header may only corroborate the effective signed context; it can never
+    // select a tenant. This preserves backwards compatibility for old clients.
     request.tenantId = jwtTenantId;
     return true;
   }

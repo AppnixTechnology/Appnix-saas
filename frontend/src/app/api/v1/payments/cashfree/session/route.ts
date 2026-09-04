@@ -2,51 +2,59 @@ import { NextRequest, NextResponse } from "next/server";
 import { cashfree, CashfreeAPIError } from "@/lib/cashfree";
 import { prisma } from "@/lib/prisma";
 import { saveStoredOrder } from "@/lib/transactions-store";
+import { getAuthenticatedWorkspace } from "@/lib/server/authenticated-workspace";
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getAuthenticatedWorkspace(req);
+    if (!session) {
+      return NextResponse.json({ error: "Authentication is required" }, { status: 401 });
+    }
     const body = await req.json();
     const {
       planId = "starter",
-      workspaceId = "ws_default_tenant",
       customerEmail = "billing@appnix.io",
       customerPhone = "9876543210",
       customerName = "Appnix Workspace Admin",
       billingCycle = "monthly",
       returnUrl,
     } = body;
+    const workspaceId = session.workspaceId;
 
     // 1. Retrieve Plan Details (Query Database with fallback)
-    let plan = null;
+    let plan: any = null;
     try {
-      plan = await prisma.plan.findFirst({
-        where: {
-          OR: [{ slug: planId }, { id: planId }],
-        },
-      });
+      const planRows: any[] = await prisma.$queryRaw`
+        SELECT id, name, slug, "monthlyPrice", "yearlyPrice" FROM plans WHERE slug = ${planId} OR id = ${planId} LIMIT 1;
+      `;
+      plan = planRows?.[0] || null;
     } catch (dbErr: any) {
-      console.warn("[Cashfree Session API] Prisma plan query skipped/failed:", dbErr.message);
+      console.warn("[Cashfree Session API] Prisma plan query notice:", dbErr.message);
     }
 
-    // Standardized fallback pricing if plan is not yet seeded in database
-    let amount = 999;
-    let resolvedPlanName = "Starter Tier";
-    let resolvedPlanId = plan?.id || planId;
+    const cycle = (billingCycle || "monthly").toLowerCase();
+    const monthlyRate = plan
+      ? Number(plan.monthlyPrice || 0)
+      : (planId === "enterprise" ? 8999 : planId === "pro" ? 2999 : 999);
+    const resolvedPlanName =
+      plan?.name ||
+      (planId === "enterprise"
+        ? "Enterprise Custom"
+        : planId === "pro"
+        ? "Professional Tier"
+        : "Starter Tier");
 
-    if (plan) {
-      amount = Number(plan.price);
-      resolvedPlanName = plan.name;
+    let amount = monthlyRate;
+    if (cycle === "yearly" || cycle === "annual" || cycle === "12_months") {
+      amount = plan?.yearlyPrice
+        ? Number(plan.yearlyPrice)
+        : (planId === "enterprise" ? 86390 : planId === "pro" ? 28790 : 9590);
+    } else if (cycle === "half_yearly" || cycle === "6_months" || cycle === "semi_annual") {
+      amount = Math.round(monthlyRate * 6 * 0.85);
+    } else if (cycle === "quarterly" || cycle === "3_months") {
+      amount = Math.round(monthlyRate * 3 * 0.9);
     } else {
-      if (planId === "pro") {
-        amount = billingCycle === "yearly" ? 28790 : 2999;
-        resolvedPlanName = "Professional Tier";
-      } else if (planId === "enterprise") {
-        amount = billingCycle === "yearly" ? 86390 : 8999;
-        resolvedPlanName = "Enterprise Tier";
-      } else {
-        amount = billingCycle === "yearly" ? 9590 : 999;
-        resolvedPlanName = "Starter Tier";
-      }
+      amount = monthlyRate;
     }
 
     // 2. Generate Unique Order ID
@@ -60,7 +68,7 @@ export async function POST(req: NextRequest) {
       "http://localhost:3000";
     const resolvedReturnUrl =
       returnUrl ||
-      `${appUrl}/workspace/billing/status?order_id={order_id}&plan=${planId}`;
+      `${appUrl}/workspace/billing/status?order_id={order_id}&plan=${planId}&amount=${amount}`;
 
     // 4. Dispatch Payload to Cashfree Service
     const orderResponse = await cashfree.createOrder({
@@ -86,8 +94,8 @@ export async function POST(req: NextRequest) {
     saveStoredOrder({
       id: `ord_${Date.now()}`,
       orderId,
-      workspaceId: sanitizedWorkspaceId || "default",
-      planId,
+      workspaceId,
+      planId: plan?.slug || planId,
       planName: resolvedPlanName,
       amount,
       currency: "INR",
@@ -100,8 +108,8 @@ export async function POST(req: NextRequest) {
       await prisma.paymentOrder.create({
         data: {
           orderId,
-          workspaceId: sanitizedWorkspaceId || "default",
-          planId: plan ? plan.id : null,
+          workspaceId,
+          planId: plan ? plan.id : planId,
           amount,
           currency: "INR",
           paymentSessionId: orderResponse.payment_session_id,

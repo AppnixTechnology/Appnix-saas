@@ -106,20 +106,21 @@ export class DashboardService {
           time: a.createdAt ? a.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently',
           status: a.status === 'Success' ? 'sent' : 'completed',
         })),
-        subscription: {
-          plan: subscription?.planName || 'Starter Tier',
-          totalDays: subscription?.totalDays || 30,
-          remainingDays: subscription?.remainingDays || 30,
-          usedDays:
-            (subscription?.totalDays || 30) -
-            (subscription?.remainingDays || 30),
-          maxMessages: subscription?.maxMessages || 2000,
-          usedMessages: subscription?.usedMessages || 0,
-          maxBots: subscription?.maxBots || 1,
-          usedBots: bots.length,
-          maxTeamSeats: subscription?.maxTeamSeats || 2,
-          usedTeamSeats: teamMembersCount || 1,
-        },
+        subscription: subscription
+          ? {
+              plan: subscription.planName,
+              status: subscription.status,
+              totalDays: subscription.totalDays,
+              remainingDays: subscription.remainingDays,
+              usedDays: Math.max(0, subscription.totalDays - subscription.remainingDays),
+              maxMessages: subscription.maxMessages,
+              usedMessages: subscription.usedMessages,
+              maxBots: subscription.maxBots,
+              usedBots: bots.length,
+              maxTeamSeats: subscription.maxTeamSeats,
+              usedTeamSeats: teamMembersCount || 1,
+            }
+          : null,
       },
     };
   }

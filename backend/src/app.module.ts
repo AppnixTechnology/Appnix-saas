@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -28,6 +29,8 @@ import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { HealthModule } from './modules/health/health.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { MediaModule } from './modules/media/media.module';
+import { SuperAdminModule } from './modules/super-admin/super-admin.module';
+import { SupportAuditInterceptor } from './common/interceptors/support-audit.interceptor';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -62,6 +65,8 @@ import { PrismaModule } from './prisma/prisma.module';
     SettingsModule,
     WebhooksModule,
     HealthModule,
+    SuperAdminModule,
   ],
+  providers: [{ provide: APP_INTERCEPTOR, useClass: SupportAuditInterceptor }],
 })
 export class AppModule {}

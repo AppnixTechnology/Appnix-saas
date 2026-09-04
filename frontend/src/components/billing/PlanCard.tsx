@@ -146,12 +146,8 @@ export function PlanCard({
           )}
         </div>
 
-        <p className="text-xs text-muted-foreground mb-4 min-h-8 leading-relaxed">
-          {plan.description}
-        </p>
-
         {/* Pricing */}
-        <div className="mb-6">
+        <div className="mb-4">
           <div className="flex items-baseline gap-1">
             <span className="text-3xl font-extrabold tracking-tight text-foreground">
               {plan.price}
@@ -165,14 +161,11 @@ export function PlanCard({
           )}
         </div>
 
-        {/* Features List */}
-        <div className="space-y-2.5 mb-6 border-t pt-4">
-          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-            Plan Features
-          </p>
-          {plan.features.map((feat, i) => (
-            <div key={i} className="flex items-start gap-2 text-xs text-foreground">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+        {/* Features List (3-5 key features) */}
+        <div className="space-y-2 mb-4 border-t pt-3">
+          {plan.features.slice(0, 4).map((feat, i) => (
+            <div key={i} className="flex items-center gap-2 text-xs text-foreground">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <span>{feat}</span>
             </div>
           ))}

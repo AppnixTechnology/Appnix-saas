@@ -511,7 +511,7 @@ export default function ChannelsBalancePage() {
                 </div>
                 <div>
                   <h3 className="text-xs font-bold text-foreground">WhatsApp Cloud API</h3>
-                  <p className="text-[10px] text-muted-foreground">+91 80627 65557</p>
+                  <p className="text-[10px] text-muted-foreground">Official Business Number</p>
                 </div>
               </div>
               <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">
@@ -999,7 +999,7 @@ export default function ChannelsBalancePage() {
                   </div>
                   <div>
                     <p className="font-semibold text-foreground">WhatsApp Instant Alert</p>
-                    <p className="text-[11px] text-muted-foreground">Notify Admin: +91 80627 65557</p>
+                    <p className="text-[11px] text-muted-foreground">Instant WhatsApp Alerts for Admins</p>
                   </div>
                 </div>
                 <input

@@ -33,6 +33,8 @@ function AuthCallbackContent() {
     const processAuth = async () => {
       try {
         localStorage.setItem(config.auth.tokenKey, token);
+        const secure = window.location.protocol === "https:" ? "; Secure" : "";
+        document.cookie = `appnix_access_token=${encodeURIComponent(token)}; Path=/; SameSite=Lax${secure}`;
         if (refreshToken) {
           localStorage.setItem(config.auth.refreshTokenKey, refreshToken);
         }

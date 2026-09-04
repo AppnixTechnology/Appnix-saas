@@ -15,11 +15,12 @@ import { DataStoreService } from './data-store.service';
 import { CreateDataStoreDto } from './dto/create-data-store.dto';
 import { UpsertRecordDto } from './dto/data-store-record.dto';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
+import { SubscriptionGuard } from '../../common/guards/subscription.guard';
 import { CurrentUser, AuthUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('Data Store')
 @ApiBearerAuth()
-@UseGuards(JwtAccessGuard)
+@UseGuards(JwtAccessGuard, SubscriptionGuard)
 @Controller(['automations/data-stores', 'automations/data-store', 'automations/datastore', 'data-stores', 'data-store'])
 export class DataStoreController {
   constructor(private readonly dataStoreService: DataStoreService) {}

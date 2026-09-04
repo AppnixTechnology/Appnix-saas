@@ -18,11 +18,12 @@ import {
   BulkImportDto,
 } from './dto/crm-contact.dto';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
+import { SubscriptionGuard } from '../../common/guards/subscription.guard';
 import { CurrentUser, AuthUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('CRM Contacts')
 @ApiBearerAuth()
-@UseGuards(JwtAccessGuard)
+@UseGuards(JwtAccessGuard, SubscriptionGuard)
 @Controller(['contacts', 'crm-contacts', 'crm/contacts'])
 export class CrmContactsController {
   constructor(private crmContactsService: CrmContactsService) {}

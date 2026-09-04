@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { TenantsService } from './tenants.service';
+import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
+import { SuperAdminGuard } from '../auth/guards/super-admin.guard';
 
 @ApiTags('Tenants')
 @Controller('tenants')
+@UseGuards(JwtAccessGuard, SuperAdminGuard)
 export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
 

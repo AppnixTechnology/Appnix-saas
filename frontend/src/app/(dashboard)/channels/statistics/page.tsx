@@ -148,8 +148,8 @@ const mockTimeTrends = {
 const defaultChannelRows: ChannelStatRow[] = [
   {
     id: "ch_wa_1",
-    name: "01 Automations Official",
-    identifier: "+91 80627 65557",
+    name: "WhatsApp Official Channel",
+    identifier: "WhatsApp Cloud API",
     channelType: "whatsapp",
     status: "connected",
     totalConversations: 28210,

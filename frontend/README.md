@@ -503,7 +503,7 @@ Open /channels → See 4 channel cards with connection status
 ```
 1. User submits credentials → /api/proxy/auth/login
 2. Backend validates → Issues access_token (15min) + refresh_token (7d/30d)
-3. Cookies set: HttpOnly, Secure, SameSite=Lax, Path=/
+3. AuthContext stores the access/refresh tokens for the existing browser API flow and mirrors the access token into a Secure, SameSite=Lax navigation cookie
 4. AuthContext fetches /api/proxy/auth/me → populates user
 5. Subsequent requests: axios interceptor attaches access_token
 6. On 401: interceptor calls /api/proxy/auth/refresh → retries original
@@ -518,8 +518,14 @@ Open /channels → See 4 channel cards with connection status
 | Super Admin | All workspaces | Full console |
 
 ### Protected Routes
-- Middleware (planned) will check cookie on navigation
-- Currently: client-side check in `AuthProvider` redirects unauthenticated to `/signin`
+- `src/proxy.ts` redirects unauthenticated browser navigations to protected dashboard/workspace and super-admin paths to `/signin`.
+- The proxy rejects non-`SUPER_ADMIN` navigation to `/super-admin/*`. This is a user-experience gate; the backend remains the authorization authority for every API request.
+- Backend JWT guards derive the effective tenant only from the verified session. Client-supplied tenant/workspace IDs cannot switch a request into another tenant.
+- Tenant-scoped Prisma reads and unique-ID mutation prechecks return `404` for records outside the effective tenant, preventing ID enumeration.
+
+### Super Admin Support Mode
+
+`POST /super-admin/impersonation` is restricted to `SUPER_ADMIN` accounts. It issues a short-lived signed support token for one target workspace; clients send it as `X-Impersonation-Token` alongside the normal bearer token. The backend verifies that the token belongs to the same Super Admin before applying its workspace context. Every request made under that context is appended to the `audit_logs` table without request-body data. Apply the backend Prisma migration before enabling this endpoint.
 
 ---
 
@@ -613,6 +619,8 @@ Open /channels → See 4 channel cards with connection status
 | `NEXT_PUBLIC_WS_URL` | No | WebSocket server for real-time | — |
 | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Yes | Google OAuth client ID | — |
 | `AUTH_SECRET` | Yes | JWT signing secret (backend) | — |
+| `IMPERSONATION_JWT_SECRET` | Backend | Separate signing secret for short-lived Super Admin support contexts (falls back to access-token secret if unset) | — |
+| `IMPERSONATION_JWT_EXPIRY` | Backend | Lifetime for Super Admin support context | `15m` |
 | `NEXT_PUBLIC_SENTRY_DSN` | No | Error tracking | — |
 | `NEXT_PUBLIC_POSTHOG_KEY` | No | Analytics | — |
 

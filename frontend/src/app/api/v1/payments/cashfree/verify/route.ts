@@ -1,224 +1,292 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cashfree, CashfreePaymentEntity } from "@/lib/cashfree";
 import { prisma } from "@/lib/prisma";
-import { saveStoredOrder } from "@/lib/transactions-store";
+import { getStoredOrders, saveStoredOrder } from "@/lib/transactions-store";
+import { getAuthenticatedWorkspace } from "@/lib/server/authenticated-workspace";
 
 export async function GET(req: NextRequest) {
+  return handleVerify(req);
+}
+
+export async function POST(req: NextRequest) {
+  return handleVerify(req);
+}
+
+async function handleVerify(req: NextRequest) {
+  const session = await getAuthenticatedWorkspace(req);
+  if (!session) {
+    return NextResponse.json({ error: "Authentication is required" }, { status: 401 });
+  }
+
+  const searchParams = req.nextUrl.searchParams;
+  let orderId = searchParams.get("order_id") || searchParams.get("orderId");
+  let explicitPlan = searchParams.get("plan");
+  let explicitAmount = searchParams.get("amount");
+  let explicitStatus = searchParams.get("status");
+
+  if (req.method === "POST") {
+    try {
+      const body = await req.json();
+      orderId = orderId || body.order_id || body.orderId;
+      explicitPlan = explicitPlan || body.plan || body.planId;
+      explicitAmount = explicitAmount || body.amount;
+      explicitStatus = explicitStatus || body.status;
+    } catch {}
+  }
+
+  if (!orderId) {
+    return NextResponse.json({ error: "Missing required order_id parameter" }, { status: 400 });
+  }
+
+  // 1. Locate Order from PostgreSQL and Persistent File Store
+  let dbOrder: any = null;
   try {
-    const searchParams = req.nextUrl.searchParams;
-    const orderId = searchParams.get("order_id");
+    dbOrder = await prisma.paymentOrder.findFirst({
+      where: { orderId },
+    });
+  } catch (err: any) {
+    console.warn("[Cashfree Verify] Prisma lookup notice:", err.message);
+  }
 
-    if (!orderId) {
-      return NextResponse.json({ error: "Missing required query param: order_id" }, { status: 400 });
-    }
+  const storedOrders = getStoredOrders();
+  const fileOrder = storedOrders.find((o) => o.orderId === orderId);
 
-    // 1. Fetch remote order and payment details from Cashfree
-    let cfOrder: any = null;
-    let cfPayments: CashfreePaymentEntity[] = [];
+  const effectiveWorkspaceId = dbOrder?.workspaceId || fileOrder?.workspaceId || session.workspaceId;
+  const resolvedPlanId = fileOrder?.planId || dbOrder?.planId || explicitPlan || "pro";
+  const resolvedAmount = Number(fileOrder?.amount || dbOrder?.amount || explicitAmount || 2999);
+  const resolvedPlanName =
+    fileOrder?.planName ||
+    (resolvedPlanId === "enterprise"
+      ? "Enterprise Custom"
+      : resolvedPlanId === "pro"
+      ? "Professional Tier"
+      : "Starter Tier");
 
-    try {
-      [cfOrder, cfPayments] = await Promise.all([
+  try {
+    let paid = false;
+    let failed = false;
+    let paymentId = "";
+    let paymentMethod = "Cashfree PG";
+    let failureReason: string | undefined;
+
+    if (cashfree.isLiveConfigured()) {
+      // Real Cashfree Gateway Verification
+      const [cashfreeOrder, payments] = await Promise.all([
         cashfree.getOrder(orderId),
-        cashfree.getOrderPayments(orderId).catch(() => []),
+        cashfree.getOrderPayments(orderId),
       ]);
-    } catch (cfErr: any) {
-      console.warn("[Cashfree Verify API] Remote lookup notice:", cfErr.message);
+
+      const successfulPayment = (payments as CashfreePaymentEntity[]).find(
+        (payment) => payment.payment_status === "SUCCESS"
+      );
+
+      paid = cashfreeOrder.order_status === "PAID" || Boolean(successfulPayment);
+      failed =
+        ["EXPIRED", "TERMINATED"].includes(cashfreeOrder.order_status) ||
+        (payments as CashfreePaymentEntity[]).some((p) => p.payment_status === "FAILED");
+
+      if (successfulPayment) {
+        paymentId = String(successfulPayment.cf_payment_id);
+        paymentMethod = successfulPayment.payment_group || "Cashfree PG";
+      } else if (cashfreeOrder.cf_order_id) {
+        paymentId = String(cashfreeOrder.cf_order_id);
+      }
+
+      if (failed) {
+        failureReason = "Payment was expired, terminated, or rejected by Cashfree.";
+      }
+    } else {
+      // Sandbox / Simulation Mode: Strictly require explicit success simulation
+      const isExplicitSuccess =
+        explicitStatus === "SUCCESS" ||
+        fileOrder?.status === "SUCCESS" ||
+        dbOrder?.status === "SUCCESS";
+
+      const isExplicitFail =
+        explicitStatus === "FAILED" ||
+        explicitStatus === "cancelled" ||
+        explicitStatus === "failed" ||
+        fileOrder?.status === "FAILED" ||
+        dbOrder?.status === "FAILED";
+
+      if (isExplicitFail) {
+        failed = true;
+        paid = false;
+        failureReason = "Payment was cancelled or declined in sandbox simulation.";
+      } else if (isExplicitSuccess) {
+        paid = true;
+        failed = false;
+        paymentId = fileOrder?.cfPaymentId || `cf_mock_${Date.now()}`;
+        paymentMethod = fileOrder?.paymentMethod || "Cashfree Sandbox Verified";
+      } else {
+        // Pending: user has not completed or simulated the payment yet
+        paid = false;
+        failed = false;
+      }
     }
 
-    // 2. Fetch existing PaymentOrder from PostgreSQL database
-    let localOrder = null;
-    try {
-      localOrder = await prisma.paymentOrder.findUnique({
-        where: { orderId },
-        include: { plan: true },
-      });
-    } catch (dbErr: any) {
-      console.warn("[Cashfree Verify API] Database order query skipped:", dbErr.message);
-    }
-
-    // Determine order payment state
-    const successfulPayment = cfPayments?.find((p) => p.payment_status === "SUCCESS");
-    const isPaid =
-      cfOrder?.order_status === "PAID" ||
-      Boolean(successfulPayment) ||
-      searchParams.get("status") === "SUCCESS" ||
-      !cashfree.isLiveConfigured();
-
-    const isFailed =
-      cfOrder?.order_status === "EXPIRED" ||
-      cfOrder?.order_status === "TERMINATED" ||
-      searchParams.get("status") === "FAILED";
-
-    let finalStatus: "SUCCESS" | "FAILED" | "PENDING" = isPaid
-      ? "SUCCESS"
-      : isFailed
-      ? "FAILED"
-      : "PENDING";
-
-    const paymentId = successfulPayment?.cf_payment_id
-      ? String(successfulPayment.cf_payment_id)
-      : `cf_pay_${Date.now()}`;
-    const paymentMethod =
-      successfulPayment?.payment_group ||
-      (successfulPayment?.payment_method ? Object.keys(successfulPayment.payment_method)[0] : "Cashfree UPI / NetBanking");
-
-    const amount = localOrder ? Number(localOrder.amount) : cfOrder?.order_amount || 999;
-
-    // 3. If PAID and local order is not already marked SUCCESS, run atomic updates
-    if (finalStatus === "SUCCESS" && localOrder && localOrder.status !== "SUCCESS") {
-      try {
-        const workspaceId = localOrder.workspaceId;
-        const oneMonthFromNow = new Date();
-        oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
-
-        const planSlug =
-          orderId.includes("enterprise") ? "enterprise" : orderId.includes("pro") ? "pro" : "starter";
-        const planDisplayName =
-          localOrder?.plan?.name ||
-          (planSlug === "enterprise"
-            ? "Enterprise Custom"
-            : planSlug === "pro"
-            ? "Professional Tier"
-            : "Starter Tier");
-
-        // Record transaction in persistent store immediately
+    // If payment is NOT paid: return FAILED or PENDING without activating subscription
+    if (!paid) {
+      if (failed) {
+        try {
+          await prisma.paymentOrder.updateMany({
+            where: { orderId },
+            data: { status: "FAILED" },
+          });
+        } catch {}
         saveStoredOrder({
-          id: `ord_${Date.now()}`,
+          id: fileOrder?.id || `ord_${Date.now()}`,
           orderId,
-          workspaceId: workspaceId || "default",
-          planId: planSlug,
-          planName: planDisplayName,
-          amount: Number(localOrder?.amount || amount || 999),
+          workspaceId: effectiveWorkspaceId,
+          planId: resolvedPlanId,
+          planName: resolvedPlanName,
+          amount: resolvedAmount,
           currency: "INR",
-          status: "SUCCESS",
-          cfPaymentId: paymentId,
-          paymentMethod: String(paymentMethod),
-          createdAt: new Date().toISOString(),
+          status: "FAILED",
+          createdAt: fileOrder?.createdAt || new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
+      }
+
+      return NextResponse.json({
+        orderId,
+        status: failed ? "FAILED" : "PENDING",
+        planName: resolvedPlanName,
+        planId: resolvedPlanId,
+        amount: resolvedAmount,
+        currency: "INR",
+        failureReason: failed ? (failureReason || "Payment was not successful.") : undefined,
+      });
+    }
+
+    // ================= PAYMENT IS VERIFIED SUCCESS =================
+    // 1. Update order in PostgreSQL and persistent store
+    try {
+      await prisma.paymentOrder.updateMany({
+        where: { orderId },
+        data: { status: "SUCCESS", cfPaymentId: paymentId, paymentMethod },
+      });
+    } catch {}
+
+    saveStoredOrder({
+      id: fileOrder?.id || `ord_${Date.now()}`,
+      orderId,
+      workspaceId: effectiveWorkspaceId,
+      planId: resolvedPlanId,
+      planName: resolvedPlanName,
+      amount: resolvedAmount,
+      currency: "INR",
+      status: "SUCCESS",
+      cfPaymentId: paymentId,
+      paymentMethod,
+      createdAt: fileOrder?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    // 2. Server-side Subscription Activation via backend API
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      "http://localhost:4000/api/v1";
+
+    let backendActivated = false;
+    try {
+      const activation = await fetch(`${backendUrl}/billing/activate-payment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: session.authorization,
+        },
+        body: JSON.stringify({
+          orderId,
+          paymentId,
+          planId: resolvedPlanId,
+          amount: resolvedAmount,
+          paymentMethod,
+        }),
+      });
+
+      if (activation.ok) {
+        backendActivated = true;
+      } else {
+        const errJson = await activation.json().catch(() => ({}));
+        console.warn("[Cashfree Verify] Backend activation response:", errJson);
+      }
+    } catch (netErr: any) {
+      console.warn("[Cashfree Verify] Backend activation network error:", netErr.message);
+    }
+
+    // 3. Fallback direct PostgreSQL activation if backend endpoint wasn't reachable
+    if (!backendActivated && effectiveWorkspaceId) {
+      try {
+        const now = new Date();
+        const periodEnd = new Date();
+        periodEnd.setDate(now.getDate() + 30);
 
         await prisma.$transaction(async (tx: any) => {
-          // A. Upsert PaymentOrder as SUCCESS in Database
-          await tx.paymentOrder.upsert({
-            where: { orderId },
-            create: {
-              orderId,
-              workspaceId: workspaceId || "default",
-              amount: localOrder ? localOrder.amount : amount,
-              currency: "INR",
-              status: "SUCCESS",
-              cfPaymentId: paymentId,
-              paymentMethod: String(paymentMethod),
-            },
-            update: {
-              status: "SUCCESS",
-              cfPaymentId: paymentId,
-              paymentMethod: String(paymentMethod),
+          // Cancel previous active/trialing subscriptions
+          await tx.subscription.updateMany({
+            where: { tenantId: effectiveWorkspaceId, status: { in: ["ACTIVE", "TRIALING"] } },
+            data: { status: "CANCELLED" as any },
+          });
+
+          // Fetch plan limits
+          const maxMsgs = resolvedPlanId === "enterprise" ? 250000 : resolvedPlanId === "pro" ? 25000 : 2000;
+          const maxBots = resolvedPlanId === "enterprise" ? 50 : resolvedPlanId === "pro" ? 5 : 1;
+          const maxSeats = resolvedPlanId === "enterprise" ? 50 : resolvedPlanId === "pro" ? 10 : 2;
+
+          // Create active subscription
+          await tx.subscription.create({
+            data: {
+              tenantId: effectiveWorkspaceId,
+              planId: resolvedPlanId,
+              planName: resolvedPlanName,
+              price: `₹${resolvedAmount.toLocaleString("en-IN")}/mo`,
+              status: "ACTIVE" as any,
+              totalDays: 30,
+              remainingDays: 30,
+              currentPeriodStart: now,
+              currentPeriodEnd: periodEnd,
+              maxMessages: maxMsgs,
+              usedMessages: 0,
+              maxBots,
+              usedBots: 0,
+              maxTeamSeats: maxSeats,
+              usedTeamSeats: 1,
+              stripeSubscriptionId: orderId,
+              stripeCustomerId: paymentId || "CASHFREE",
             },
           });
 
-          // B. Provision or Upgrade Workspace Subscription
-          if (workspaceId) {
-            const existingSub = await tx.subscription.findFirst({
-              where: {
-                OR: [{ tenantId: workspaceId }, { status: "ACTIVE" }],
-              },
-            });
-
-            if (existingSub) {
-              await tx.subscription.update({
-                where: { id: existingSub.id },
-                data: {
-                  status: "ACTIVE",
-                  planId: planSlug,
-                  planRefId: localOrder?.planId || undefined,
-                  planName: planDisplayName,
-                  price: `₹${Number(localOrder?.amount || amount).toLocaleString()}/mo`,
-                  currentPeriodEnd: oneMonthFromNow,
-                  remainingDays: 30,
-                },
-              });
-            } else {
-              const tenantExists = await tx.tenant.findUnique({
-                where: { id: workspaceId },
-              });
-
-              if (tenantExists) {
-                await tx.subscription.create({
-                  data: {
-                    tenantId: workspaceId,
-                    status: "ACTIVE",
-                    planId: planSlug,
-                    planRefId: localOrder?.planId || undefined,
-                    planName: planDisplayName,
-                    price: `₹${Number(localOrder?.amount || amount).toLocaleString()}/mo`,
-                    currentPeriodStart: new Date(),
-                    currentPeriodEnd: oneMonthFromNow,
-                    totalDays: 30,
-                    remainingDays: 30,
-                  },
-                });
-              }
-            }
-
-            // C. Create Tax Invoice record in PostgreSQL
-            const invNumber = `INV-${orderId.slice(-8).toUpperCase()}`;
-            const tenantExists = await tx.tenant.findUnique({
-              where: { id: workspaceId },
-            });
-
-            if (tenantExists) {
-              await tx.invoice.create({
-                data: {
-                  tenantId: workspaceId,
-                  invoiceNumber: invNumber,
-                  date: new Date(),
-                  plan: `${planDisplayName} (Monthly)`,
-                  amount: `₹${Number(localOrder?.amount || amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
-                  status: "Paid",
-                },
-              }).catch(() => {});
-            }
-          }
-        });
-      } catch (txErr: any) {
-        console.error("[Cashfree Verify API] Transaction fulfillment error:", txErr.message);
-      }
-    } else if (finalStatus === "FAILED" && localOrder && localOrder.status === "PENDING") {
-      try {
-        await prisma.paymentOrder.update({
-          where: { orderId },
-          data: { status: "FAILED" },
+          // Create tax invoice
+          await tx.invoice.create({
+            data: {
+              tenantId: effectiveWorkspaceId,
+              invoiceNumber: orderId,
+              plan: `${resolvedPlanName} (MONTHLY)`,
+              amount: `₹${resolvedAmount.toLocaleString("en-IN")}`,
+              status: "Paid",
+            },
+          });
         });
       } catch (dbErr: any) {
-        console.warn("[Cashfree Verify API] Error marking order failed:", dbErr.message);
+        console.error("[Cashfree Verify] Direct DB activation error:", dbErr.message);
       }
     }
 
-    // 4. Plan details summary for UI presentation
-    const planName =
-      localOrder?.plan?.name ||
-      (orderId.includes("enterprise")
-        ? "Enterprise Custom"
-        : orderId.includes("pro")
-        ? "Professional Tier"
-        : "Starter Tier");
-
     return NextResponse.json({
       orderId,
-      status: finalStatus,
-      amount,
+      status: "SUCCESS",
+      planName: resolvedPlanName,
+      planId: resolvedPlanId,
+      amount: resolvedAmount,
       currency: "INR",
-      planName,
       paymentMethod,
       cfPaymentId: paymentId,
-      paidAt: cfOrder?.entity ? new Date().toISOString() : new Date().toISOString(),
+      paidAt: new Date().toISOString(),
     });
   } catch (error: any) {
-    console.error("[Cashfree Verify API] Error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to verify Cashfree payment status" },
-      { status: 500 }
-    );
+    console.error("[Cashfree Verify API Error]:", error);
+    return NextResponse.json({ error: "Unable to verify payment with Cashfree." }, { status: 502 });
   }
 }

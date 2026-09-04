@@ -49,6 +49,21 @@ model Tenant {
   @@map("tenants")
 }
 
+// Append-only support and platform-administration audit trail. It intentionally
+// has no mutation-facing service and keeps both the actor and target tenant.
+model AuditLog {
+  id                String   @id @default(uuid())
+  superAdminId      String
+  targetWorkspaceId String
+  action            String
+  endpoint          String
+  createdAt         DateTime @default(now())
+
+  @@index([superAdminId, createdAt])
+  @@index([targetWorkspaceId, createdAt])
+  @@map("audit_logs")
+}
+
 model User {
   id                  String         @id @default(uuid())
   email               String         @unique

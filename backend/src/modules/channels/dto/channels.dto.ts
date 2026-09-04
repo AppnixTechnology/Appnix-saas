@@ -19,7 +19,7 @@ export class MetaEmbeddedSignupDto {
   @IsNotEmpty()
   code: string;
 
-  @ApiPropertyOptional({ description: 'WhatsApp Business Account ID', example: '896015703596388' })
+  @ApiPropertyOptional({ description: 'WhatsApp Business Account ID', example: '102938475619283' })
   @IsOptional()
   @IsString()
   wabaId?: string;

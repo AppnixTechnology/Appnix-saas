@@ -17,7 +17,7 @@ export class NotificationsService {
       const initial = [
         {
           title: 'Meta WhatsApp Verification Synced',
-          description: 'Your business phone number (+91 80627 65557) official green badge request is currently being verified.',
+          description: 'Your official WhatsApp Business channel verification is active and synced with Meta Cloud API.',
           type: 'success',
           link: '/channels/whatsapp',
         },

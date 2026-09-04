@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { getStoredOrders } from "@/lib/transactions-store";
 
 export interface CashfreeCustomerDetails {
   customer_id: string;
@@ -42,7 +43,7 @@ export interface CashfreePaymentEntity {
   payment_message?: string;
   payment_time?: string;
   payment_completion_time?: string;
-  payment_group?: string; // e.g. "upi", "card", "net_banking"
+  payment_group?: string;
   payment_method?: Record<string, any>;
 }
 
@@ -79,9 +80,6 @@ export class CashfreeService {
         : "https://sandbox.cashfree.com/pg";
   }
 
-  /**
-   * Evaluates whether valid production or sandbox merchant credentials are configured.
-   */
   public isLiveConfigured(): boolean {
     return (
       Boolean(this.appId) &&
@@ -92,9 +90,6 @@ export class CashfreeService {
     );
   }
 
-  /**
-   * Returns mandatory authorization & payload headers for Cashfree REST API requests.
-   */
   private getHeaders(): Record<string, string> {
     return {
       "x-client-id": this.appId,
@@ -105,9 +100,6 @@ export class CashfreeService {
     };
   }
 
-  /**
-   * Low-level HTTP executor wrapping fetch with structured error parsing.
-   */
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = {
@@ -144,12 +136,7 @@ export class CashfreeService {
     return data as T;
   }
 
-  /**
-   * 1. Create Order Backend API
-   * Calls: POST /orders
-   */
   public async createOrder(params: CreateCashfreeOrderParams): Promise<CashfreeOrderResponse> {
-    // If live credentials are valid, dispatch to remote Cashfree Sandbox/Production API
     if (this.isLiveConfigured()) {
       return this.request<CashfreeOrderResponse>("/orders", {
         method: "POST",
@@ -164,7 +151,6 @@ export class CashfreeService {
       });
     }
 
-    // In local development or dummy sandbox mode, return compliant mock order contract
     const mockSessionId = `session_mock_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
     const mockPaymentLink = `${this.baseUrl}/orders/${params.order_id}`;
 
@@ -179,10 +165,6 @@ export class CashfreeService {
     };
   }
 
-  /**
-   * 2. Get Order Details API
-   * Calls: GET /orders/{order_id}
-   */
   public async getOrder(orderId: string): Promise<CashfreeOrderResponse> {
     if (this.isLiveConfigured() && !orderId.startsWith("cf_ord_mock")) {
       return this.request<CashfreeOrderResponse>(`/orders/${encodeURIComponent(orderId)}`, {
@@ -190,21 +172,33 @@ export class CashfreeService {
       });
     }
 
-    // Development mock response
+    let orderStatus: CashfreeOrderResponse["order_status"] = "ACTIVE";
+    let orderAmount = 999.0;
+    try {
+      const stored = getStoredOrders();
+      const found = stored.find((o: any) => o.orderId === orderId);
+      if (found) {
+        orderAmount = Number(found.amount) || 999.0;
+        if (found.status === "SUCCESS") {
+          orderStatus = "PAID";
+        } else if (found.status === "FAILED" || found.status === "USER_DROPPED") {
+          orderStatus = "TERMINATED";
+        } else {
+          orderStatus = "ACTIVE";
+        }
+      }
+    } catch {}
+
     return {
       cf_order_id: `cf_${orderId}`,
       order_id: orderId,
       payment_session_id: `session_${orderId}`,
-      order_status: "PAID",
-      order_amount: 999.0,
+      order_status: orderStatus,
+      order_amount: orderAmount,
       order_currency: "INR",
     };
   }
 
-  /**
-   * 3. Get Payments for an Order
-   * Calls: GET /orders/{order_id}/payments
-   */
   public async getOrderPayments(orderId: string): Promise<CashfreePaymentEntity[]> {
     if (this.isLiveConfigured() && !orderId.startsWith("cf_ord_mock")) {
       return this.request<CashfreePaymentEntity[]>(`/orders/${encodeURIComponent(orderId)}/payments`, {
@@ -212,31 +206,45 @@ export class CashfreeService {
       });
     }
 
-    // Development mock payment
+    let paymentStatus: "SUCCESS" | "FAILED" | "PENDING" = "PENDING";
+    let paymentAmount = 0;
+    let paymentId = `pending_${orderId}`;
+    let paymentMethod = "upi";
+
+    try {
+      const stored = getStoredOrders();
+      const found = stored.find((o: any) => o.orderId === orderId);
+      if (found) {
+        paymentAmount = Number(found.amount) || 999.0;
+        if (found.status === "SUCCESS") {
+          paymentStatus = "SUCCESS";
+          paymentId = found.cfPaymentId || `cf_pay_${Date.now()}`;
+          paymentMethod = found.paymentMethod || "upi";
+        } else if (found.status === "FAILED" || found.status === "USER_DROPPED") {
+          paymentStatus = "FAILED";
+          paymentId = `cf_declined_${Date.now()}`;
+        }
+      }
+    } catch {}
+
     return [
       {
-        cf_payment_id: `pay_${Date.now()}`,
+        cf_payment_id: paymentId,
         order_id: orderId,
-        payment_status: "SUCCESS",
-        payment_amount: 999.0,
+        payment_status: paymentStatus,
+        payment_amount: paymentAmount,
         payment_currency: "INR",
-        payment_group: "upi",
+        payment_group: paymentMethod,
         payment_time: new Date().toISOString(),
       },
     ];
   }
 
-  /**
-   * 4. Webhook Signature Verification
-   * Cryptographically validates that the webhook originated from Cashfree servers.
-   * Signature calculation: HMAC-SHA256 of (timestamp + rawBody) using CASHFREE_SECRET_KEY in base64.
-   */
   public verifyWebhookSignature(rawBody: string, signature: string | null, timestamp: string | null): boolean {
     if (!signature || !timestamp) {
       return false;
     }
 
-    // In local development sandbox testing with mock webhook, allow simulation prefix
     if (!this.isLiveConfigured() && signature.startsWith("sim_wh_")) {
       return true;
     }

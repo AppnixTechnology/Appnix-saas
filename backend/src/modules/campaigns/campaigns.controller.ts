@@ -32,10 +32,11 @@ import {
 } from './dto/campaign.dto';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
 import { TenantGuard } from '../../common/guards/tenant.guard';
+import { SubscriptionGuard } from '../../common/guards/subscription.guard';
 
 @ApiTags('Campaigns')
 @ApiBearerAuth()
-@UseGuards(JwtAccessGuard, TenantGuard)
+@UseGuards(JwtAccessGuard, TenantGuard, SubscriptionGuard)
 @Controller(['campaigns', 'api/campaigns', 'crm/campaigns', 'crm/bulk-campaign'])
 export class CampaignsController {
   constructor(private readonly campaignsService: CampaignsService) {}

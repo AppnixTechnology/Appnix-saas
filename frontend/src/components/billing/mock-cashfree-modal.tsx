@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { markSubscriptionActive } from "@/lib/subscription";
 
 export interface MockCashfreeModalOptions {
   orderId: string;
@@ -117,7 +118,13 @@ export function MockCashfreeModalContainer() {
     const amt = Number(options.amount || 999);
 
     if (typeof window !== "undefined") {
-      localStorage.setItem("appnix_active_plan", planId);
+      markSubscriptionActive(planId);
+      let wsId = "";
+      try {
+        const u = JSON.parse(localStorage.getItem("appnix_user") || "{}");
+        wsId = u.workspaceId || u.tenantId || "";
+      } catch {}
+
       try {
         const existing = JSON.parse(localStorage.getItem("appnix_transactions") || "[]");
         const record = {
@@ -138,12 +145,20 @@ export function MockCashfreeModalContainer() {
         localStorage.setItem("appnix_transactions", JSON.stringify([record, ...filtered]));
       } catch {}
 
+      const token =
+        localStorage.getItem("appnix_auth_token") ||
+        localStorage.getItem("token") ||
+        localStorage.getItem("appnix_token") ||
+        "";
+      const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
       // Register with history store immediately
       fetch("/api/v1/payments/cashfree/history", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders },
         body: JSON.stringify({
           orderId: options.orderId,
+          workspaceId: wsId || undefined,
           planId,
           planName,
           amount: amt,
@@ -151,12 +166,14 @@ export function MockCashfreeModalContainer() {
           paymentMethod: "Cashfree PG",
         }),
       }).catch(() => {});
-    }
 
-    // Trigger verify API
-    fetch(
-      `/api/v1/payments/cashfree/verify?order_id=${options.orderId}&plan=${planId}&amount=${amt}&status=SUCCESS`
-    ).catch(() => {});
+      // Trigger verify API with workspace context and auth token
+      const wsQuery = wsId ? `&workspace_id=${encodeURIComponent(wsId)}` : "";
+      fetch(
+        `/api/v1/payments/cashfree/verify?order_id=${options.orderId}&plan=${planId}&amount=${amt}&status=SUCCESS${wsQuery}`,
+        { headers: authHeaders }
+      ).catch(() => {});
+    }
 
     setTimeout(() => {
       setIsOpen(false);
@@ -168,6 +185,16 @@ export function MockCashfreeModalContainer() {
 
   const handleSimulateFailure = () => {
     setIsProcessing(true);
+    if (typeof window !== "undefined") {
+      fetch("/api/v1/payments/cashfree/history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: options.orderId,
+          status: "FAILED",
+        }),
+      }).catch(() => {});
+    }
     setTimeout(() => {
       setIsOpen(false);
       setIsProcessing(false);

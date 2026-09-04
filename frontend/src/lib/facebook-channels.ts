@@ -17,7 +17,7 @@ export const MOCK_FB_USER: FacebookUserProfile = {
 
 export const INITIAL_FACEBOOK_PAGES: FacebookPage[] = [
   {
-    id: '896015703596388',
+    id: '1092837465928',
     name: 'Appnix Official Page',
     category: 'Software & Technology',
     avatarUrl:

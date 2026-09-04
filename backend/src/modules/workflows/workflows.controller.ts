@@ -16,11 +16,12 @@ import { WorkflowsService } from './workflows.service';
 import { CreateWorkflowDto } from './dto/create-workflow.dto';
 import { UnlockWorkflowDto } from './dto/unlock-workflow.dto';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
+import { SubscriptionGuard } from '../../common/guards/subscription.guard';
 import { CurrentUser, AuthUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('Automations & Workflows')
 @ApiBearerAuth()
-@UseGuards(JwtAccessGuard)
+@UseGuards(JwtAccessGuard, SubscriptionGuard)
 @Controller(['automations/workflows', 'api/automations/workflows', 'automations'])
 export class WorkflowsController {
   constructor(private readonly workflowsService: WorkflowsService) {}
